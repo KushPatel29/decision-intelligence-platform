@@ -1,6 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/pagesMetadata/1.1.0/schema.json",
   "pageOrder": [
+    "p0_command",
     "p1_plan",
     "p2_contacts",
     "p3_customers",
@@ -10,5 +11,5 @@
     "p7_policy",
     "p8_operations"
   ],
-  "activePageName": "p1_plan"
+  "activePageName": "p0_command"
 }

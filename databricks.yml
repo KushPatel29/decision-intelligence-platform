@@ -1,0 +1,91 @@
+# Databricks Asset Bundle for the Corridor decision job.
+#
+#   databricks bundle deploy && databricks bundle run corridor
+#
+# databricks/run_job.py deploys this same job through the Python SDK (browser OAuth, no
+# token) for workspaces without the CLI; it reads the job from this file, so the two
+# cannot drift. Notebook tasks with no cluster run on serverless compute.
+bundle:
+  name: corridor-decision-platform
+
+variables:
+  catalog:
+    description: Unity Catalog catalog for the Delta tables, volume and registered models
+    default: workspace
+  schema:
+    description: Schema created for this project
+    default: corridor
+  customers:
+    description: Simulated customers (budget, contacts and points cap scale with it)
+    default: "25000"
+  solver:
+    description: Campaign MIP core solver (auto uses Gurobi when the core fits its licence)
+    default: auto
+
+sync:
+  # data/ is gitignored; the cached public context is the one part of it the job needs.
+  # Everything the job does not read stays local.
+  include:
+    - data/external/*.json
+  exclude:
+    - outputs/**
+    - output/**
+    - powerbi/**
+    - web/**
+    - docs/**
+    - tests/**
+    - views/**
+    - aws/**
+    - adhoc/**
+    - scripts/**
+
+resources:
+  jobs:
+    corridor:
+      name: corridor-decision-platform
+      description: >-
+        Synthetic 407-style customer, pricing and transportation decisions: pipeline with a Gurobi-certified
+        campaign MIP and workspace MLflow, Delta medallion with PySpark feature parity, Unity Catalog model
+        registry, and a reconciled publish with a run receipt.
+      max_concurrent_runs: 1
+      timeout_seconds: 7200
+      parameters:
+        - name: code_root
+          default: ${workspace.file_path}
+        - name: catalog
+          default: ${var.catalog}
+        - name: schema
+          default: ${var.schema}
+        - name: customers
+          default: ${var.customers}
+        - name: solver
+          default: ${var.solver}
+        - name: run_path
+          default: ""
+        - name: job_run_id
+          default: "{{job.run_id}}"
+      tasks:
+        - task_key: pipeline
+          notebook_task:
+            notebook_path: ./databricks/notebooks/01_pipeline.py
+        - task_key: lakehouse
+          depends_on:
+            - task_key: pipeline
+          notebook_task:
+            notebook_path: ./databricks/notebooks/02_lakehouse.py
+        - task_key: registry
+          depends_on:
+            - task_key: pipeline
+          notebook_task:
+            notebook_path: ./databricks/notebooks/03_registry.py
+        - task_key: publish
+          depends_on:
+            - task_key: lakehouse
+            - task_key: registry
+          notebook_task:
+            notebook_path: ./databricks/notebooks/04_publish.py
+
+targets:
+  dev:
+    mode: development
+    default: true

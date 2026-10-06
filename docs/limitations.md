@@ -1,18 +1,63 @@
-# Evidence and limitations - release 0.4.0
+# Evidence and limitations
 
-- All customers, prices, capacities, loyalty rules and treatment outcomes are synthetic. Public weather/calendar/FX context is genuine; FX is not a fuel proxy. No actual company affiliation, data, performance, fairness or employment claim is made.
-- Capacity is a zone/period planning cell, not routing over real shared road segments. Estimated incentive cost and traffic need realized enforcement in execution systems; the app does not contact customers or charge anyone.
-- Classifiers use time-purged labels but repeat customer identities across periods. Causal folds hold out randomized identities. Hidden simulator effects and future outcomes never enter predictor features.
-- Validation chooses contribution/demand candidates. The learned demand candidate failed its untouched acceptance gate, so the seasonal baseline remains the serving model. Do not reinterpret a rejected candidate as a tuned winner.
-- Twelve-month contribution projections use heuristic survival. BG/NBD/Gamma-Gamma is tested on 90-day purchase-days, with left truncation, stationarity and frequency/value dependence limits. Days31-90 causal margin is a separate non-overlapping horizon, not validated incremental twelve-month CLV.
-- Fixed-origin monthly demand backtests use validation-derived marginal intervals. Origins overlap and cells are dependent; coverage does not establish simultaneous network protection. Hour/direction values disaggregate daily forecasts and have no independent hourly evaluation or live weather forecast.
-- Four-arm trial power applies to the planned primary response endpoint. Held-out learner subsets and secondary endpoints are smaller/exploratory. Negative Qini and the fresh constrained-policy trial's wide ITT interval remain visible. No real-world policy benefit is established.
-- Subgroup comparisons use declared pre-treatment groups, multiplicity adjustment and small-cell suppression. Spend/engagement groups are proxies, not measured customer price sensitivity or protected-group fairness validation.
-- Trip and later-margin effects use a declared 25% planning shrinkage, not individual confidence bounds. Retention is reported separately to avoid double monetization. Optimality covers the 600-customer shortlist, not every possible customer/offer combination.
-- Joint price/campaign plans assume constant elasticity and separable offer effects. Customer/segment-specific elasticity and price/treatment interactions are not estimated. Consumer surplus depends on that assumed demand curve.
-- Rewards reconcile earned/awarded/redeemed balances and reserve full award liability. Long-term breakage and causal loyalty earning propensity remain unvalidated.
-- Status and marketing consent now have effective-dated synthetic transitions. MyAccount, PastDue, autopay and other account flags remain static. Real consent governance and history must follow approved business policy.
-- Bootstrap clustering agreement is not temporal stability; Isolation Forest signals are not validated fraud labels. Batch volume/campaign thresholds are review signals, not continuous campaign baselines or automated alerts/retraining.
-- Fail-closed serving, hashes, an owner allowlist and SQLite audit are implemented locally. Hashes detect corruption but are not signed provenance against a compromised host. This is one private workspace, not a proven multi-tenant service or SLA.
-- Nine local registry scoring roundtrips and six local SageMaker contracts are verified. Some cloud candidates fail quality gates and cannot proceed to registration/batch. Container execution, hosted AWS/Databricks, OIDC roundtrips, CI, restore/load tests and cost receipts remain pending.
-- Native Power BI 0.4 source schemas pass. The earlier 0.3 Desktop refresh/DAX/page receipt is historical; it does not verify the revised 16-table/32-measure report. Latest native refresh is blocked at the owned reload dialog.
+What the evidence in this repository does and does not establish. Figures are from the committed
+25,000-customer run.
+
+## Data
+
+- Customers, prices, capacities, loyalty rules and every treatment effect are synthetic. The weather,
+  statutory holidays and CAD/USD context are real public data, cached with provenance. Nothing here is a
+  claim about a real operator's customers, performance or systems.
+- The simulator was written to be realistic in structure (heterogeneous responses, discounts paid on
+  baseline trips, carry-over, capacity), not calibrated to real elasticities or response rates. A method that
+  works here has passed a necessary test, not a sufficient one.
+- Capacity is a zone × period planning cell with a 20% reserve, not routing over real road segments.
+
+## Experiment and causal estimates
+
+- The ten-arm trial is powered for its planned primary endpoint (1,794 per arm required, 2,500 run).
+  Subgroup results are exploratory and FDR-controlled; they are hypotheses, not targeting rules.
+- The production causal ensemble is chosen by an observable rule (pooled doubly robust validation loss,
+  one standard error). In this run it chose the S-learner alone; on the simulator's truth the X-learner
+  ranks customers better (mean Spearman 0.29 vs 0.11). The rule is kept because a rule tuned on the truth
+  would not exist in production; the gap is reported on the Experiments page.
+- The learners under-state value in level (mean bias −$4.49 per customer-offer). A BLP recalibration is
+  computed as a diagnostic and not applied.
+- Carry-over into days 31-90 uses the conservative 20th percentile of its bootstrap distribution. Retention
+  value is reported separately and is not added to the objective, to avoid counting it twice.
+- The policy trial (+$1.40 per customer, 95% CI $0.23 to $2.57) is one randomised test of one plan.
+
+## Optimisation
+
+- The MIP is solved over every eligible customer-offer pair, and its certificate states the gap to the LP
+  bound (1.5e-7 here). Gurobi's size-limited licence covers cores up to 2,000 variables and constraints:
+  here HiGHS solved the 4,402-variable core and Gurobi independently re-solved the 445-variable residual
+  after a second round of fixing. At smaller populations the residual can exceed the licence, and the
+  certificate then says Gurobi's check was not run.
+- Offer effects are assumed separable across customers (no network or word-of-mouth effects) and constant
+  over the 30-day window.
+- The joint price and campaign plan assumes constant elasticity within each zone × period cell.
+- Congestion relief is valued at a planning rate per net rush-hour trip moved onto the 407 ($0.50); it is
+  a policy parameter for the business to set, not an estimate.
+
+## Models
+
+- Classifiers are evaluated on an untouched later fold with 90-day labels that never cross a fold boundary,
+  but customers repeat across snapshots; the folds are separated in time, not by identity.
+- The zone-level 30-day demand forecast runs 4-9% above the sum of the customer-level baselines, by period.
+  The customer baselines are not rescaled to it, because doing so made the plan's estimates worse; the ratio
+  is recorded in `uplift_metrics.json`. Interval coverage (92% at nominal 90%) is marginal over cells, not
+  simultaneous.
+- Isolation Forest flags are review signals evaluated against 30 planted anomalies, not fraud labels.
+- Clustering stability is bootstrap agreement on one snapshot, not stability over time.
+
+## Platform
+
+- The Databricks job's four notebooks have been executed locally with real PySpark and a stand-in for the
+  Databricks runtime (`databricks/local_run.py`); Delta and Unity Catalog statements were checked against the
+  data rather than executed. The hosted run's status is recorded in `databricks/README.md`.
+- SageMaker: the pipeline is defined and its entry points run locally; it has not run in AWS.
+- Power BI: every measure executes against Power BI's engine and the HTML panels render from its output. The
+  HTML Content visual is an AppSource custom visual; an organisation that blocks AppSource visuals would see
+  those nine panels empty while the native visuals still work.
+- Serving is fail-closed on a hash-verified snapshot; hashes detect corruption, not a compromised host.

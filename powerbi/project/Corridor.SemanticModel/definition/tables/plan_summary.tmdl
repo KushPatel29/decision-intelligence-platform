@@ -35,13 +35,34 @@ table plan_summary
 		summarizeBy: none
 		sourceColumn: proven_optimal
 
+	column decision_variables
+		dataType: int64
+		formatString: #,0
+		lineageTag: b9657e49-73ec-5634-b2eb-464302f4a81e
+		summarizeBy: sum
+		sourceColumn: decision_variables
+
+	column free_variables
+		dataType: int64
+		formatString: #,0
+		lineageTag: 19029199-6e75-5cc5-894a-cb2e55535367
+		summarizeBy: sum
+		sourceColumn: free_variables
+
+	column relief_value_per_trip
+		dataType: double
+		formatString: #,0.00
+		lineageTag: c4589a2a-25ff-5a7b-a6dc-1d8cdc7c384a
+		summarizeBy: sum
+		sourceColumn: relief_value_per_trip
+
 	partition plan_summary = m
 		mode: import
 		source =
 				let
-				    Source = #table(type table [#"budget" = nullable text, #"contact_limit" = nullable text, #"points_limit" = nullable text, #"eligible_customers" = nullable text, #"proven_optimal" = nullable text], {
-				        {"10000.0", "5000", "2500000", "17059", "True"}
+				    Source = #table(type table [#"budget" = nullable text, #"contact_limit" = nullable text, #"points_limit" = nullable text, #"eligible_customers" = nullable text, #"proven_optimal" = nullable text, #"decision_variables" = nullable text, #"free_variables" = nullable text, #"relief_value_per_trip" = nullable text], {
+				        {"10000.0", "5000", "2500000", "17059", "True", "112563", "4402", "0.5"}
 				    }),
-				    Typed = Table.TransformColumnTypes(Source, {{"budget", type number}, {"contact_limit", Int64.Type}, {"points_limit", Int64.Type}, {"eligible_customers", Int64.Type}, {"proven_optimal", type logical}})
+				    Typed = Table.TransformColumnTypes(Source, {{"budget", type number}, {"contact_limit", Int64.Type}, {"points_limit", Int64.Type}, {"eligible_customers", Int64.Type}, {"proven_optimal", type logical}, {"decision_variables", Int64.Type}, {"free_variables", Int64.Type}, {"relief_value_per_trip", type number}})
 				in
 				    Typed

@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from decision_platform.ui import SERIES, callout, chart, money, page_header, pct, profile_card
+from decision_platform.ui import callout, chart, money, offer_marker, page_header, pct, profile_card
 from decision_platform.webapp import download, offer_names, offer_order, table, zone_names
 
 page_header(
@@ -37,8 +37,14 @@ elif mode == "Not contacted":
 with right:
     if mode == "Search by ID":
         text = st.text_input("Customer ID contains", placeholder="e.g. 3f2a")
-        pool = customers[customers.customer_id.str.contains(text, case=False, regex=False)] if text else customers
-    customer_id = st.selectbox("Customer", pool.customer_id.head(300).tolist(), index=0 if len(pool) else None)
+        pool = (
+            customers[customers.customer_id.str.contains(text, case=False, regex=False)]
+            if text
+            else customers
+        )
+    customer_id = st.selectbox(
+        "Customer", pool.customer_id.head(300).tolist(), index=0 if len(pool) else None
+    )
 
 if not customer_id:
     st.info("No customer matches.")
@@ -94,13 +100,12 @@ else:
             f"{money(best.objective_value, 2)}, but the budget, contact limit or capacity buys more value elsewhere.",
         )
     fig = go.Figure()
-    colors = [SERIES[order.index(o) % len(SERIES)] for o in offers.offer_id]
     fig.add_trace(
         go.Bar(
             y=offers.offer_id.map(names),
             x=offers.objective_value,
             orientation="h",
-            marker=dict(color=colors),
+            marker=offer_marker(offers.offer_id),
             error_x=dict(type="data", array=offers.value_uplift_sd, color="#8faebf", thickness=1.2),
             customdata=np.column_stack([offers.cost, offers.incremental_trips, offers.value_uplift_sd]),
             hovertemplate="%{y}<br>Expected value %{x:$,.2f}<br>Incentive cost %{customdata[0]:$,.2f}"

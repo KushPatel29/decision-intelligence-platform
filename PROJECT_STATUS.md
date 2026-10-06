@@ -1,15 +1,24 @@
-# Verified delivery status - release 0.4.0
+# Status: release 1.1
 
-Assessment: 6 October 2026. A hardened synthetic planning release; hosted production acceptance remains open.
+Assessed 6 October 2026, against the committed 25,000-customer run.
 
-- Twelve app workspaces and 73 local checks passed: real Gurobi/HiGHS solves, malformed inputs, missing capacity, empty plans, partial/corrupt release refusal, exclusive refresh, owner isolation, durable reviewed plans, joint price actions and all five analyst conclusions.
-- The 8,000-customer, 1,221,317-trip pipeline rebuilt and reproduced from the committed source: raw hashes, customer predictions, core metrics and campaign allocation matched within 1e-9. Demand candidate rejection retains the seasonal serving baseline (MAE 10.48); contribution serves historical margin (MAE 55.30). Neither is a learned-model improvement.
-- Fixed-origin monthly backtests have three held-out origins, MAE 9.91 and 92.5% marginal 90% interval coverage. Hour/direction values disaggregate daily forecasts; independent hourly accuracy remains unverified.
-- Joint price/campaign capacity solves, separate signed days31-90 value/retention effects, richer explicit-grain customer marts, a fresh policy trial and exploratory subgroup reports are exported.
-- Nine local registry scoring roundtrips matched. Reviewed lifecycle tooling retains previous versions and reasons; no hosted model is auto-approved.
-- Six cloud workflows compile and all stage/inference contracts run locally. Failed quality gates remain closed. Docker/ECR and actual AWS jobs have not executed; no resources/charges created.
-- Databricks full-feature/mart notebook is authored. Hosted execution remains pending; the Free Edition automated-console restriction was respected.
-- Native BI: eight pages, 16 tables, 32 measures, five relationships and 66 schema validations passed. Latest Desktop reload is blocked by the helper rejecting input to its owned WebView dialog. Previous native refresh/visual receipts do not certify this revision.
-- Declared runtime dependency audit found no known vulnerabilities; CloudFormation passed cfn-lint. Container execution, OIDC provider roundtrip, hosted CI, staging load/backup tests and publication remain pending.
+## Verified
 
-Use outputs/readiness.json and docs/production_runbook.md before deploying. No live AWS/Databricks, service SLA or observed customer-impact claim is made.
+| Area | Evidence |
+|---|---|
+| Pipeline | End to end in 475 s: 3,680,249 trips, 1,412,304 digital events, 4,147 quarantined; release gate passed (8 of 8 checks) |
+| Optimisation | 112,563-binary MIP proven optimal (gap 1.5e-7); Gurobi confirmed the 445-variable residual |
+| Evaluation | Plan reaches 75% of the perfect-knowledge ceiling; propensity targeting 7%; policy trial +$1.40 per customer (95% CI $0.23 to $2.57) |
+| Tests | 200+ passing, including every app page, the API, the Power BI model's references, and the registry scorer reproducing the plan's effects |
+| Spark | PySpark features equal DuckDB's on all 39 features (max difference 2.2e-11) over the full silver layer |
+| Power BI | All 149 measures executed against Power BI's engine; the HTML panels rendered from its output with no overflow; byte-for-byte drift gate |
+| Databricks | All four job notebooks executed locally in task order (`databricks/local_run.py`) |
+
+## Open
+
+| Item | What it needs |
+|---|---|
+| Hosted Databricks run | The workspace owner's browser sign-in; then `python databricks/run_job.py --host …` records a receipt in `databricks/receipts/` |
+| Hosted SageMaker run | An AWS account role, a bucket and a spending limit (see `aws/README.md`) |
+| Opening the report in Desktop with the HTML Content visual loaded | A Desktop session that can reach AppSource; the measures themselves are verified |
+| Tableau | Not built; the posting accepts Tableau or Power BI |

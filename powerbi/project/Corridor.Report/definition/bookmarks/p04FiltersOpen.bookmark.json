@@ -1,6 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
-  "displayName": "Transportation and capacity - filters open",
+  "displayName": "Customers - filters open",
   "name": "p04FiltersOpen",
   "options": {
     "targetVisualNames": [
@@ -8,6 +8,7 @@
       "p04PanelBg",
       "p04PanelTitle",
       "p04PanelClose",
+      "v0408",
       "v0409",
       "p04PanelClear"
     ],
@@ -17,13 +18,14 @@
   },
   "explorationState": {
     "version": "1.3",
-    "activeSection": "p4_capacity",
+    "activeSection": "p3_customers",
     "sections": {
-      "p4_capacity": {
+      "p3_customers": {
         "visualContainers": {
           "p04PanelBg": {},
           "p04PanelTitle": {},
           "p04PanelClose": {},
+          "v0408": {},
           "v0409": {},
           "p04PanelClear": {}
         },

@@ -3,13 +3,14 @@
 import plotly.graph_objects as go
 import streamlit as st
 
-from decision_platform.ui import SERIES, callout, chart, money, page_header, pct, tiles
+from decision_platform.ui import callout, chart, money, offer_marker, page_header, pct, tiles
 from decision_platform.webapp import doc, download, offer_names, offer_order, table, zone_names
 
 page_header(
     "Offers & loyalty",
-    "Eight offers with different mechanics: percentage discounts, a weekend incentive, a spend-threshold "
-    "credit, a free trip, an off-peak driving pass and two loyalty-point rewards. What each costs, who it moves "
+    "Nine offers with different mechanics: a rush-hour discount that moves commuters off congested roads, "
+    "percentage discounts, a weekend incentive, a spend-threshold credit, a free trip, an off-peak driving pass "
+    "and two loyalty-point rewards. What each costs, who it moves "
     "and what the plan buys with it.",
     eyebrow="Understand",
 )
@@ -20,8 +21,12 @@ optimization = doc("optimization")
 experiment = {r["offer_id"]: r for r in doc("experiment")["results"]}
 
 catalogue = offers.copy()
-catalogue["trial_value_per_customer"] = catalogue.offer_id.map(lambda o: experiment[o]["incremental_net_contribution_cuped"]["difference"])
-catalogue["trial_trips_per_customer"] = catalogue.offer_id.map(lambda o: experiment[o]["incremental_trips_cuped"]["difference"])
+catalogue["trial_value_per_customer"] = catalogue.offer_id.map(
+    lambda o: experiment[o]["incremental_net_contribution_cuped"]["difference"]
+)
+catalogue["trial_trips_per_customer"] = catalogue.offer_id.map(
+    lambda o: experiment[o]["incremental_trips_cuped"]["difference"]
+)
 catalogue["plan_contacts"] = catalogue.offer_id.map(decisions.offer_id.value_counts()).fillna(0).astype(int)
 plan = decisions.groupby("offer_id").agg(value=("objective_value", "sum"), spend=("cost", "sum"))
 catalogue["plan_value"] = catalogue.offer_id.map(plan.value).fillna(0)
@@ -49,7 +54,9 @@ st.dataframe(
         "period": "Designed to fill",
         "inventory": st.column_config.NumberColumn("Monthly inventory", format="localized"),
         "trial_trips_per_customer": st.column_config.NumberColumn("Trial: trips / customer", format="%+.2f"),
-        "trial_value_per_customer": st.column_config.NumberColumn("Trial: net CAD / customer", format="$%+.2f"),
+        "trial_value_per_customer": st.column_config.NumberColumn(
+            "Trial: net CAD / customer", format="$%+.2f"
+        ),
         "plan_contacts": st.column_config.NumberColumn("Plan contacts", format="localized"),
         "plan_spend": st.column_config.NumberColumn("Plan spend", format="$%.0f"),
         "plan_value": st.column_config.NumberColumn("Plan expected value", format="$%.0f"),
@@ -70,7 +77,7 @@ with left:
         go.Bar(
             x=[names[o] for o in present],
             y=[plan.loc[o, "value"] for o in present],
-            marker_color=[SERIES[order.index(o)] for o in present],
+            marker=offer_marker(present),
             hovertemplate="%{x}<br>%{y:$,.0f} expected value<extra></extra>",
         )
     )
@@ -83,7 +90,7 @@ with right:
         go.Bar(
             x=[names[o] for o in present],
             y=efficiency.values,
-            marker_color=[SERIES[order.index(o)] for o in present],
+            marker=offer_marker(present),
             hovertemplate="%{x}<br>%{y:.2f} CAD per CAD<extra></extra>",
         )
     )
@@ -91,7 +98,9 @@ with right:
     chart(fig, 330, legend=False)
 
 st.subheader("Plan contacts by offer and zone")
-mix = decisions.assign(zone=decisions.zone_id.map(zones)).pivot_table(index="zone", columns="offer_id", values="customer_id", aggfunc="count", fill_value=0)
+mix = decisions.assign(zone=decisions.zone_id.map(zones)).pivot_table(
+    index="zone", columns="offer_id", values="customer_id", aggfunc="count", fill_value=0
+)
 fig = go.Figure()
 for offer in [o for o in order if o in mix.columns]:
     fig.add_trace(
@@ -99,7 +108,7 @@ for offer in [o for o in order if o in mix.columns]:
             x=mix.index,
             y=mix[offer],
             name=names[offer],
-            marker=dict(color=SERIES[order.index(offer)], line=dict(width=1, color="#081522")),
+            marker=offer_marker([offer] * len(mix), line=dict(width=1, color="#081522")),
         )
     )
 fig.update_layout(barmode="stack", hovermode="x unified")
@@ -114,8 +123,16 @@ tiles(
         ("Points earned to date", f"{accounting['points_earned']:,}", "2 points per dollar of tolls", True),
         ("Trial points awarded", f"{accounting['points_awarded']:,}", "July bonus-points arms"),
         ("Points redeemed", f"{accounting['points_redeemed']:,}", "Reconciles to balances"),
-        ("Outstanding liability", money(accounting["points_balance"] * accounting["point_value_cad"]), f"at {money(accounting['point_value_cad'], 2)} per point"),
-        ("October plan points", f"{combined['points_awarded']:,}", f"cap {combined['points_limit']:,} · {pct(combined['points_awarded'] / max(combined['points_limit'], 1))} used"),
+        (
+            "Outstanding liability",
+            money(accounting["points_balance"] * accounting["point_value_cad"]),
+            f"at {money(accounting['point_value_cad'], 2)} per point",
+        ),
+        (
+            "October plan points",
+            f"{combined['points_awarded']:,}",
+            f"cap {combined['points_limit']:,} · {pct(combined['points_awarded'] / max(combined['points_limit'], 1))} used",
+        ),
     ]
 )
 ledger = table("loyalty_ledger")

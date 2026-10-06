@@ -1,5 +1,7 @@
 # SageMaker delivery package
 
+This is the AWS side of the project. The decision pipeline itself runs on Databricks (`databricks/`); the SageMaker pipeline packages the travel-propensity model the way a SageMaker-based team would ship it, with a quality gate and manual approval before registration.
+
 `pipeline.py` compiles an SDK v2 pipeline without creating resources. It has Processing, Training, untouched-test Evaluation, a ROC-AUC quality gate, registration with PendingManualApproval, model creation and Batch Transform. SDK v2 is deliberately pinned for this implementation; migrate before its retirement. The definition compiles locally; this is not a cloud-run receipt.
 
 The selected region is eu-north-1, matching the inspected console. No SageMaker execution role was available in the console selector. No local AWS CLI credentials are configured. Hosted execution is pending role/storage setup and a usable quota. Databricks Free Edition requires manual console operation or its supported Genie One connector.
@@ -18,4 +20,4 @@ Browser creation of a new role changes security-sensitive access and requires co
 
 ## Measured local stage verification
 
-Run `scripts/verify_cloud_stages.py` to execute Processing, Training, held-out Evaluation and CSV batch inference locally. The saved receipt is `outputs/sagemaker_local_validation.json`: 56,000 training snapshots, 8,000 validation snapshots and 8,000 untouched test snapshots; test AUC 0.826, above the 0.70 gate, and 12 inference rows passed serialization checks. This tests the actual entry points without an AWS API call. The cloud container, permissions, quota and service execution still need hosted verification.
+Run `scripts/verify_cloud_stages.py` to execute Processing, Training, held-out Evaluation and CSV batch inference locally. The saved receipt is `outputs/sagemaker_local_validation.json`. On the release 1.1 run: 167,743 training snapshots, 25,000 validation and 25,000 untouched test snapshots; test AUC 0.831, above the 0.70 gate; 12 inference rows passed serialization checks. This tests the actual entry points without an AWS API call. The cloud container, permissions, quota and service execution still need hosted verification.

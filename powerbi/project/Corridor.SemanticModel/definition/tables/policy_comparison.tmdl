@@ -62,13 +62,13 @@ table policy_comparison
 		source =
 				let
 				    Source = #table(type table [#"policy" = nullable text, #"policy_order" = nullable text, #"contacts" = nullable text, #"predicted_value" = nullable text, #"true_value" = nullable text, #"true_spend" = nullable text, #"share_of_oracle" = nullable text, #"customers_losing_money" = nullable text], {
-				        {"Random targeting", "1", "1845", "1768.6956", "1079.0437", "9982.0008", "0.0128", "749"},
-				        {"Propensity: 10% off top travellers", "2", "392", "5996.7949", "5623.6515", "9986.2822", "0.0669", "49"},
-				        {"RFM segment playbook", "3", "1766", "-2374.8206", "-4304.4744", "10644.4928", "-0.0512", "1623"},
-				        {"Uplift ranking (greedy)", "4", "5000", "89980.0265", "57367.3784", "5940.2182", "0.6824", "671"},
-				        {"Optimized (MIP)", "5", "5000", "117257.3797", "60381.5078", "9527.8064", "0.7182", "284"},
-				        {"Optimized, risk-averse (MIP on LCB)", "6", "5000", "113791.0124", "58147.9019", "9348.1707", "0.6917", "342"},
-				        {"Oracle optimum (true effects)", "7", "5000", "84816.4791", "84068.5006", "9999.9986", "1.0", "0"}
+				        {"Random targeting", "1", "1943", "-6841.3754", "1106.7269", "10832.5317", "0.0129", "789"},
+				        {"Propensity: 10% off top travellers", "2", "431", "-2038.1231", "6277.7471", "10814.983", "0.0731", "50"},
+				        {"RFM segment playbook", "3", "1763", "-9331.9912", "-4226.0294", "10599.7508", "-0.0492", "1617"},
+				        {"Uplift ranking (greedy)", "4", "5000", "38914.2587", "64158.3829", "9229.7825", "0.7472", "85"},
+				        {"Optimized (MIP)", "5", "5000", "42648.7522", "64773.8093", "12904.7417", "0.7543", "94"},
+				        {"Optimized, risk-averse (MIP on LCB)", "6", "4239", "40336.3685", "57727.196", "10230.8813", "0.6723", "60"},
+				        {"Oracle optimum (true effects)", "7", "5000", "29062.0542", "85868.0939", "9999.9975", "1.0", "0"}
 				    }),
 				    Typed = Table.TransformColumnTypes(Source, {{"policy", type text}, {"policy_order", Int64.Type}, {"contacts", Int64.Type}, {"predicted_value", type number}, {"true_value", type number}, {"true_spend", type number}, {"share_of_oracle", type number}, {"customers_losing_money", Int64.Type}})
 				in

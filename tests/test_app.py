@@ -86,7 +86,8 @@ def test_next_best_offer_shows_ranked_offers(app_test):
 
 
 @pytest.mark.parametrize(
-    "case", ["weekend_decline", "segment_decline", "cannibalization", "unused_capacity", "enrollment_vs_value"]
+    "case",
+    ["weekend_decline", "segment_decline", "cannibalization", "unused_capacity", "enrollment_vs_value"],
 )
 def test_analyst_case_shows_sql_and_conclusion(app_test, case):
     app_test.switch_page("views/analyst_workbench.py").run()

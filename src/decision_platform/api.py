@@ -22,6 +22,7 @@ import pandas as pd
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 
+from . import __version__
 from .config import ROOT
 from .experiments import sample_size
 from .optimization import solve
@@ -56,6 +57,7 @@ class ScenarioRequest(BaseModel):
     points: int = Field(2_500_000, ge=0, le=50_000_000)
     reserve: float = Field(0.20, ge=0, le=0.5)
     risk_aversion: float = Field(0.0, ge=0, le=3)
+    relief_value: float = Field(0.5, ge=0, le=10)
     solver: str = Field("auto", pattern="^(auto|highs)$")
     include_allocation: bool = False
 
@@ -98,7 +100,7 @@ def create_app(serving: Path | None = None) -> FastAPI:
 
     app = FastAPI(
         title="Corridor decision API",
-        version="1.0.0",
+        version=__version__,
         description="Next-best-offer lookups, the verified October plan and bounded scenario solves. Synthetic data.",
         lifespan=lifespan,
     )
@@ -206,14 +208,15 @@ def create_app(serving: Path | None = None) -> FastAPI:
         body: ScenarioRequest, data: Snapshot = Depends(snapshot), owner: str = Depends(require_key)
     ):
         candidates = data.candidates.copy()
-        if body.risk_aversion > 0:
-            candidates["net_contribution"] = (
-                candidates.value_uplift - body.risk_aversion * candidates.value_uplift_sd
-            )
-            candidates["objective_value"] = candidates.net_contribution + candidates.later_value_uplift
-            candidates = candidates[
-                (candidates.objective_value > 0) | (candidates.trips_peak < 0)
-            ].reset_index(drop=True)
+        candidates["net_contribution"] = (
+            candidates.value_uplift - body.risk_aversion * candidates.value_uplift_sd
+        )
+        candidates["relief_value"] = body.relief_value * candidates.trips_peak
+        candidates["objective_value"] = (
+            candidates.net_contribution + candidates.later_value_uplift + candidates.relief_value
+        )
+        keep = (candidates.objective_value > 0) | (candidates.trips_peak < 0)
+        candidates = candidates[keep].reset_index(drop=True)
         started = time.perf_counter()
         try:
             allocation = solve(

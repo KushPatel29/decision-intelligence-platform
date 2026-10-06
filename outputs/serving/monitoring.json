@@ -478,75 +478,83 @@
   "campaign_checks": [
     {
       "arm": "1,500 bonus points",
-      "enrollment_rate": 0.39971191933741446,
-      "conversion": 0.814548073460569,
-      "redemption_rate": 0.32481094706517827,
-      "net_contribution": 65440.02019123999,
-      "rows": 2777
+      "enrollment_rate": 0.4124,
+      "conversion": 0.8176,
+      "redemption_rate": 0.3444,
+      "net_contribution": 56889.851826663995,
+      "rows": 2500
     },
     {
       "arm": "10% off every trip",
-      "enrollment_rate": 0.4035277177825774,
-      "conversion": 0.7681785457163427,
-      "redemption_rate": 0.3092152627789777,
-      "net_contribution": 94801.087911332,
-      "rows": 2778
+      "enrollment_rate": 0.42,
+      "conversion": 0.7836,
+      "redemption_rate": 0.3296,
+      "net_contribution": 85743.406370256,
+      "rows": 2500
     },
     {
       "arm": "500 bonus points",
-      "enrollment_rate": 0.41267554915376303,
-      "conversion": 0.7976233345336694,
-      "redemption_rate": 0.33741447605329494,
-      "net_contribution": 88617.20745090401,
-      "rows": 2777
+      "enrollment_rate": 0.39,
+      "conversion": 0.7892,
+      "redemption_rate": 0.3112,
+      "net_contribution": 80193.51738879198,
+      "rows": 2500
     },
     {
       "arm": "Control",
       "enrollment_rate": 0.0,
-      "conversion": 0.7516198704103672,
+      "conversion": 0.7548,
       "redemption_rate": 0.0,
-      "net_contribution": 94303.944978048,
-      "rows": 2778
+      "net_contribution": 86976.053913312,
+      "rows": 2500
     },
     {
       "arm": "Fifth trip free",
-      "enrollment_rate": 0.3952483801295896,
-      "conversion": 0.9452843772498201,
-      "redemption_rate": 0.1994240460763139,
-      "net_contribution": 107399.36225160341,
-      "rows": 2778
+      "enrollment_rate": 0.402,
+      "conversion": 0.9484,
+      "redemption_rate": 0.1908,
+      "net_contribution": 87557.501399766,
+      "rows": 2500
     },
     {
       "arm": "Off-peak 15% off",
-      "enrollment_rate": 0.408207343412527,
-      "conversion": 0.7901367890568755,
-      "redemption_rate": 0.3228941684665227,
-      "net_contribution": 92030.12654484899,
-      "rows": 2778
+      "enrollment_rate": 0.39,
+      "conversion": 0.7904,
+      "redemption_rate": 0.3104,
+      "net_contribution": 85563.83021610999,
+      "rows": 2500
     },
     {
       "arm": "Off-peak pass ($30 cap)",
-      "enrollment_rate": 0.4064074874010079,
-      "conversion": 0.7728581713462923,
-      "redemption_rate": 0.09539236861051116,
-      "net_contribution": 76657.24660391599,
-      "rows": 2778
+      "enrollment_rate": 0.3976,
+      "conversion": 0.7752,
+      "redemption_rate": 0.0972,
+      "net_contribution": 69916.564040016,
+      "rows": 2500
+    },
+    {
+      "arm": "Rush-hour 25% off",
+      "enrollment_rate": 0.398,
+      "conversion": 0.8024,
+      "redemption_rate": 0.3172,
+      "net_contribution": 83396.74488434699,
+      "rows": 2500
     },
     {
       "arm": "Spend & get $10",
-      "enrollment_rate": 0.4089272858171346,
-      "conversion": 0.7944564434845213,
-      "redemption_rate": 0.09467242620590353,
-      "net_contribution": 104324.86699195999,
-      "rows": 2778
+      "enrollment_rate": 0.4068,
+      "conversion": 0.782,
+      "redemption_rate": 0.1024,
+      "net_contribution": 92388.95795776,
+      "rows": 2500
     },
     {
       "arm": "Weekend 20% off",
-      "enrollment_rate": 0.4164866810655148,
-      "conversion": 0.8038156947444205,
-      "redemption_rate": 0.33225341972642186,
-      "net_contribution": 95271.57711370398,
-      "rows": 2778
+      "enrollment_rate": 0.408,
+      "conversion": 0.8032,
+      "redemption_rate": 0.336,
+      "net_contribution": 86475.299414396,
+      "rows": 2500
     }
   ],
   "alerts": [

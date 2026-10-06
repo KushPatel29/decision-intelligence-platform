@@ -218,21 +218,6 @@ def calibrate(effect, blp, reference_mean):
     }
 
 
-def _dr_loss(effects, rows, arm, mu1, mu0):
-    """Doubly robust validation loss: mean squared gap to the DR pseudo-outcome, summed over periods."""
-    group = rows[rows.arm.isin([arm, "Control"])]
-    w = group.arm.eq(arm).astype(int).to_numpy()
-    x = group[FEATURES].to_numpy(float)
-    predicted = effects.frame(x)
-    loss = 0.0
-    for p, column in OUTCOMES.items():
-        y = group[column].to_numpy(float)
-        a, b = mu1[p].predict(x), mu0[p].predict(x)
-        pseudo = a - b + 2 * w * (y - a) - 2 * (1 - w) * (y - b)
-        loss += float(np.mean((pseudo - predicted[p].to_numpy()) ** 2))
-    return loss
-
-
 PRE_PERIOD = ["spend_30d", "spend_90d", "spend_365d", "trips_30d", "trips_90d", "recency_days"]
 
 
@@ -355,6 +340,91 @@ class _Bootstrap:
         return out
 
 
+def _dr_loss(effects, rows, arm, mu1, mu0, per_row=False):
+    """Doubly robust validation loss: squared gap to the DR pseudo-outcome, summed over periods."""
+    group = rows[rows.arm.isin([arm, "Control"])]
+    w = group.arm.eq(arm).astype(int).to_numpy()
+    x = group[FEATURES].to_numpy(float)
+    predicted = effects.frame(x)
+    loss = np.zeros(len(group))
+    for p, column in OUTCOMES.items():
+        y = group[column].to_numpy(float)
+        a, b = mu1[p].predict(x), mu0[p].predict(x)
+        pseudo = a - b + 2 * w * (y - a) - 2 * (1 - w) * (y - b)
+        loss += (pseudo - predicted[p].to_numpy()) ** 2
+    return loss if per_row else float(loss.mean())
+
+
+def select_ensemble(pooled):
+    """Average every learner whose pooled validation loss is within one standard error of the best.
+
+    The losses are paired (same validation customers), so the standard error is
+    that of the per-customer loss difference. Learners the data cannot tell apart
+    are averaged rather than picked between on noise.
+    """
+    means = {name: float(values.mean()) for name, values in pooled.items()}
+    best = min(means, key=means.get)
+    table, members = [], [best]
+    for name, values in pooled.items():
+        difference = values - pooled[best]
+        se = float(difference.std(ddof=1) / np.sqrt(len(difference)))
+        within = name == best or float(difference.mean()) <= se
+        if within and name != best:
+            members.append(name)
+        table.append(
+            {
+                "learner": name,
+                "pooled_loss": means[name],
+                "gap_to_best": float(difference.mean()),
+                "se": se,
+                "member": within,
+            }
+        )
+    return sorted(members, key=LEARNERS.index), table
+
+
+class Ensemble(Effects):
+    """Equal-weight average of several learners' per-period effects."""
+
+    def __init__(self, members):
+        self.members = members
+        super().__init__(
+            {p: (lambda x, p=p: np.mean([m.predict[p](x) for m in members], axis=0)) for p in PERIODS}
+        )
+
+
+def _value(offer, base, effect, toll, cfg, persistence):
+    money, later = _economics(offer, base, effect, toll, cfg, persistence)
+    return money, later, money.net.to_numpy() + later
+
+
+def _rank_correlation(predicted, truth):
+    """Spearman correlation, scored 0 for a constant prediction.
+
+    A learner that cannot split (too few trial customers for its leaf size) predicts one
+    effect for everyone. Its correlation is undefined, but as a targeting rule it ranks no
+    one, which is what 0 means here; NaN would also stop the metrics being written at all.
+    """
+    if np.ptp(predicted) == 0 or np.ptp(truth) == 0:
+        return 0.0
+    return float(spearmanr(predicted, truth).statistic)
+
+
+def _oracle_entry(effect, value, truth):
+    true_trips = truth.true_incremental_trips.to_numpy()
+    true_value = truth.true_value.to_numpy()
+    trips = effect.sum(axis=1).to_numpy()
+    return {
+        "trips_pehe": float(np.sqrt(np.mean((trips - true_trips) ** 2))),
+        "trips_spearman": _rank_correlation(trips, true_trips),
+        "value_pehe": float(np.sqrt(np.mean((value - true_value) ** 2))),
+        "value_spearman": _rank_correlation(value, true_value),
+        "value_bias": float(np.mean(value - true_value)),
+        "true_trips_sd": float(true_trips.std()),
+        "true_value_sd": float(true_value.std()),
+    }
+
+
 def fit_uplift(cfg, trial, current, forecast_totals=None, tracking=True):
     """Fit, select and score effect models for all offers; return one row per customer and offer."""
     started = time.perf_counter()
@@ -383,83 +453,64 @@ def fit_uplift(cfg, trial, current, forecast_totals=None, tracking=True):
     tolls_test = tolls(test)
     bootstrap = _Bootstrap(train, mu0, x_current, seed)
 
+    # Pass 1: every learner for every offer, and pooled per-customer validation losses.
+    fitted, losses = {}, {}
+    pooled = {name: [] for name in LEARNERS}
+    for index, (offer, arm) in enumerate(OFFER_ARMS.items()):
+        learners, nuisance = _fit_learners(seed + 100 * (index + 1), train, arm, s_models, mu0)
+        fitted[offer] = (learners, nuisance)
+        losses[offer] = {}
+        for name, effects in learners.items():
+            row_loss = _dr_loss(effects, validation, arm, nuisance["mu1"], mu0, per_row=True)
+            losses[offer][name] = float(row_loss.mean())
+            pooled[name].append(row_loss)
+    members, selection_table = select_ensemble({k: np.concatenate(v) for k, v in pooled.items()})
+    selected = "+".join(members)
+    print(f"  ensemble members (within one SE of the best pooled loss): {selected}", flush=True)
+
+    # Pass 2: evaluate on untouched customers, then score the decision population.
     metrics, scores, chosen = {}, [], {}
     heldout = test[["customer_id", "arm", "net_contribution", "trip_count"]].copy()
     for index, (offer, arm) in enumerate(OFFER_ARMS.items()):
-        learners, nuisance = _fit_learners(seed + 100 * (index + 1), train, arm, s_models, mu0)
-        losses = {
-            name: _dr_loss(effects, validation, arm, nuisance["mu1"], mu0)
-            for name, effects in learners.items()
-        }
-        best = min(losses, key=losses.get)
-        blp = blp_calibration(learners[best], validation, arm, nuisance["mu1"], mu0)
-        reference_mean = learners[best].frame(validation[FEATURES].to_numpy(float)).mean()
+        learners, nuisance = fitted[offer]
+        ensemble = Ensemble([learners[m] for m in members])
+        blp = blp_calibration(ensemble, validation, arm, nuisance["mu1"], mu0)
+        reference_mean = ensemble.frame(validation[FEATURES].to_numpy(float)).mean()
         sample = test[test.arm.isin(["Control", arm])]
         sample_w = sample.arm.eq(arm).astype(int)
         positions = test.index.get_indexer(sample.index)
-        offer_metrics = {"n_test": len(sample), "selected": best, "validation_dr_loss": losses, "blp": blp}
+        offer_metrics = {
+            "n_test": len(sample),
+            "selected": selected,
+            "validation_dr_loss": losses[offer],
+            "blp": blp,
+        }
         truth = None
         if oracle is not None:
             truth = oracle[oracle.offer_id.eq(offer)].set_index("customer_id").loc[test.customer_id]
-        for name, effects in learners.items():
+        for name, effects in {**learners, "ensemble": ensemble}.items():
             effect = effects.frame(x_test)
-            money, later = _economics(offer, base_test, effect, tolls_test, cfg, persistence)
-            value = money.net.to_numpy() + later
+            _, _, value = _value(offer, base_test, effect, tolls_test, cfg, persistence)
             entry = uplift_curve(sample.net_contribution, sample_w, value[positions])
             if truth is not None:
-                true_trips = truth.true_incremental_trips.to_numpy()
-                trips = effect.sum(axis=1).to_numpy()
-                true_value = truth.true_value.to_numpy()
-                entry["oracle"] = {
-                    "trips_pehe": float(np.sqrt(np.mean((trips - true_trips) ** 2))),
-                    "trips_spearman": float(spearmanr(trips, true_trips).statistic),
-                    "value_pehe": float(np.sqrt(np.mean((value - true_value) ** 2))),
-                    "value_spearman": float(spearmanr(value, true_value).statistic),
-                    "true_trips_sd": float(true_trips.std()),
-                    "true_value_sd": float(true_value.std()),
-                }
+                entry["oracle"] = _oracle_entry(effect, value, truth)
             offer_metrics[name] = entry
-        calibrated_test, adjustment = calibrate(learners[best].frame(x_test), blp, reference_mean)
-        raw_money, raw_later = _economics(
-            offer, base_test, learners[best].frame(x_test), tolls_test, cfg, persistence
-        )
-        money, later = _economics(offer, base_test, calibrated_test, tolls_test, cfg, persistence)
-        value = money.net.to_numpy() + later
-        heldout[offer + "_value"] = value if APPLY_BLP_CALIBRATION else raw_money.net.to_numpy() + raw_later
-        entry = uplift_curve(sample.net_contribution, sample_w, value[positions])
+            if name == "ensemble":
+                heldout[offer + "_value"] = value
         if truth is not None:
-            entry["oracle"] = {
-                "trips_pehe": float(
-                    np.sqrt(np.mean((calibrated_test.sum(axis=1).to_numpy() - true_trips) ** 2))
-                ),
-                "value_pehe": float(np.sqrt(np.mean((value - truth.true_value.to_numpy()) ** 2))),
-                "value_spearman": float(spearmanr(value, truth.true_value.to_numpy()).statistic),
-                "value_bias": float(np.mean(value - truth.true_value.to_numpy())),
-                "raw_value_bias": float(
-                    np.mean(
-                        _economics(
-                            offer, base_test, learners[best].frame(x_test), tolls_test, cfg, persistence
-                        )[0].net.to_numpy()
-                        + _economics(
-                            offer, base_test, learners[best].frame(x_test), tolls_test, cfg, persistence
-                        )[1]
-                        - truth.true_value.to_numpy()
-                    )
-                ),
-            }
-        offer_metrics["calibrated"] = {**entry, **adjustment}
+            # Documented negative result: BLP calibration of the ensemble, checked against the truth.
+            calibrated, _ = calibrate(ensemble.frame(x_test), blp, reference_mean)
+            _, _, value = _value(offer, base_test, calibrated, tolls_test, cfg, persistence)
+            offer_metrics["blp_calibrated_bias"] = float(np.mean(value - truth.true_value.to_numpy()))
         metrics[offer] = offer_metrics
 
-        effect = learners[best].frame(x_current)
-        if APPLY_BLP_CALIBRATION:
-            effect, _ = calibrate(effect, blp, reference_mean)
-        money, later = _economics(offer, base_current, effect, tolls_current, cfg, persistence)
+        effect = ensemble.frame(x_current)
+        money, later, _ = _value(offer, base_current, effect, tolls_current, cfg, persistence)
+        member_draws = [bootstrap.draws(m, arm, nuisance, index) for m in members]
         values = []
-        for draw in bootstrap.draws(best, arm, nuisance, index):
-            if APPLY_BLP_CALIBRATION:
-                draw, _ = calibrate(draw, blp, reference_mean)
-            draw_money, draw_later = _economics(offer, base_current, draw, tolls_current, cfg, persistence)
-            values.append(draw_money.net.to_numpy() + draw_later)
+        for draws in zip(*member_draws, strict=True):
+            draw = sum(draws) / len(draws)
+            values.append(_value(offer, base_current, draw, tolls_current, cfg, persistence)[2])
         sd = np.std(np.column_stack(values), axis=1, ddof=1)
         mu = base_current.sum(axis=1).to_numpy()
         total = effect.sum(axis=1).to_numpy()
@@ -479,17 +530,16 @@ def fit_uplift(cfg, trial, current, forecast_totals=None, tracking=True):
                     "incremental_trips": total,
                     "baseline_trips": mu,
                     "incremental_response": np.exp(-mu) - np.exp(-(mu + total)),
-                    "learner": best,
+                    "learner": selected,
                 }
             )
         )
         chosen[offer] = {
-            "learner": best,
+            "members": members,
             "blp": blp,
-            "reference_mean": reference_mean.to_dict(),
             "nuisance": {k: v for k, v in nuisance.items() if k != "dr_x"},
         }
-        print(f"  {offer}: {best}, BLP slope {blp['slope']:.2f} (se {blp['slope_se']:.2f})", flush=True)
+        print(f"  {offer}: BLP slope {blp['slope']:.2f} (se {blp['slope_se']:.2f})", flush=True)
 
     uplift = pd.concat(scores, ignore_index=True)
     heldout.to_csv(cfg.path("outputs", "heldout_policy_scores.csv"), index=False)
@@ -519,28 +569,27 @@ def fit_uplift(cfg, trial, current, forecast_totals=None, tracking=True):
     )
 
     rows = []
+    candidates = [*LEARNERS, "ensemble"]
     for offer in OFFER_ARMS:
         row = {
             "offer_id": offer,
-            "selected": metrics[offer]["selected"],
+            "selected": selected,
             "blp_slope": metrics[offer]["blp"]["slope"],
             "blp_slope_se": metrics[offer]["blp"]["slope_se"],
             "blp_ate": metrics[offer]["blp"]["ate"],
             "heterogeneity_detected": metrics[offer]["blp"]["heterogeneity_detected"],
-            "calibrated_qini": metrics[offer]["calibrated"]["qini"],
         }
-        for key, value in metrics[offer]["calibrated"].get("oracle", {}).items():
-            row["calibrated_" + key] = value
-        for learner in LEARNERS:
+        for learner in candidates:
             entry = metrics[offer][learner]
             row[learner + "_qini"] = entry["qini"]
-            row[learner + "_dr_loss"] = metrics[offer]["validation_dr_loss"][learner]
+            if learner in LEARNERS:
+                row[learner + "_dr_loss"] = metrics[offer]["validation_dr_loss"][learner]
             for key, value in entry.get("oracle", {}).items():
                 if not key.startswith("true_"):
                     row[f"{learner}_{key}"] = value
-        for key in ["true_value_sd", "true_trips_sd"]:
-            if "oracle" in metrics[offer]["dr_learner"]:
-                row[key] = metrics[offer]["dr_learner"]["oracle"][key]
+        if "oracle" in metrics[offer]["ensemble"]:
+            row["true_value_sd"] = metrics[offer]["ensemble"]["oracle"]["true_value_sd"]
+            row["true_trips_sd"] = metrics[offer]["ensemble"]["oracle"]["true_trips_sd"]
         rows.append(row)
     summary = pd.DataFrame(rows)
     summary.to_csv(cfg.path("outputs", "uplift_learner_comparison.csv"), index=False)
@@ -554,28 +603,23 @@ def fit_uplift(cfg, trial, current, forecast_totals=None, tracking=True):
             if oracle is not None
             else None,
             "mean_qini": float(summary[learner + "_qini"].mean()),
-            "times_selected": int((summary.selected == learner).sum()),
+            "in_ensemble": learner in members or learner == "ensemble",
         }
-        for learner in LEARNERS
+        for learner in candidates
     }
+    metrics["ensemble_selection"] = selection_table
+    metrics["ensemble_members"] = members
     if oracle is not None:
-        selected = [metrics[o][metrics[o]["selected"]]["oracle"] for o in OFFER_ARMS]
-        metrics["selected_value_spearman"] = float(np.mean([m["value_spearman"] for m in selected]))
-        metrics["selected_value_pehe"] = float(np.mean([m["value_pehe"] for m in selected]))
+        metrics["selected_value_spearman"] = float(summary["ensemble_value_spearman"].mean())
+        metrics["selected_value_pehe"] = float(summary["ensemble_value_pehe"].mean())
+        raw = [metrics[o]["ensemble"]["oracle"]["value_bias"] for o in OFFER_ARMS]
+        calibrated = [metrics[o]["blp_calibrated_bias"] for o in OFFER_ARMS]
         metrics["blp_calibration_check"] = {
-            "applied": APPLY_BLP_CALIBRATION,
-            "mean_value_bias_raw": float(
-                np.mean([metrics[o]["calibrated"]["oracle"]["raw_value_bias"] for o in OFFER_ARMS])
-            ),
-            "mean_value_bias_calibrated": float(
-                np.mean([metrics[o]["calibrated"]["oracle"]["value_bias"] for o in OFFER_ARMS])
-            ),
+            "applied": False,
+            "mean_value_bias_raw": float(np.mean(raw)),
+            "mean_value_bias_calibrated": float(np.mean(calibrated)),
             "offers_where_calibration_increased_bias": int(
-                sum(
-                    abs(metrics[o]["calibrated"]["oracle"]["value_bias"])
-                    > abs(metrics[o]["calibrated"]["oracle"]["raw_value_bias"])
-                    for o in OFFER_ARMS
-                )
+                sum(abs(c) > abs(r) for c, r in zip(calibrated, raw, strict=True))
             ),
         }
     metrics["heterogeneity_detected_offers"] = int(
@@ -584,7 +628,8 @@ def fit_uplift(cfg, trial, current, forecast_totals=None, tracking=True):
     metrics["persistence"] = persistence
     metrics["forecast_to_customer_baseline_ratio"] = calibration
     metrics["selection_rule"] = (
-        "Lowest doubly robust validation loss per offer (observable; no simulator truth)"
+        "Equal-weight ensemble of every learner whose pooled doubly robust validation loss is within one paired "
+        "standard error of the best (observable; no simulator truth)"
     )
     metrics["training_seconds"] = time.perf_counter() - started
     folder = cfg.path("outputs", "models")
@@ -592,9 +637,9 @@ def fit_uplift(cfg, trial, current, forecast_totals=None, tracking=True):
     joblib.dump(
         {
             "baseline": mu0,
-            "forecast_to_customer_baseline_ratio": calibration,
             "s_learner": s_models,
             "offers": chosen,
+            "members": members,
             "enrollment": enroll,
             "redemption": redemption,
             "persistence": persistence,
@@ -609,14 +654,13 @@ def fit_uplift(cfg, trial, current, forecast_totals=None, tracking=True):
         None,
         {
             "selected_value_spearman": metrics.get("selected_value_spearman", 0.0),
-            "mean_qini_selected": float(
-                np.mean([metrics[o][metrics[o]["selected"]]["qini"] for o in OFFER_ARMS])
-            ),
+            "mean_qini_ensemble": float(summary["ensemble_qini"].mean()),
         },
         {
             "seed": seed,
-            "assignment": "customer-randomised, 9 equal arms",
+            "assignment": f"customer-randomised, {len(OFFER_ARMS) + 1} equal arms",
             "selection": metrics["selection_rule"],
+            "members": selected,
             "bootstraps": BOOTSTRAPS,
         },
         tracking,

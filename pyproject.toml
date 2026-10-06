@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "decision-intelligence-platform"
-version = "1.0.0"
+version = "1.1.0"
 description = "Customer, pricing and transportation decision intelligence: causal targeting, certified optimization, truth-scored evaluation"
 requires-python = ">=3.11"
 dependencies = ["numpy>=2.0", "pandas>=2.2", "scipy>=1.14", "scikit-learn>=1.5", "duckdb>=1.1", "pyarrow>=17", "joblib>=1.4"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ruff>=0.15", "httpx>=0.27"]
+dev = ["pytest>=8", "ruff>=0.15", "httpx>=0.27", "pyyaml>=6"]
 tracking = ["mlflow>=3"]
 gurobi = ["gurobipy>=12"]
 spark = ["pyspark==4.0.1", "delta-spark==4.0.0", "deltalake>=1.6"]
@@ -40,7 +40,7 @@ select = ["E", "F", "W", "B", "I", "UP"]
 ignore = ["E501", "B905"]
 
 [tool.ruff.lint.per-file-ignores]
-"databricks/*.py" = ["F821"]
+"databricks/notebooks/*.py" = ["F821", "E402"]
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Header"]

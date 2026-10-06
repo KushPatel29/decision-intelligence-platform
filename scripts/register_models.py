@@ -8,8 +8,10 @@ import numpy as np
 import pandas as pd
 from mlflow.tracking import MlflowClient
 
-from decision_platform.config import ROOT, write_json
+from decision_platform import __version__
+from decision_platform.config import ROOT, Config, write_json
 from decision_platform.features import FEATURES
+from decision_platform.forecasting import daily_cells, horizon_dataset
 from decision_platform.scoring import score_bundle
 
 
@@ -45,15 +47,18 @@ def main():
         scorer = CustomerScorer(bundle, name)
         sample = customer_sample
         if name == "demand":
-            sample = (
-                pd.read_parquet(ROOT / "data/gold/zone_day.parquet")
-                .dropna(subset=bundle["features"])[bundle["features"]]
-                .tail(5)
+            # The forecaster's inputs are built per (origin, cell, target day) from the daily cells.
+            context = pd.read_parquet(ROOT / "data/silver/external_context.parquet")
+            trips = pd.read_parquet(
+                ROOT / "data/silver/fact_trip.parquet", columns=["timestamp", "zone_id", "period"]
             )
+            cells = daily_cells(Config(), trips, context)
+            sample = horizon_dataset(cells, context, origins=[pd.Timestamp(Config().decision_date)])
+            sample = sample[bundle["features"]].head(5)
         if name == "elasticity":
             sample = pd.read_parquet(ROOT / "data/silver/fact_pricing_scenario.parquet").tail(5).copy()
             sample["log_price"] = np.log(sample.effective_price)
-            sample = sample[["zone_id", "period"] + bundle["features"]]
+            sample = sample[["zone_id", "period", "segment"] + bundle["features"]]
         registered = "Corridor-" + name
         with mlflow.start_run(run_name="registry-" + name):
             info = mlflow.pyfunc.log_model(
@@ -67,7 +72,7 @@ def main():
             version = str(info.registered_model_version)
             client.set_registered_model_alias(registered, "Candidate", version)
             client.set_model_version_tag(registered, version, "data_kind", "synthetic")
-            client.set_model_version_tag(registered, version, "release", "0.4.0")
+            client.set_model_version_tag(registered, version, "release", __version__)
             client.set_model_version_tag(registered, version, "git_sha", manifest["git_sha"])
             client.set_model_version_tag(registered, version, "approval", "PendingReview")
             for artifact in [

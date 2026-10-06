@@ -1,0 +1,73 @@
+{
+  "kind": "local run of all four job notebooks (databricks/local_run.py); not a hosted Databricks run",
+  "status": "passed",
+  "task_seconds": {
+    "pipeline": 456.6,
+    "lakehouse": 31.9,
+    "registry": 9.4,
+    "publish": 4.5
+  },
+  "pipeline": {
+    "solver": "HiGHS LP + HiGHS core",
+    "proven_optimal": true,
+    "gurobi_check": {
+      "free_variables": 445,
+      "free_constraints": 468,
+      "status": "optimal",
+      "gurobi_objective": 42648.73934208945,
+      "confirmed": true
+    },
+    "gate_passed": true,
+    "contacts": 5000,
+    "spend": 10000.0,
+    "expected_value": 42648.75,
+    "true_value": 64773.81,
+    "share_of_oracle": 0.7543,
+    "runtime_seconds": 453.7
+  },
+  "lakehouse": {
+    "tables": 63,
+    "silver_trips": 3680249,
+    "bronze_trips": 3684396,
+    "quarantined": {
+      "distance_out_of_range": 1528,
+      "duplicate_natural_key": 2500,
+      "charge_out_of_range": 119
+    },
+    "check_constraints": [
+      "charge_within_toll",
+      "distance_positive",
+      "known_period",
+      "toll_non_negative"
+    ],
+    "features_checked": 39,
+    "customers": 25000,
+    "max_feature_error": 2.1827872842550278e-11,
+    "worst_feature": "spend_365d",
+    "delta_history_versions": 1
+  },
+  "registry": {
+    "spark_catalog.corridor.corridor_propensity": "1",
+    "spark_catalog.corridor.corridor_churn": "1",
+    "spark_catalog.corridor.corridor_attrition": "1",
+    "spark_catalog.corridor.corridor_uplift": "1"
+  },
+  "plan_checks": {
+    "one_offer_per_customer": true,
+    "contacts_match_certificate": true,
+    "spend_matches_certificate": true,
+    "value_matches_certificate": true,
+    "within_budget": true,
+    "within_contact_limit": true,
+    "within_points_cap": true,
+    "proven_optimal": true
+  },
+  "published_tables": 36,
+  "delta_and_uc_statements_checked": [
+    "CHECK toll_non_negative held on every row",
+    "CHECK charge_within_toll held on every row",
+    "CHECK distance_positive held on every row",
+    "CHECK known_period held on every row",
+    "PRIMARY KEY customer_features_pk unique"
+  ]
+}

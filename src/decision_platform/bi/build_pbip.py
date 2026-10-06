@@ -39,6 +39,7 @@ from typing import Any
 
 import pandas as pd
 
+from decision_platform.bi.html_spec import CSS, HTML_MEASURES, HTML_VISUAL
 from decision_platform.bi.model_spec import (
     DATE_COLUMNS,
     MEASURES,
@@ -250,15 +251,24 @@ def table_tmdl(name: str, meta: dict, columns: list[dict], rows: list[list[str]]
     return "\n".join(lines)
 
 
+def quoted(name: str) -> str:
+    """A TMDL object name in single quotes, with any apostrophe doubled.
+
+    ``measure 'Winner's curse'`` ends the name at the apostrophe; the parser then
+    rejects the line and Desktop refuses to open the whole model.
+    """
+    return "'" + name.replace("'", "''") + "'"
+
+
 def measures_tmdl() -> str:
     lines = ["table _Measures", f"\tlineageTag: {tag('table', '_Measures')}", ""]
     for name, dax, fmt, folder, description in MEASURES:
         body = dax.split("\n")
         lines.append(f"\t/// {description}")
         if len(body) == 1:
-            lines.append(f"\tmeasure '{name}' = {body[0]}")
+            lines.append(f"\tmeasure {quoted(name)} = {body[0]}")
         else:
-            lines.append(f"\tmeasure '{name}' =")
+            lines.append(f"\tmeasure {quoted(name)} =")
             lines.extend(f"\t\t\t{line}" if line else "" for line in body)
         if fmt:
             lines.append(f"\t\tformatString: {fmt}")
@@ -271,7 +281,7 @@ def measures_tmdl() -> str:
     # list of business definitions.
     formats = {name: fmt for name, _dax, fmt, _folder, _description in MEASURES}
     for name, dax, image in ui_measures(PAGES, formats):
-        lines.append(f"\tmeasure '{name}' =")
+        lines.append(f"\tmeasure {quoted(name)} =")
         lines.extend(f"\t\t\t{line}" if line else "" for line in dax.split("\n"))
         lines.append(f"\t\tlineageTag: {tag('measure', name)}")
         if image:
@@ -279,6 +289,16 @@ def measures_tmdl() -> str:
             # only once the column says it is one.
             lines.append("\t\tdataCategory: ImageUrl")
         lines.append("\t\tdisplayFolder: Report UI")
+        lines.append("")
+
+    # HTML panels: each returns markup that the HTML Content visual renders with the
+    # one stylesheet in html_spec. Report furniture, so not in the metric reference.
+    for name, dax, _fmt, folder, description in HTML_MEASURES:
+        lines.append(f"\t/// {description}")
+        lines.append(f"\tmeasure {quoted(name)} =")
+        lines.extend(f"\t\t\t{line}" if line else "" for line in dax.split("\n"))
+        lines.append(f"\t\tlineageTag: {tag('measure', name)}")
+        lines.append(f"\t\tdisplayFolder: {folder}")
         lines.append("")
 
     # A measures table needs one hidden column or Desktop will not show it in the
@@ -671,10 +691,57 @@ def chrome_visual_json(spec: dict, index: int) -> dict:
 CARTESIAN = ("bar", "column", "stacked_column", "line", "area", "waterfall")
 
 
+def html_visual_json(spec: dict, index: int) -> dict:
+    """A panel drawn by the HTML Content custom visual from one HTML measure.
+
+    The measure goes in the visual's ``content`` role (Desktop labels it Values);
+    the stylesheet is the visual's own ``stylesheet`` property, stored as a quoted
+    literal, which is why html_spec.CSS may contain no quotes. Raw-HTML display is
+    off so the markup renders instead of being shown as text.
+    """
+    x, y, width, height = spec["pos"]
+    z = 1000 + index
+    containers: dict[str, list] = {"general": _alt(spec["alt"]), **_off("title")}
+    if spec.get("framed", True):
+        containers["padding"] = _padding(10)
+    else:
+        containers["padding"] = _padding(0)
+        containers.update(_off("background", "border", "dropShadow"))
+    return {
+        "$schema": SCHEMA["visual"],
+        "name": spec["id"],
+        "position": {"x": x, "y": y, "z": z, "height": height, "width": width, "tabOrder": z},
+        "visual": {
+            "visualType": HTML_VISUAL,
+            "query": {"queryState": {"content": {"projections": [projection(spec["measure"])]}}},
+            "objects": {
+                "contentFormatting": [
+                    {
+                        "properties": {
+                            "showRawHtml": literal(False),
+                            "hyperlinks": literal(False),
+                            "userSelect": literal(False),
+                            "fontFamily": literal("Segoe UI"),
+                            "fontSize": literal(11),
+                            "fontColour": colour(INK),
+                            "noDataMessage": literal("No data in the current filter context."),
+                        }
+                    }
+                ],
+                "stylesheet": [{"properties": {"stylesheet": literal(CSS)}}],
+            },
+            "visualContainerObjects": containers,
+            "drillFilterOtherVisuals": True,
+        },
+    }
+
+
 def visual_json(spec: dict, index: int) -> dict:
     kind = spec["type"]
     if kind == "card" or kind in CHROME_KINDS:
         return chrome_visual_json(spec, index)
+    if kind == "html":
+        return html_visual_json(spec, index)
     visual_type = VISUAL_TYPES[kind]
     x, y, width, height = spec["pos"]
     z = 1000 + index
@@ -1103,6 +1170,13 @@ def build(out_dir: Path, data_dir: Path = DATA_DIR) -> dict[str, int]:
                     "items": [{"name": THEME, "path": THEME, "type": "CustomTheme"}],
                 },
             ],
+            # An AppSource visual is fetched by GUID when the report opens; one
+            # missing from this list renders as "Can't display this visual".
+            **(
+                {"publicCustomVisuals": [HTML_VISUAL]}
+                if any(v["type"] == "html" for page in PAGES for v in page["visuals"])
+                else {}
+            ),
             "settings": {
                 "useStylableVisualContainerHeader": True,
                 "defaultDrillFilterOtherVisuals": True,

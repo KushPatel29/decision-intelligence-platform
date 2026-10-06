@@ -46,7 +46,11 @@ def build_features(spark, raw_path, as_of="2025-10-01", table_reader=None):
     from pyspark.sql import functions as F
 
     def read(name):
-        return table_reader(name) if table_reader else spark.read.parquet(str(raw_path) + "/" + name + ".parquet")
+        return (
+            table_reader(name)
+            if table_reader
+            else spark.read.parquet(str(raw_path) + "/" + name + ".parquet")
+        )
 
     cutoff = F.to_timestamp(F.lit(as_of))
 
@@ -57,7 +61,9 @@ def build_features(spark, raw_path, as_of="2025-10-01", table_reader=None):
     expressions = [F.sum(F.when(recent(d), 1).otherwise(0)).alias(f"trips_{d}d") for d in (7, 30, 90)]
     expressions.append(F.sum(F.when(recent(180) & ~recent(90), 1).otherwise(0)).alias("trips_previous90d"))
     for days in (30, 90, 365):
-        expressions.append(F.sum(F.when(recent(days), F.col("final_charge")).otherwise(0)).alias(f"spend_{days}d"))
+        expressions.append(
+            F.sum(F.when(recent(days), F.col("final_charge")).otherwise(0)).alias(f"spend_{days}d")
+        )
     expressions += [
         F.avg(F.when(recent(90), F.col("toll"))).alias("avg_toll"),
         F.avg(F.when(recent(90) & (F.col("period") == "Peak"), F.col("toll"))).alias("avg_toll_peak"),
@@ -139,14 +145,21 @@ def build_features(spark, raw_path, as_of="2025-10-01", table_reader=None):
     return (
         frame.withColumn("as_of", cutoff)
         .withColumn(
-            "days_since_last_login", F.least(F.coalesce(F.col("days_since_last_login"), F.lit(365)), F.lit(365))
+            "days_since_last_login",
+            F.least(F.coalesce(F.col("days_since_last_login"), F.lit(365)), F.lit(365)),
         )
-        .withColumn("offer_click_rate_90d", (F.col("offer_clicks_90d") + 0.5) / (F.col("offer_views_90d") + 3.0))
+        .withColumn(
+            "offer_click_rate_90d", (F.col("offer_clicks_90d") + 0.5) / (F.col("offer_views_90d") + 3.0)
+        )
         .withColumn("enroll_rate_90d", (F.col("offer_enrolls_90d") + 0.5) / (F.col("offer_clicks_90d") + 2.0))
-        .withColumn("email_click_rate_90d", (F.col("email_clicks_90d") + 0.5) / (F.col("email_opens_90d") + 3.0))
+        .withColumn(
+            "email_click_rate_90d", (F.col("email_clicks_90d") + 0.5) / (F.col("email_opens_90d") + 3.0)
+        )
         .withColumn(
             "app_share_90d",
-            F.when(F.col("logins_90d") == 0, F.lit(0.0)).otherwise(F.col("app_logins_90d") / F.col("logins_90d")),
+            F.when(F.col("logins_90d") == 0, F.lit(0.0)).otherwise(
+                F.col("app_logins_90d") / F.col("logins_90d")
+            ),
         )
         .withColumn("frequency_trend", (F.col("trips_90d") + 1) / (F.col("trips_previous90d") + 1))
         .withColumn("digital_engagement_score", F.log1p("digital_events_30d"))

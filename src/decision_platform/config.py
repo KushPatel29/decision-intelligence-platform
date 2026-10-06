@@ -25,6 +25,8 @@ class Config:
     points_budget: int = 2_500_000
     min_roi: float = 0.15  # Net incremental contribution / incentive cost.
     contribution_margin: float = 0.72
+    # Value per net rush-hour trip the 407 takes off congested alternate routes (strategic, not revenue).
+    relief_value: float = 0.50
     root: Path = ROOT
 
     def path(self, *parts):

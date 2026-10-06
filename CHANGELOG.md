@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.1.0
+
+**Rush hour and congestion relief.** A ninth offer, 25% off rush-hour trips, and a planning value per net rush-hour
+trip moved onto the 407 in the objective; capacity rows still decide where it can be used. The trial grows to ten arms.
+
+**Causal learner selection.** Learners are chosen once, on doubly robust validation loss pooled across offers, and
+every learner within one standard error of the best is averaged. A rebuilt registry scorer reproduces the plan's
+effects from the stored model to 1e-16.
+
+**Release gate.** Blocking checks are the ones production could compute; the simulation checks (share of the
+ceiling, elasticity coverage) are reported beside them.
+
+**Power BI.** A Command centre page and eight more panels drawn as HTML and CSS by DAX measures in the HTML Content
+visual: hero KPIs, offer cards, guardrails with shadow prices, a policy leaderboard, an experiment forest plot with
+Bonferroni intervals, a zone-by-period capacity heat grid, a segment table and a release scorecard. Every one of 149
+measures is executed against Power BI's engine by `scripts/validate_powerbi_model.ps1`, which also found that an
+apostrophe in a measure name had stopped Desktop opening the model; the generator now escapes it. Offers share one
+colour map with the app, and the two loyalty rewards share a slot with a texture instead of a ninth, unvalidated hue.
+
+**Databricks.** A four-task serverless job (`databricks.yml`, `databricks/`): the pipeline with a Gurobi core and
+workspace MLflow; a Delta medallion with CHECK constraints and a PySpark feature-parity gate; Unity Catalog model
+registration with a load-back scoring test; a reconciled publish with a run receipt. `databricks/run_job.py` deploys
+it through the SDK with browser sign-in, and `databricks/local_run.py` runs all four notebooks locally first.
+
+**Fixes.** The resent bronze batch is capped at the day's trips (a 3,000-customer run crashed); a learner that
+cannot split no longer writes NaN rank correlations; consent history wrote nanosecond timestamps, which Spark cannot
+read; the elasticity scorer looked up cells without their segment; the experiments page described the old per-offer
+learner rule and crashed on a mixed-type column; offer charts indexed an eight-colour palette with nine offers; the
+feature catalog covered 24 of 39 features and overwrote the model cards. Importing the feature list no longer loads
+DuckDB, so a registered model's serving environment does not need it.
+
+**Documentation.** Role coverage, an A/B testing playbook, a data platform plan for IT, a project plan with RACI,
+rewritten README and limitations, four new decision records.
+
 ## 1.0.0
 
 A rebuild of the decision science, the optimizer, the app and the Power BI layer.

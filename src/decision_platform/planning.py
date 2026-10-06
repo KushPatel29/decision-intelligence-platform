@@ -1,12 +1,27 @@
 """Scenario starting points and capacity arithmetic shared by the app and tests."""
 
 SCENARIO_TEMPLATES = {
-    "October plan": dict(budget=10000.0, limit=5000, roi=0.15, points=2_500_000, reserve=0.20, risk=0.0),
-    "Double the budget": dict(budget=20000.0, limit=5000, roi=0.15, points=2_500_000, reserve=0.20, risk=0.0),
-    "Lean budget": dict(budget=6000.0, limit=3000, roi=0.25, points=1_000_000, reserve=0.20, risk=0.0),
-    "Protect capacity": dict(budget=10000.0, limit=5000, roi=0.15, points=2_500_000, reserve=0.25, risk=0.0),
-    "No loyalty points": dict(budget=10000.0, limit=5000, roi=0.15, points=0, reserve=0.20, risk=0.0),
-    "Risk-averse": dict(budget=10000.0, limit=5000, roi=0.15, points=2_500_000, reserve=0.20, risk=1.0),
+    "October plan": dict(
+        budget=10000.0, limit=5000, roi=0.15, points=2_500_000, reserve=0.20, risk=0.0, relief=0.5
+    ),
+    "Double the budget": dict(
+        budget=20000.0, limit=5000, roi=0.15, points=2_500_000, reserve=0.20, risk=0.0, relief=0.5
+    ),
+    "Lean budget": dict(
+        budget=6000.0, limit=3000, roi=0.25, points=1_000_000, reserve=0.20, risk=0.0, relief=0.5
+    ),
+    "Protect capacity": dict(
+        budget=10000.0, limit=5000, roi=0.15, points=2_500_000, reserve=0.25, risk=0.0, relief=0.5
+    ),
+    "Congestion relief first": dict(
+        budget=10000.0, limit=5000, roi=0.10, points=2_500_000, reserve=0.20, risk=0.0, relief=2.0
+    ),
+    "No loyalty points": dict(
+        budget=10000.0, limit=5000, roi=0.15, points=0, reserve=0.20, risk=0.0, relief=0.5
+    ),
+    "Risk-averse": dict(
+        budget=10000.0, limit=5000, roi=0.15, points=2_500_000, reserve=0.20, risk=1.0, relief=0.5
+    ),
 }
 
 

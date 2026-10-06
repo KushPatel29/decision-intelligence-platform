@@ -31,7 +31,7 @@ def build(
     task,
     region="eu-north-1",
     role="arn:aws:iam::000000000000:role/CorridorExecution",
-    image="000000000000.dkr.ecr.eu-north-1.amazonaws.com/corridor-ml:0.4.0",
+    image="000000000000.dkr.ecr.eu-north-1.amazonaws.com/corridor-ml:1.1.0",
     offline=True,
 ):
     if task not in TASKS:

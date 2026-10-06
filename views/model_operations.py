@@ -15,7 +15,12 @@ page_header(
 )
 metrics = doc("metrics")
 gate = doc("quality_gate")
-badges([(f"{c['model']}: {'passed' if c['passed'] else 'review'}", "good" if c["passed"] else "warning") for c in gate["checks"]])
+badges(
+    [
+        (f"{c['model']}: {'passed' if c['passed'] else 'review'}", "good" if c["passed"] else "warning")
+        for c in gate["checks"]
+    ]
+)
 
 customer = metrics["customer"]
 rows = []
@@ -25,15 +30,26 @@ for name in ["propensity", "churn", "attrition"]:
 quality = pd.DataFrame(rows)
 tiles(
     [
-        (f"{row.model.capitalize()} AUC", f"{row.roc_auc:.3f}", f"{row.champion.replace('_', ' ')} · ECE {row.ece_10bins:.3f}", i == 0)
+        (
+            f"{row.model.capitalize()} AUC",
+            f"{row.roc_auc:.3f}",
+            f"{row.champion.replace('_', ' ')} · ECE {row.ece_10bins:.3f}",
+            i == 0,
+        )
         for i, row in enumerate(quality.itertuples())
     ]
     + [
-        ("Demand 30-day MAE", f"{metrics['demand']['test']['mae']:.1f}", metrics["demand"]["champion"].replace("_", " ")),
+        (
+            "Demand 30-day MAE",
+            f"{metrics['demand']['test']['mae']:.1f}",
+            metrics["demand"]["champion"].replace("_", " "),
+        ),
     ]
 )
 
-tab_quality, tab_calibration, tab_explain, tab_drift = st.tabs(["Leaderboards", "Calibration", "Explanations", "Drift"])
+tab_quality, tab_calibration, tab_explain, tab_drift = st.tabs(
+    ["Leaderboards", "Calibration", "Explanations", "Drift"]
+)
 with tab_quality:
     st.subheader("Validation leaderboard (uncalibrated), then the held-out test of the champion")
     for name in ["propensity", "churn", "attrition"]:
@@ -61,12 +77,21 @@ with tab_quality:
     st.caption(gate["scope"])
 
 with tab_calibration:
-    name = st.segmented_control("Model", ["propensity", "churn", "attrition"], default="propensity") or "propensity"
+    name = (
+        st.segmented_control("Model", ["propensity", "churn", "attrition"], default="propensity")
+        or "propensity"
+    )
     performance = table(f"performance_{name}")
-    performance["bin"] = pd.cut(performance.predicted_probability, bins=[i / 10 for i in range(11)], include_lowest=True)
+    performance["bin"] = pd.cut(
+        performance.predicted_probability, bins=[i / 10 for i in range(11)], include_lowest=True
+    )
     curve = (
         performance.groupby("bin", observed=True)
-        .agg(predicted=("predicted_probability", "mean"), observed=("target", "mean"), customers=("target", "size"))
+        .agg(
+            predicted=("predicted_probability", "mean"),
+            observed=("target", "mean"),
+            customers=("target", "size"),
+        )
         .reset_index()
     )
     fig = go.Figure()
@@ -82,7 +107,11 @@ with tab_calibration:
             hovertemplate="Predicted %{x:.1%}<br>Observed %{y:.1%}<br>%{text:,} customers<extra></extra>",
         )
     )
-    fig.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode="lines", name="Perfect calibration", line=dict(color=NEUTRAL, dash="dot")))
+    fig.add_trace(
+        go.Scatter(
+            x=[0, 1], y=[0, 1], mode="lines", name="Perfect calibration", line=dict(color=NEUTRAL, dash="dot")
+        )
+    )
     fig.update_xaxes(title="Predicted probability", tickformat=".0%")
     fig.update_yaxes(title="Observed rate", tickformat=".0%")
     chart(fig, 380)
@@ -90,11 +119,19 @@ with tab_calibration:
 with tab_explain:
     shap = table("shap_global").head(15).sort_values("mean_absolute_shap")
     fig = go.Figure(
-        go.Bar(x=shap.mean_absolute_shap, y=shap.feature, orientation="h", marker_color=SERIES[0], hovertemplate="%{y}<br>%{x:.3f}<extra></extra>")
+        go.Bar(
+            x=shap.mean_absolute_shap,
+            y=shap.feature,
+            orientation="h",
+            marker_color=SERIES[0],
+            hovertemplate="%{y}<br>%{x:.3f}<extra></extra>",
+        )
     )
     fig.update_xaxes(title="Mean |SHAP| on the travel model's log-odds")
     chart(fig, 460, legend=False)
-    st.caption("Predictive explanations of travel propensity on 300 sampled customers. They explain the score, not causes.")
+    st.caption(
+        "Predictive explanations of travel propensity on 300 sampled customers. They explain the score, not causes."
+    )
     clv = doc("probabilistic_clv")
     st.subheader("Probabilistic value benchmark (BG/NBD + Gamma-Gamma)")
     st.write(clv["method"])

@@ -19,14 +19,24 @@ active = customers[customers.churn_probability.notna()]
 tiles(
     [
         ("Customers", f"{len(customers):,}", f"{customers.eligible.mean():.0%} eligible for offers", True),
-        ("Travel propensity AUC", f"{metrics['propensity']['test_calibrated']['roc_auc']:.3f}", metrics["propensity"]["champion"].replace("_", " ")),
-        ("Inactivity risk AUC", f"{metrics['churn']['test_calibrated']['roc_auc']:.3f}", "Historically active customers"),
+        (
+            "Travel propensity AUC",
+            f"{metrics['propensity']['test_calibrated']['roc_auc']:.3f}",
+            metrics["propensity"]["champion"].replace("_", " "),
+        ),
+        (
+            "Inactivity risk AUC",
+            f"{metrics['churn']['test_calibrated']['roc_auc']:.3f}",
+            "Historically active customers",
+        ),
         ("At high inactivity risk", f"{(active.churn_probability > 0.5).sum():,}", "Probability above 50%"),
         ("Anomaly review queue", f"{int(customers.anomaly_flag.sum()):,}", "Top 0.5% by isolation score"),
     ]
 )
 
-tab_segments, tab_risk, tab_anomaly, tab_360 = st.tabs(["Segments", "Risk and value", "Anomaly review", "Customer 360"])
+tab_segments, tab_risk, tab_anomaly, tab_360 = st.tabs(
+    ["Segments", "Risk and value", "Anomaly review", "Customer 360"]
+)
 with tab_segments:
     left, right = st.columns([1, 1.15])
     with left:
@@ -55,10 +65,16 @@ with tab_segments:
                 "rfm_segment": "Segment",
                 "customers": st.column_config.NumberColumn("Customers", format="localized"),
                 "clv": st.column_config.NumberColumn("Projected 12-month value", format="$%.0f"),
-                "propensity": st.column_config.ProgressColumn("Travel propensity", min_value=0, max_value=1, format="percent"),
-                "churn": st.column_config.ProgressColumn("Inactivity risk", min_value=0, max_value=1, format="percent"),
+                "propensity": st.column_config.ProgressColumn(
+                    "Travel propensity", min_value=0, max_value=1, format="percent"
+                ),
+                "churn": st.column_config.ProgressColumn(
+                    "Inactivity risk", min_value=0, max_value=1, format="percent"
+                ),
                 "digital": st.column_config.NumberColumn("Digital events, 30 days", format="%.1f"),
-                "in_plan": st.column_config.ProgressColumn("Share in October plan", min_value=0, max_value=1, format="percent"),
+                "in_plan": st.column_config.ProgressColumn(
+                    "Share in October plan", min_value=0, max_value=1, format="percent"
+                ),
                 "best_offer_value": st.column_config.NumberColumn("Mean best-offer value", format="$%.2f"),
             },
         )
@@ -117,7 +133,9 @@ with tab_risk:
     fig.update_xaxes(title="90-day inactivity risk (%)")
     fig.update_yaxes(title="Projected 12-month contribution (CAD)")
     chart(fig, 430)
-    st.caption("A 4,000-customer sample of historically active customers. Hover for IDs; look them up in Next best offer.")
+    st.caption(
+        "A 4,000-customer sample of historically active customers. Hover for IDs; look them up in Next best offer."
+    )
     left, right = st.columns(2)
     with left:
         st.subheader("Inactivity risk distribution")
@@ -141,19 +159,45 @@ with tab_anomaly:
     if forest:
         tiles(
             [
-                ("Planted anomalies caught", f"{forest['caught']} of {forest['planted']}", f"Isolation Forest recall {pct(forest['recall'])}", True),
+                (
+                    "Planted anomalies caught",
+                    f"{forest['caught']} of {forest['planted']}",
+                    f"Isolation Forest recall {pct(forest['recall'])}",
+                    True,
+                ),
                 ("Review queue precision", pct(forest["precision"]), f"{forest['flagged']} accounts flagged"),
                 ("PR-AUC", f"{forest['pr_auc']:.3f}", "Ranking quality on planted cases"),
-                ("Robust z-score baseline", f"{robust.get('caught', 0)} of {robust.get('planted', 0)}", f"PR-AUC {robust.get('pr_auc', 0):.3f}"),
+                (
+                    "Robust z-score baseline",
+                    f"{robust.get('caught', 0)} of {robust.get('planted', 0)}",
+                    f"PR-AUC {robust.get('pr_auc', 0):.3f}",
+                ),
             ]
         )
     st.caption(anomaly["method"])
     queue = customers[customers.anomaly_flag].sort_values("anomaly_score", ascending=False)
     st.dataframe(
-        queue[["customer_id", "rfm_segment", "trips_30d", "trips_90d", "recency_days", "anomaly_score", "eligible"]],
+        queue[
+            [
+                "customer_id",
+                "rfm_segment",
+                "trips_30d",
+                "trips_90d",
+                "recency_days",
+                "anomaly_score",
+                "eligible",
+            ]
+        ],
         hide_index=True,
         width="stretch",
-        column_config={"anomaly_score": st.column_config.ProgressColumn("Isolation score", min_value=float(queue.anomaly_score.min()) if len(queue) else 0, max_value=float(queue.anomaly_score.max()) if len(queue) else 1, format="%.3f")},
+        column_config={
+            "anomaly_score": st.column_config.ProgressColumn(
+                "Isolation score",
+                min_value=float(queue.anomaly_score.min()) if len(queue) else 0,
+                max_value=float(queue.anomaly_score.max()) if len(queue) else 1,
+                format="%.3f",
+            )
+        },
     )
     download(queue, "anomaly_review_queue.csv")
 
@@ -161,7 +205,9 @@ with tab_360:
     st.subheader("Customer 360 workbench")
     c1, c2, c3 = st.columns([1, 1, 1.2])
     segment = c1.selectbox("Segment", ["All", *sorted(customers.rfm_segment.unique())])
-    plan_filter = c2.selectbox("Plan status", ["All", "In the October plan", "Eligible, not contacted", "Not eligible"])
+    plan_filter = c2.selectbox(
+        "Plan status", ["All", "In the October plan", "Eligible, not contacted", "Not eligible"]
+    )
     text = c3.text_input("Customer ID contains")
     view = customers if segment == "All" else customers[customers.rfm_segment.eq(segment)]
     if plan_filter == "In the October plan":
@@ -191,8 +237,12 @@ with tab_360:
         hide_index=True,
         width="stretch",
         column_config={
-            "propensity_probability": st.column_config.ProgressColumn("Travel propensity", min_value=0, max_value=1, format="percent"),
-            "churn_probability": st.column_config.ProgressColumn("Inactivity risk", min_value=0, max_value=1, format="percent"),
+            "propensity_probability": st.column_config.ProgressColumn(
+                "Travel propensity", min_value=0, max_value=1, format="percent"
+            ),
+            "churn_probability": st.column_config.ProgressColumn(
+                "Inactivity risk", min_value=0, max_value=1, format="percent"
+            ),
             "clv_12m": st.column_config.NumberColumn("Projected value", format="$%.0f"),
             "best_offer_value": st.column_config.NumberColumn("Best offer value", format="$%.2f"),
         },

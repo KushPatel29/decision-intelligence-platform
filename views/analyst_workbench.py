@@ -37,4 +37,6 @@ with right:
     st.dataframe(frame, hide_index=True, width="stretch")
     download(frame, f"{name}.csv")
 st.code(case["sql"], language="sql")
-st.caption("DuckDB SQL over the silver tables and gold marts; the same file ships under adhoc/ in the repository.")
+st.caption(
+    "DuckDB SQL over the silver tables and gold marts; the same file ships under adhoc/ in the repository."
+)

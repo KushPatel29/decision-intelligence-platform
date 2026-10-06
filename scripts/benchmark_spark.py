@@ -58,9 +58,16 @@ def main():
         # Delta-rs writes transaction-log-backed tables; Spark is the feature compute engine.
         for layer in ["bronze", "silver"]:
             raw = pq.read_table(ROOT / "data" / layer / "fact_trip.parquet")
-            write_deltalake(str(lake / layer / "fact_trip"), raw, mode="overwrite")
-            assert DeltaTable(str(lake / layer / "fact_trip")).to_pyarrow_dataset().count_rows() == trip_rows
-        write_deltalake(str(lake / "gold/customer_features"), output, mode="overwrite")
+            # schema_mode: an earlier release's table at the same path has fewer columns, and a
+            # plain overwrite refuses a schema change rather than replacing it.
+            write_deltalake(str(lake / layer / "fact_trip"), raw, mode="overwrite", schema_mode="overwrite")
+            # Bronze keeps the planted defects (duplicates, late batches), so it has its own count.
+            assert (
+                DeltaTable(str(lake / layer / "fact_trip")).to_pyarrow_dataset().count_rows() == raw.num_rows
+            )
+        write_deltalake(
+            str(lake / "gold/customer_features"), output, mode="overwrite", schema_mode="overwrite"
+        )
         readback = (
             DeltaTable(str(lake / "gold/customer_features"))
             .to_pandas()

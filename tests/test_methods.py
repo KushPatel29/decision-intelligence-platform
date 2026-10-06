@@ -49,7 +49,9 @@ def test_offpeak_pass_cost_is_the_exact_poisson_excess():
 
     brute = sum(max(10 * k - 30, 0) * poisson.pmf(k, 5) for k in range(80))
     assert exact == pytest.approx(brute)
-    assert economics.incentive_cost("offpeak_pass", base, trips, tolls)[0] == pytest.approx(exact + economics.CONTACT_COST)
+    assert economics.incentive_cost("offpeak_pass", base, trips, tolls)[0] == pytest.approx(
+        exact + economics.CONTACT_COST
+    )
 
 
 def test_unknown_offer_is_rejected():
@@ -167,13 +169,31 @@ def test_exact_method_certifies_a_large_problem(monkeypatch):
     monkeypatch.setattr(optimization, "GUROBI_LICENCE_LIMIT", 40)
     frame, capacity = random_problem(11, customers=60, offers=3)
     capacity["available_trips"] = 15.0
-    small = solve(frame.copy(), capacity, budget=60.0, campaign_limit=20, min_roi=0.15, solver="highs", points_budget=6000)
+    small = solve(
+        frame.copy(),
+        capacity,
+        budget=60.0,
+        campaign_limit=20,
+        min_roi=0.15,
+        solver="highs",
+        points_budget=6000,
+    )
     certificate = small.diagnostics["certificate"]
     assert certificate is not None and certificate["proven_optimal"]
-    assert certificate["fixed_to_zero"] + certificate["fixed_to_one"] + certificate["free_variables"] == len(frame)
+    assert certificate["fixed_to_zero"] + certificate["fixed_to_one"] + certificate["free_variables"] == len(
+        frame
+    )
     assert certificate["relative_gap_to_lp_bound"] >= -1e-9
     monkeypatch.setattr(optimization, "GUROBI_LICENCE_LIMIT", 100_000)
-    direct = solve(frame.copy(), capacity, budget=60.0, campaign_limit=20, min_roi=0.15, solver="highs", points_budget=6000)
+    direct = solve(
+        frame.copy(),
+        capacity,
+        budget=60.0,
+        campaign_limit=20,
+        min_roi=0.15,
+        solver="highs",
+        points_budget=6000,
+    )
     assert small.objective == pytest.approx(direct.objective, rel=1e-6)
 
 

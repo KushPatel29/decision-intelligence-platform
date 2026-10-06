@@ -23,7 +23,10 @@ evaluation = monitor.get("evaluation_against_planted", {})
 badges(
     [
         (f"Release {ctx['release_id'][:12]} verified", "good"),
-        ("Model acceptance passed" if gate["passed"] else "Model acceptance: review", "good" if gate["passed"] else "warning"),
+        (
+            "Model acceptance passed" if gate["passed"] else "Model acceptance: review",
+            "good" if gate["passed"] else "warning",
+        ),
         (f"{len(alerts)} review alerts", "warning" if alerts else "good"),
     ]
 )
@@ -31,10 +34,26 @@ quarantined = quality.get("quarantined", {})
 tiles(
     [
         ("Bronze trips ingested", f"{quality.get('bronze_rows', 0):,}", "Raw feed, defects included", True),
-        ("Quarantined in silver", f"{sum(quarantined.values()):,}", ", ".join(f"{k.replace('_', ' ')}: {v:,}" for k, v in quarantined.items())),
-        ("Feed defects caught", f"{evaluation.get('caught', 0)} of {evaluation.get('planted_defect_days', 0)}", f"precision {pct(evaluation.get('precision', 0))}"),
-        ("False-alarm days", f"{evaluation.get('false_alarm_days', 0)}", f"of {evaluation.get('monitored_days', 0)} monitored days"),
-        ("Data contracts", f"{sum(quality['checks'].values())}/{len(quality['checks'])}", "Silver layer checks passed"),
+        (
+            "Quarantined in silver",
+            f"{sum(quarantined.values()):,}",
+            ", ".join(f"{k.replace('_', ' ')}: {v:,}" for k, v in quarantined.items()),
+        ),
+        (
+            "Feed defects caught",
+            f"{evaluation.get('caught', 0)} of {evaluation.get('planted_defect_days', 0)}",
+            f"precision {pct(evaluation.get('precision', 0))}",
+        ),
+        (
+            "False-alarm days",
+            f"{evaluation.get('false_alarm_days', 0)}",
+            f"of {evaluation.get('monitored_days', 0)} monitored days",
+        ),
+        (
+            "Data contracts",
+            f"{sum(quality['checks'].values())}/{len(quality['checks'])}",
+            "Silver layer checks passed",
+        ),
     ]
 )
 
@@ -44,9 +63,19 @@ with tab_feed:
     daily["day"] = pd.to_datetime(daily["day"])
     fig = go.Figure()
     fig.add_trace(
-        go.Scatter(x=daily.day, y=daily.expected_rows, mode="lines", name="Expected (same weekday)", line=dict(color=NEUTRAL, dash="dot", width=2))
+        go.Scatter(
+            x=daily.day,
+            y=daily.expected_rows,
+            mode="lines",
+            name="Expected (same weekday)",
+            line=dict(color=NEUTRAL, dash="dot", width=2),
+        )
     )
-    fig.add_trace(go.Scatter(x=daily.day, y=daily.rows, mode="lines", name="Ingested rows", line=dict(color=SERIES[0], width=2)))
+    fig.add_trace(
+        go.Scatter(
+            x=daily.day, y=daily.rows, mode="lines", name="Ingested rows", line=dict(color=SERIES[0], width=2)
+        )
+    )
     flagged = daily[daily.flagged]
     fig.add_trace(
         go.Scatter(
@@ -54,7 +83,9 @@ with tab_feed:
             y=flagged.rows,
             mode="markers",
             name="Flagged",
-            marker=dict(size=12, color=STATUS["serious"], symbol="diamond", line=dict(width=2, color="#081522")),
+            marker=dict(
+                size=12, color=STATUS["serious"], symbol="diamond", line=dict(width=2, color="#081522")
+            ),
             text=flagged.reason,
             hovertemplate="%{x|%b %d}<br>%{y:,} rows<br>%{text}<extra></extra>",
         )
@@ -64,7 +95,9 @@ with tab_feed:
     chart(fig, 380)
     st.caption(monitor["method"])
     st.dataframe(
-        flagged[["day", "rows", "expected_rows", "volume_z", "duplicate_rate", "out_of_range_rate", "reason"]],
+        flagged[
+            ["day", "rows", "expected_rows", "volume_z", "duplicate_rate", "out_of_range_rate", "reason"]
+        ],
         hide_index=True,
         width="stretch",
         column_config={
@@ -92,8 +125,12 @@ with tab_alerts:
 
 with tab_release:
     manifest = pd.read_json(SERVING / "manifest.json", typ="series")
-    st.markdown(f"**Serving snapshot** · release `{manifest['release_id'][:16]}` · decision date {manifest['decision_date']}")
-    files = pd.DataFrame({"file": list(manifest["files"]), "sha256": [v[:16] + "…" for v in manifest["files"].values()]})
+    st.markdown(
+        f"**Serving snapshot** · release `{manifest['release_id'][:16]}` · decision date {manifest['decision_date']}"
+    )
+    files = pd.DataFrame(
+        {"file": list(manifest["files"]), "sha256": [v[:16] + "…" for v in manifest["files"].values()]}
+    )
     st.dataframe(files, hide_index=True, width="stretch")
     st.caption(
         "The app verifies every file's SHA-256 against this manifest before serving and refuses a partial, "
@@ -101,11 +138,39 @@ with tab_release:
     )
     st.subheader("Deployment readiness")
     readiness = [
-        ("Container image", "Built from Dockerfile; read-only filesystem, non-root user, health check", "Ready"),
-        ("Identity", "OIDC sign-in with an explicit subject allowlist; anonymous mode refused in production", "Ready"),
-        ("Audit trail", "Owner-isolated SQLite WAL store of solves and saved plans with release identity", "Ready"),
+        (
+            "Container image",
+            "Built from Dockerfile; read-only filesystem, non-root user, health check",
+            "Ready",
+        ),
+        (
+            "Identity",
+            "OIDC sign-in with an explicit subject allowlist; anonymous mode refused in production",
+            "Ready",
+        ),
+        (
+            "Audit trail",
+            "Owner-isolated SQLite WAL store of solves and saved plans with release identity",
+            "Ready",
+        ),
         ("Decision API", "FastAPI service with API-key auth, health and readiness probes", "Ready"),
-        ("Cloud training", "SageMaker pipeline definitions compile; hosted execution needs an AWS account", "Pending account"),
-        ("Hosted Spark", "Databricks medallion notebook authored; hosted run needs a workspace", "Pending account"),
+        (
+            "Cloud training",
+            "SageMaker pipeline definitions compile; hosted execution needs an AWS account",
+            "Pending account",
+        ),
+        (
+            "Power BI",
+            "Generated nine-page report; all 149 measures executed against Power BI's engine",
+            "Ready",
+        ),
+        (
+            "Databricks job",
+            "Four tasks (pipeline with Gurobi, Delta with CHECK constraints and a PySpark parity gate, Unity Catalog "
+            "registry, reconciled publish) run locally end to end; the hosted run needs the workspace owner's sign-in",
+            "Pending sign-in",
+        ),
     ]
-    st.dataframe(pd.DataFrame(readiness, columns=["Component", "Evidence", "Status"]), hide_index=True, width="stretch")
+    st.dataframe(
+        pd.DataFrame(readiness, columns=["Component", "Evidence", "Status"]), hide_index=True, width="stretch"
+    )

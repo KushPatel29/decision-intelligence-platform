@@ -23,10 +23,26 @@ recovery = metrics["elasticity_rmse_vs_truth"]
 tiles(
     [
         ("Method", "Empirical Bayes", "Cell OLS shrunk toward period x segment mean", True),
-        ("Error vs true elasticity", f"{recovery.get('elasticity', float('nan')):.3f}", "RMSE across 36 cells (simulation check)"),
-        ("Pooled model error", f"{recovery.get('pooled_elasticity', float('nan')):.3f}", "Ignores zone differences"),
-        ("Boosting error", f"{recovery.get('boosting_elasticity', float('nan')):.3f}", "Monotone gradient boosting"),
-        ("95% interval coverage", f"{recovery.get('ci_coverage', float('nan')):.0%}", "Cells whose interval holds the truth"),
+        (
+            "Error vs true elasticity",
+            f"{recovery.get('elasticity', float('nan')):.3f}",
+            "RMSE across 36 cells (simulation check)",
+        ),
+        (
+            "Pooled model error",
+            f"{recovery.get('pooled_elasticity', float('nan')):.3f}",
+            "Ignores zone differences",
+        ),
+        (
+            "Boosting error",
+            f"{recovery.get('boosting_elasticity', float('nan')):.3f}",
+            "Monotone gradient boosting",
+        ),
+        (
+            "95% interval coverage",
+            f"{recovery.get('ci_coverage', float('nan')):.0%}",
+            "Cells whose interval holds the truth",
+        ),
     ]
 )
 callout(
@@ -35,7 +51,9 @@ callout(
     "pricing question badly."
 )
 
-tab_elasticity, tab_scenarios, tab_optimize = st.tabs(["Elasticity", "Price scenarios", "Optimize prices with the campaign"])
+tab_elasticity, tab_scenarios, tab_optimize = st.tabs(
+    ["Elasticity", "Price scenarios", "Optimize prices with the campaign"]
+)
 with tab_elasticity:
     segment = st.segmented_control("Segment", ["Personal", "Business"], default="Personal")
     view = elasticity[elasticity.segment.eq(segment or "Personal")].copy()
@@ -72,14 +90,18 @@ with tab_elasticity:
     fig.add_vline(x=-1, line_dash="dot", line_color="#ec835a", annotation_text="Unit elastic")
     fig.update_xaxes(title="Price elasticity of demand (95% interval)")
     chart(fig, 560)
-    st.caption("Below −1, a price cut raises revenue; above −1 it lowers revenue. Business travel is less price sensitive.")
+    st.caption(
+        "Below −1, a price cut raises revenue; above −1 it lowers revenue. Business travel is less price sensitive."
+    )
     download(elasticity, "elasticity.csv")
 
 with tab_scenarios:
     c1, c2 = st.columns(2)
     zone = c1.selectbox("Zone", list(zones), format_func=lambda z: zones[z])
     period = c2.selectbox("Travel period", ["Off-peak", "Weekend", "Peak"])
-    current = scenarios[(scenarios.zone_id == zone) & (scenarios.period == period)].sort_values("price_change")
+    current = scenarios[(scenarios.zone_id == zone) & (scenarios.period == period)].sort_values(
+        "price_change"
+    )
     change = st.select_slider(
         "Effective price change",
         options=current.price_change.tolist(),
@@ -87,10 +109,21 @@ with tab_scenarios:
         format_func=lambda v: f"{v:+.0%}" if v else "Baseline",
     )
     row = current[current.price_change == change].iloc[0]
-    st.columns(3)[0].metric("Elasticity", f"{row.elasticity:.2f}", f"± {1.96 * row.elasticity_se:.2f}", delta_color="off")
+    st.columns(3)[0].metric(
+        "Elasticity", f"{row.elasticity:.2f}", f"± {1.96 * row.elasticity_se:.2f}", delta_color="off"
+    )
     fig = go.Figure()
     x = current.price_change * 100
-    fig.add_trace(go.Scatter(x=x, y=current.demand_index_high, mode="lines", line=dict(width=0), showlegend=False, hoverinfo="skip"))
+    fig.add_trace(
+        go.Scatter(
+            x=x,
+            y=current.demand_index_high,
+            mode="lines",
+            line=dict(width=0),
+            showlegend=False,
+            hoverinfo="skip",
+        )
+    )
     fig.add_trace(
         go.Scatter(
             x=x,
@@ -103,8 +136,24 @@ with tab_scenarios:
             hoverinfo="skip",
         )
     )
-    fig.add_trace(go.Scatter(x=x, y=current.demand_index, name="Demand index", mode="lines+markers", line=dict(color=SERIES[0], width=2)))
-    fig.add_trace(go.Scatter(x=x, y=current.revenue_index, name="Revenue index", mode="lines+markers", line=dict(color=SERIES[1], width=2)))
+    fig.add_trace(
+        go.Scatter(
+            x=x,
+            y=current.demand_index,
+            name="Demand index",
+            mode="lines+markers",
+            line=dict(color=SERIES[0], width=2),
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=x,
+            y=current.revenue_index,
+            name="Revenue index",
+            mode="lines+markers",
+            line=dict(color=SERIES[1], width=2),
+        )
+    )
     fig.add_hline(y=100, line_dash="dot", line_color=NEUTRAL)
     fig.add_vline(x=change * 100, line_dash="dot", line_color="#fab219")
     fig.update_layout(hovermode="x unified")
@@ -152,15 +201,44 @@ with tab_optimize:
         chosen = table("price_allocation")
     tiles(
         [
-            ("Price contribution change", money(receipt["price_contribution"]), f"{receipt['price_changes']} of 18 cells change price", True),
-            ("Campaign value alongside", money(receipt.get("campaign_objective", receipt["campaign_net_contribution"])), f"{receipt['contacts']:,} contacts"),
-            ("Consumer surplus change", money(receipt["consumer_surplus_change"]), f"Weight {receipt['surplus_weight']:.1f}"),
-            ("Solver", receipt["solver"], "All shared constraints passed" if receipt["all_constraints_passed"] else "Review"),
+            (
+                "Price contribution change",
+                money(receipt["price_contribution"]),
+                f"{receipt['price_changes']} of 18 cells change price",
+                True,
+            ),
+            (
+                "Campaign value alongside",
+                money(receipt.get("campaign_objective", receipt["campaign_net_contribution"])),
+                f"{receipt['contacts']:,} contacts",
+            ),
+            (
+                "Consumer surplus change",
+                money(receipt["consumer_surplus_change"]),
+                f"Weight {receipt['surplus_weight']:.1f}",
+            ),
+            (
+                "Solver",
+                receipt["solver"],
+                "All shared constraints passed" if receipt["all_constraints_passed"] else "Review",
+            ),
         ]
     )
     shown = chosen.assign(zone=chosen.zone_id.map(zones))
     st.dataframe(
-        shown[["zone", "period", "price_change", "elasticity", "forecast_trips", "campaign_trips", "remaining_with_reserve", "incremental_contribution", "consumer_surplus_change"]],
+        shown[
+            [
+                "zone",
+                "period",
+                "price_change",
+                "elasticity",
+                "forecast_trips",
+                "campaign_trips",
+                "remaining_with_reserve",
+                "incremental_contribution",
+                "consumer_surplus_change",
+            ]
+        ],
         hide_index=True,
         width="stretch",
         column_config={

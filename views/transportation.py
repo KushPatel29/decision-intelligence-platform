@@ -19,9 +19,22 @@ demand = doc("metrics")["demand"]
 test = demand["test"]
 tiles(
     [
-        ("Forecast model", demand["champion"].replace("_", " ").capitalize(), demand["selection"].get("promotion_gate", ""), True),
-        ("30-day MAE, trips per cell-day", f"{test['mae']:.1f}", f"Same-weekday baseline {test['same_weekday_mean_mae']:.1f}"),
-        ("90% interval coverage", pct(test["interval_coverage_90"]), f"{test['test_origins']} held-out forecast origins"),
+        (
+            "Forecast model",
+            demand["champion"].replace("_", " ").capitalize(),
+            demand["selection"].get("promotion_gate", ""),
+            True,
+        ),
+        (
+            "30-day MAE, trips per cell-day",
+            f"{test['mae']:.1f}",
+            f"Same-weekday baseline {test['same_weekday_mean_mae']:.1f}",
+        ),
+        (
+            "90% interval coverage",
+            pct(test["interval_coverage_90"]),
+            f"{test['test_origins']} held-out forecast origins",
+        ),
         (
             "Campaign peak trips",
             f"{capacity[capacity.period.eq('Peak')].allocated_trips.sum():+,.0f}",
@@ -68,9 +81,23 @@ with tab_capacity:
     fig.update_layout(barmode="relative", hovermode="x unified")
     fig.update_yaxes(title="Trips over the 30-day window")
     chart(fig, 400)
-    st.caption("White ticks mark planning capacity. Campaign trips can be negative where off-peak offers move commuters out of the peak.")
+    st.caption(
+        "White ticks mark planning capacity. Campaign trips can be negative where off-peak offers move commuters out of the peak."
+    )
     st.dataframe(
-        view[["zone", "period", "baseline_forecast", "forecast_high", "allocated_trips", "reserve_trips", "capacity_trips", "final_utilization", "remaining_with_reserve"]],
+        view[
+            [
+                "zone",
+                "period",
+                "baseline_forecast",
+                "forecast_high",
+                "allocated_trips",
+                "reserve_trips",
+                "capacity_trips",
+                "final_utilization",
+                "remaining_with_reserve",
+            ]
+        ],
         hide_index=True,
         width="stretch",
         column_config={
@@ -79,7 +106,9 @@ with tab_capacity:
             "allocated_trips": st.column_config.NumberColumn("Campaign", format="%+.0f"),
             "reserve_trips": st.column_config.NumberColumn("Reserve", format="%.0f"),
             "capacity_trips": st.column_config.NumberColumn("Capacity", format="%.0f"),
-            "final_utilization": st.column_config.ProgressColumn("Load", min_value=0, max_value=1, format="percent"),
+            "final_utilization": st.column_config.ProgressColumn(
+                "Load", min_value=0, max_value=1, format="percent"
+            ),
             "remaining_with_reserve": st.column_config.NumberColumn("Free after reserve", format="%.0f"),
         },
     )
@@ -89,14 +118,25 @@ with tab_forecast:
     backtest = table("demand_backtest")
     cells = backtest[["zone_id", "period"]].drop_duplicates().sort_values(["zone_id", "period"])
     labels = {f"{zones[z]} · {p}": (z, p) for z, p in cells.itertuples(index=False)}
-    choice = st.selectbox("Zone and period", list(labels), index=list(labels).index(f"{zones[2]} · Peak") if f"{zones[2]} · Peak" in labels else 0)
+    choice = st.selectbox(
+        "Zone and period",
+        list(labels),
+        index=list(labels).index(f"{zones[2]} · Peak") if f"{zones[2]} · Peak" in labels else 0,
+    )
     zone_id, cell_period = labels[choice]
     series = backtest[(backtest.zone_id == zone_id) & (backtest.period == cell_period)].sort_values("date")
     origin = series.origin.max()
     series = series[series.origin.eq(origin)]
     fig = go.Figure()
     fig.add_trace(
-        go.Scatter(x=series.date, y=series.upper_90, mode="lines", line=dict(width=0), showlegend=False, hoverinfo="skip")
+        go.Scatter(
+            x=series.date,
+            y=series.upper_90,
+            mode="lines",
+            line=dict(width=0),
+            showlegend=False,
+            hoverinfo="skip",
+        )
     )
     fig.add_trace(
         go.Scatter(
@@ -110,13 +150,31 @@ with tab_forecast:
             hoverinfo="skip",
         )
     )
-    fig.add_trace(go.Scatter(x=series.date, y=series.prediction, mode="lines", name="Forecast", line=dict(color=SERIES[0], width=2)))
-    fig.add_trace(go.Scatter(x=series.date, y=series.trips, mode="markers", name="Actual", marker=dict(color="#eef8ff", size=6)))
+    fig.add_trace(
+        go.Scatter(
+            x=series.date,
+            y=series.prediction,
+            mode="lines",
+            name="Forecast",
+            line=dict(color=SERIES[0], width=2),
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=series.date, y=series.trips, mode="markers", name="Actual", marker=dict(color="#eef8ff", size=6)
+        )
+    )
     fig.update_layout(hovermode="x unified")
     fig.update_yaxes(title="Trips per day")
     chart(fig, 380)
-    st.caption(f"Latest held-out origin ({str(origin)[:10]}); the forecast is frozen at the origin for 30 days. {demand['decision_forecast']}")
-    errors = backtest.assign(abs_error=(backtest.trips - backtest.prediction).abs()).groupby("period").abs_error.mean()
+    st.caption(
+        f"Latest held-out origin ({str(origin)[:10]}); the forecast is frozen at the origin for 30 days. {demand['decision_forecast']}"
+    )
+    errors = (
+        backtest.assign(abs_error=(backtest.trips - backtest.prediction).abs())
+        .groupby("period")
+        .abs_error.mean()
+    )
     st.dataframe(errors.rename("MAE").reset_index(), hide_index=True)
 
 with tab_hourly:
@@ -126,11 +184,18 @@ with tab_hourly:
     fig = go.Figure()
     for i, direction in enumerate(grouped.columns):
         fig.add_trace(
-            go.Scatter(x=grouped.index, y=grouped[direction], name=direction, mode="lines", line=dict(width=2, color=SERIES[i]))
+            go.Scatter(
+                x=grouped.index,
+                y=grouped[direction],
+                name=direction,
+                mode="lines",
+                line=dict(width=2, color=SERIES[i]),
+            )
         )
     fig.update_layout(hovermode="x unified")
     fig.update_xaxes(title="Hour of day", dtick=2)
     fig.update_yaxes(title="Forecast trips, October")
     chart(fig, 340)
-    st.caption("Daily forecasts disaggregated with pre-cutoff hour and direction shares; not separately validated hourly models.")
-
+    st.caption(
+        "Daily forecasts disaggregated with pre-cutoff hour and direction shares; not separately validated hourly models."
+    )

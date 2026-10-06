@@ -34,7 +34,9 @@ def test_plan_satisfies_every_shared_constraint(outputs):
     selected = pd.read_csv(outputs / "decision_table.csv")
     capacity = pd.read_csv(outputs / "capacity.csv")
     assert set(frame.offer_id) <= set(OFFERS)
-    matrix, upper, _ = constraint_matrix(frame, capacity, cfg.budget, cfg.campaign_limit, cfg.min_roi, cfg.points_budget)
+    matrix, upper, _ = constraint_matrix(
+        frame, capacity, cfg.budget, cfg.campaign_limit, cfg.min_roi, cfg.points_budget
+    )
     x = frame.candidate_id.isin(selected.candidate_id).to_numpy(dtype=float)
     assert (matrix @ x <= upper + 1e-6).all()
     assert not selected.customer_id.duplicated().any() and selected.eligible.all()
@@ -46,7 +48,10 @@ def test_certificate_proves_optimality(outputs):
     certificate = result["certification"]
     assert certificate["proven_optimal"]
     assert certificate["relative_gap_to_lp_bound"] <= 1e-4
-    assert certificate["fixed_to_zero"] + certificate["fixed_to_one"] + certificate["free_variables"] == certificate["variables"]
+    assert (
+        certificate["fixed_to_zero"] + certificate["fixed_to_one"] + certificate["free_variables"]
+        == certificate["variables"]
+    )
 
 
 def test_folds_are_purged_and_features_end_before_cutoff(outputs):
@@ -60,7 +65,7 @@ def test_folds_are_purged_and_features_end_before_cutoff(outputs):
 
 def test_trial_is_powered_balanced_and_isolated(outputs):
     result = json.loads((outputs / "experiment_results.json").read_text())
-    assert len(result["actual_per_arm"]) == 9
+    assert len(result["actual_per_arm"]) == len(OFFERS) + 1
     assert result["powered_for_planned_mde"] and result["srm_p_value"] > 0.01
     assert result["max_abs_smd"] < 0.1
     trial = pd.read_parquet(ROOT / "data/silver/fact_campaign_result.parquet")
@@ -80,14 +85,18 @@ def test_truth_never_enters_features_or_serving(outputs):
 def test_optimized_plan_beats_naive_targeting_on_true_value(outputs):
     policy = pd.read_csv(outputs / "policy_comparison.csv").set_index("policy")
     optimized = policy.loc["Optimized (MIP)", "true_value"]
-    for naive in ["Random targeting", "RFM segment playbook"] + [p for p in policy.index if p.startswith("Propensity")]:
+    for naive in ["Random targeting", "RFM segment playbook"] + [
+        p for p in policy.index if p.startswith("Propensity")
+    ]:
         assert optimized > policy.loc[naive, "true_value"]
     assert policy.loc["Oracle optimum (true effects)", "true_value"] >= optimized - 1e-6
 
 
 def test_reward_ledger_reconciles(outputs):
     ledger = pd.read_csv(outputs / "loyalty_ledger.csv")
-    np.testing.assert_allclose(ledger.points_balance, ledger.points_earned + ledger.points_awarded - ledger.points_redeemed)
+    np.testing.assert_allclose(
+        ledger.points_balance, ledger.points_earned + ledger.points_awarded - ledger.points_redeemed
+    )
     assert (ledger.points_balance >= 0).all() and ledger.points_redeemed.sum() > 0
 
 
@@ -112,3 +121,41 @@ def test_tracking_runs_exist_when_enabled(outputs):
             pytest.skip("Tracking disabled for this run")
         statuses.append(json.loads(file.read_text())["status"])
     assert set(statuses) == {"tracked"}
+
+
+def test_uplift_scorer_reproduces_the_pipeline_effects(outputs):
+    """The registry scorer rebuilds the ensemble from stored parts; it must match what the plan used."""
+    import joblib
+
+    from decision_platform.scoring import uplift_effects
+
+    bundle = joblib.load(outputs / "models" / "uplift.joblib")
+    customers = pd.read_parquet(ROOT / "data/gold/customer_360.parquet").set_index("customer_id")
+    candidates = pd.read_parquet(outputs / "serving" / "candidates.parquet").sample(300, random_state=7)
+    effects = uplift_effects(bundle, customers.loc[candidates.customer_id].reset_index())
+    for period, column in [
+        ("Peak", "trips_peak"),
+        ("Off-peak", "trips_offpeak"),
+        ("Weekend", "trips_weekend"),
+    ]:
+        scored = [effects.iloc[i][f"{o}|{period}"] for i, o in enumerate(candidates.offer_id)]
+        np.testing.assert_allclose(scored, candidates[column].to_numpy(), atol=1e-9)
+
+
+def test_demand_scorer_reproduces_the_plan_forecast(outputs):
+    """The registered demand model is the refit one the capacity plan used, scored the same way."""
+    import joblib
+
+    from decision_platform.forecasting import daily_cells, horizon_dataset
+    from decision_platform.scoring import score_bundle
+
+    bundle = joblib.load(outputs / "models" / "demand.joblib")
+    context = pd.read_parquet(ROOT / "data/silver/external_context.parquet")
+    trips = pd.read_parquet(
+        ROOT / "data/silver/fact_trip.parquet", columns=["timestamp", "zone_id", "period"]
+    )
+    future = horizon_dataset(
+        daily_cells(Config(), trips, context), context, origins=[pd.Timestamp("2025-10-01")]
+    )
+    plan = pd.read_csv(outputs / "decision_forecast.csv")
+    np.testing.assert_allclose(score_bundle("demand", bundle, future), plan.baseline_forecast, rtol=1e-9)

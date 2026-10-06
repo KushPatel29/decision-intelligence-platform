@@ -8,6 +8,7 @@ import os
 
 import streamlit as st
 
+from decision_platform import __version__
 from decision_platform.access import require_access
 from decision_platform.ui import CSS, footer
 from decision_platform.webapp import SERVING, snapshot_stamp, verify_snapshot
@@ -84,13 +85,13 @@ with st.sidebar:
     )
     st.markdown(
         f'<div class="sidebar-note"><strong>October 2025 plan</strong><br>Decision date {manifest["decision_date"]}'
-        f'<br>Release {manifest["release_id"][:10]}<small>Synthetic customers, zones and rates. Real public weather, '
+        f"<br>Release {manifest['release_id'][:10]}<small>Synthetic customers, zones and rates. Real public weather, "
         "holiday and exchange-rate context.</small></div>",
         unsafe_allow_html=True,
     )
 
 st.markdown(
-    '<div class="masthead"><span>Corridor / Planning workspace · v1.0</span>'
+    f'<div class="masthead"><span>Corridor / Planning workspace · v{__version__}</span>'
     '<span class="status"><span class="status-dot"></span>Verified snapshot · local simulation</span></div>',
     unsafe_allow_html=True,
 )

@@ -1,0 +1,213 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "v0101",
+  "position": {
+    "x": 20,
+    "y": 88,
+    "z": 1002,
+    "height": 140,
+    "width": 1240,
+    "tabOrder": 1002
+  },
+  "visual": {
+    "visualType": "htmlContent443BE3AD55E043BF878BED274D3A6855",
+    "query": {
+      "queryState": {
+        "content": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "HTML Hero"
+                }
+              },
+              "queryRef": "_Measures.HTML Hero",
+              "nativeQueryRef": "HTML Hero"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "contentFormatting": [
+        {
+          "properties": {
+            "showRawHtml": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "hyperlinks": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "userSelect": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "11D"
+                }
+              }
+            },
+            "fontColour": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#eef8ff'"
+                    }
+                  }
+                }
+              }
+            },
+            "noDataMessage": {
+              "expr": {
+                "Literal": {
+                  "Value": "'No data in the current filter context.'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "stylesheet": [
+        {
+          "properties": {
+            "stylesheet": {
+              "expr": {
+                "Literal": {
+                  "Value": "'body{margin:0} .w{font-family:Segoe UI,sans-serif;color:#eef8ff;font-size:12px;line-height:1.45} .h{font-size:12px;color:#b3c7d7;margin:0 0 8px 0;font-weight:600;letter-spacing:.02em} .eyebrow{color:#4bdcd5;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700} .hero{display:flex;gap:18px;background:linear-gradient(135deg,#123349,#0b1c2a 70%);border:1px solid #2d4c61;border-radius:14px;padding:11px 18px} .hero .left{flex:1.05} .headline{font-size:21px;font-weight:600;margin:4px 0 4px 0;letter-spacing:-.01em} .sub{color:#b3c7d7;font-size:11.5px} .kpis{flex:1.6;display:grid;grid-template-columns:repeat(4,1fr);gap:10px} .kpi{background:rgba(13,32,48,.85);border:1px solid #263f52;border-radius:10px;padding:9px 11px} .kpi .l{color:#b3c7d7;font-size:10.5px} .kpi .v{font-size:21px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:2px} .kpi .d{color:#8faebf;font-size:10px;margin-top:2px} .kpi.accent{border-color:#2f6b70;background:linear-gradient(180deg,#0f2f3a,#0d2030)} .kpi.accent .v{color:#7fe8e1} .badge{display:inline-block;border-radius:999px;padding:2px 9px;font-size:10px;margin:6px 6px 0 0;border:1px solid #1f6b2a;color:#9be59b;background:#0b2016} .badge.blue{border-color:#2d4c61;color:#b7d9e5;background:#0b1c2a} .cards{display:grid;grid-template-columns:repeat(5,1fr);gap:6px} .card{background:#102437;border:1px solid #263f52;border-radius:10px;padding:5px 10px 6px} .card.idle{opacity:.55} .top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px} .card .n{font-size:12px;font-weight:600;white-space:nowrap} .card .t{color:#8faebf;font-size:10px} .big{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap} .r{display:flex;justify-content:space-between;font-size:11px;color:#d4e6f0;margin-top:2px} .r b{font-variant-numeric:tabular-nums;font-weight:600} .track{height:5px;background:#1d3448;border-radius:3px;margin-top:5px;overflow:hidden} .fill{height:5px;border-radius:3px} .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px} table.t{width:100%;border-collapse:collapse;font-size:11px} table.t th{color:#8faebf;font-weight:600;text-align:left;padding:3px 6px;border-bottom:1px solid #263f52} table.t td{padding:3px 6px;border-bottom:1px solid #18304a} table.t td .track{margin-top:0} table.t tr.hl td{background:#0f2b3d;color:#eef8ff;font-weight:600} .num{text-align:right;font-variant-numeric:tabular-nums} .lane{position:relative;height:14px;background:#0b1c2a;border-radius:4px} .zero{position:absolute;top:0;bottom:0;width:1px;background:#5b7486} .ci{position:absolute;top:6px;height:2px;background:#8faebf;border-radius:1px} .pt{position:absolute;top:3px;width:8px;height:8px;border-radius:50%;margin-left:-4px} .fr{display:grid;grid-template-columns:150px 1fr 64px;gap:8px;align-items:center;margin:2px 0} .grid{display:grid;gap:4px;font-size:11px} .gh{color:#8faebf;font-weight:600;text-align:center;padding:2px} .gz{color:#d4e6f0;padding:0 2px;align-self:center} .cell{border-radius:6px;padding:3px 4px;text-align:center;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.25} .cell small{font-weight:400;color:#d4e6f0;font-size:9.5px;margin-left:6px} .ok{color:#9be59b;font-weight:700} .no{color:#ff9c9c;font-weight:700} .note{color:#8faebf;font-size:10px;margin-top:4px}'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Banner. The October plan's size and spend, its certificate, and four headline figures: expected value, true value against the ceiling, net ROI and rush-hour trips moved onto the 407.'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "padding": [
+        {
+          "properties": {
+            "top": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "bottom": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "left": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "right": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dropShadow": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

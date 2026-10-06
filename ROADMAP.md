@@ -1,16 +1,10 @@
-# Delivery roadmap - 0.4.0
+# Roadmap
 
-| Milestone | Local evidence | Remaining acceptance |
+| Next | Why | Acceptance |
 |---|---|---|
-| Data foundation | Dated status/consent, Customer 360, six grain-checked business marts and canonical data | Real business policies and complete account history |
-| Customer models | Validation baselines, calibrated classifiers, explanations, nine registered scorers | Real population and long-horizon validation; reviewed champion |
-| Causal analysis | Four-arm trial, later margin/retention, subgroups and fresh policy randomization | Observed operational benefit, temporal replication |
-| Decisions | Campaign/rewards and price/campaign MIPs with shared constraints | Real traffic/spending enforcement and price interactions |
-| Forecasting | Six fixed-origin monthly backtests and interval coverage | Independent hourly and operational weather evaluation |
-| Operations | Integrity/run locks, audit saves, batch reviews and quality gates | OIDC staging, backup restore, load/uptime and escalation ownership |
-| App and reporting | Twelve workspaces, four-page PDF, 16-table/32-measure native source | Latest Desktop refresh/DAX/page review; user acceptance |
-| AWS portfolio | Six stage contracts, gated definitions, private S3/ECR/IAM template | Immutable image build, approved spend, hosted jobs and acceptance |
-| Databricks | Full-feature Spark notebook and imported gold marts | Supported hosted run and current parity receipt |
-| GitHub release | Local source, CI/container workflows and release archive | Repository publication, real issues/milestones and executed CI |
-
-Private hosted acceptance is a separate milestone. Never convert prepared definitions or local stage execution into cloud-run evidence. See docs/release_0_4_gaps.md and docs/production_runbook.md.
+| Hosted Databricks run, then a schedule | The job is built and locally exercised; a hosted receipt proves the platform side | `run_receipts` row with status `passed`; idempotent on a second run |
+| Learner selection with cross-fitted losses | The one-SE rule keeps the S-learner alone while the X-learner ranks better on the truth; more folds would tighten the paired standard errors the rule depends on | Same observable rule, smaller standard errors, no truth in the rule |
+| Recalibrate value levels on a larger validation fold | Estimates are conservative by about $4.49 per customer-offer | BLP calibration lowers bias on most offers before it is applied |
+| Customer-specific elasticity | Prices are optimised per zone × period cell | Heterogeneous elasticities with interval coverage checked against the simulator |
+| SageMaker execution | The pipeline is defined and its stages run locally | Processing, training, evaluation and batch transform logs from AWS |
+| Streaming feed monitoring | Feed checks run daily in batch | Late and duplicate batches flagged within an hour of landing |

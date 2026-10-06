@@ -1,16 +1,28 @@
-"""Experiments: the July nine-arm trial, CUPED effects, sequential monitoring and causal-learner evidence."""
+"""Experiments: the July ten-arm trial, CUPED effects, sequential monitoring and causal-learner evidence."""
 
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from decision_platform.ui import NEUTRAL, SERIES, callout, chart, money, page_header, pct, tiles
+from decision_platform.ui import (
+    DIVERGING,
+    NEUTRAL,
+    OFFER_TEXTURE,
+    SERIES,
+    callout,
+    chart,
+    money,
+    offer_color,
+    page_header,
+    pct,
+    tiles,
+)
 from decision_platform.webapp import doc, download, offer_names, offer_order, table
 
 page_header(
     "Experiments",
-    "The July trial randomised every customer into control or one of eight offers. Effects are measured with "
+    "The July trial randomised every customer into control or one of nine offers. Effects are measured with "
     "CUPED variance reduction, monitored with group-sequential boundaries and corrected for multiple comparisons.",
     eyebrow="Prove",
 )
@@ -42,9 +54,18 @@ results = pd.DataFrame(
 )
 tiles(
     [
-        ("Customers per arm", f"{min(e['actual_per_arm'].values()):,}", f"Planned ≥ {e['required_per_arm']:,} for a 5-pt lift", True),
+        (
+            "Customers per arm",
+            f"{min(e['actual_per_arm'].values()):,}",
+            f"Planned ≥ {e['required_per_arm']:,} for a 5-pt lift",
+            True,
+        ),
         ("Sample-ratio check", f"p = {e['srm_p_value']:.2f}", "Allocation matches the design"),
-        ("Worst covariate imbalance", f"{e.get('max_abs_smd', 0):.3f} SMD", "Blocked randomisation; |SMD| < 0.1 is balanced"),
+        (
+            "Worst covariate imbalance",
+            f"{e.get('max_abs_smd', 0):.3f} SMD",
+            "Blocked randomisation; |SMD| < 0.1 is balanced",
+        ),
         ("CUPED variance removed", pct(e["cuped_mean_variance_reduction"]), "Pre-period trips as covariate"),
         (
             "Detectable effect, trips",
@@ -65,7 +86,11 @@ with tab_effects:
             x=ranked.value,
             y=ranked.arm,
             mode="markers",
-            marker=dict(size=11, color=[SERIES[order.index(o)] for o in ranked.offer_id]),
+            marker=dict(
+                size=11,
+                color=[offer_color(o) for o in ranked.offer_id],
+                symbol=["diamond" if o in OFFER_TEXTURE else "circle" for o in ranked.offer_id],
+            ),
             error_x=dict(
                 type="data",
                 symmetric=False,
@@ -143,9 +168,15 @@ with tab_sequential:
     boundaries = e["sequential_boundaries"]
     days = [10, 20, 30]
     fig.add_trace(
-        go.Scatter(x=days, y=boundaries, mode="lines", name="Efficacy boundary", line=dict(color="#ec835a", width=2, dash="dash"))
+        go.Scatter(
+            x=days,
+            y=boundaries,
+            mode="lines",
+            name="Efficacy boundary",
+            line=dict(color="#ec835a", width=2, dash="dash"),
+        )
     )
-    for i, r in enumerate(e["results"]):
+    for r in e["results"]:
         looks = r["sequential"]["looks"]
         fig.add_trace(
             go.Scatter(
@@ -153,7 +184,11 @@ with tab_sequential:
                 y=[look["z"] for look in looks],
                 mode="lines+markers",
                 name=r["arm"],
-                line=dict(width=2, color=SERIES[i % len(SERIES)]),
+                line=dict(
+                    width=2,
+                    color=offer_color(r["offer_id"]),
+                    dash="dash" if r["offer_id"] in OFFER_TEXTURE else "solid",
+                ),
                 marker=dict(size=8),
                 hovertemplate="Day %{x}<br>z = %{y:.2f}<extra>" + r["arm"] + "</extra>",
             )
@@ -161,47 +196,96 @@ with tab_sequential:
     fig.update_xaxes(title="Day of the 30-day window", tickvals=days)
     fig.update_yaxes(title="CUPED z-statistic")
     chart(fig, 440)
-    stops = results[["arm", "stopped_at_day"]].fillna({"stopped_at_day": "Not stopped"})
-    st.dataframe(stops, hide_index=True, width="stretch")
+    # One column of text: a mix of day numbers and "Not stopped" is not a column Arrow can serialise.
+    stops = results[["arm"]].assign(
+        decision=results.stopped_at_day.map(
+            lambda day: f"Stopped for efficacy at day {int(day)}" if pd.notna(day) else "Ran the full 30 days"
+        )
+    )
+    st.dataframe(
+        stops, hide_index=True, width="stretch", column_config={"arm": "Arm", "decision": "Decision"}
+    )
 
 with tab_learners:
     learners = table("uplift_learners")
     metrics = doc("uplift_metrics")
-    st.subheader("Which causal learner to trust, per offer")
+
+    def learner_label(name: str) -> str:
+        return {"ensemble": "Production ensemble"}.get(
+            name, name.replace("_learner", "").upper() + "-learner"
+        )
+
+    st.subheader("Which causal learner to trust")
     st.caption(
-        "Each offer's production learner is the one with the lowest doubly robust loss on the validation fold, "
-        "a criterion computable from trial data alone. The rank correlation with the simulator's true value "
-        "shows whether that observable rule picks well."
+        f"Rule, fixed before looking at results: {metrics['selection_rule']}. Doubly robust loss needs only the "
+        "trial's randomised outcomes, so the rule could run on real data; the rank correlation with the simulator's "
+        "true value is a check of the rule, never an input to it."
     )
+    selection = pd.DataFrame(metrics["ensemble_selection"])
+    members = ", ".join(learner_label(m) for m in metrics["ensemble_members"])
     summary = pd.DataFrame(metrics["learner_summary"]).T.reset_index(names="learner")
+    production = summary.set_index("learner").loc["ensemble"]
     tiles(
         [
-            ("Selected learners vs truth", f"{metrics.get('selected_value_spearman', float('nan')):.2f}", "Mean rank correlation with true value", True),
-        ]
-        + [
-            (row.learner.replace("_", "-").upper().replace("-LEARNER", " learner"), f"{row.mean_value_spearman:.2f}", f"chosen for {int(row.times_selected)} offers")
-            for row in summary.itertuples()
+            ("Production ensemble", members, "within one standard error of the best pooled loss", True),
+            (
+                "Ensemble vs truth",
+                f"{production.mean_value_spearman:.2f}",
+                "mean rank correlation with true value (simulation check)",
+            ),
+            ("Held-out Qini", f"{production.mean_qini:.2f}", "observed outcomes, test fold"),
+            (
+                "Value bias per customer",
+                money(metrics["blp_calibration_check"]["mean_value_bias_raw"], 2),
+                "negative: estimates are conservative",
+            ),
         ]
     )
-    value_cols = [c for c in learners if c.endswith("_value_spearman")]
-    grid = learners.set_index("offer_id")[value_cols].rename(columns=lambda c: c.replace("_value_spearman", ""))
-    grid.index = [names[o] for o in grid.index]
-    fig = go.Figure(
-        go.Heatmap(
-            z=grid.to_numpy(),
-            x=grid.columns,
-            y=grid.index,
-            colorscale=[[0, "#0d366b"], [0.5, "#3987e5"], [1, "#86b6ef"]],
-            zmin=0,
-            zmax=1,
-            text=np.round(grid.to_numpy(), 2),
-            texttemplate="%{text}",
-            hovertemplate="%{y} · %{x}<br>rank correlation %{z:.2f}<extra></extra>",
-            colorbar=dict(title="ρ", thickness=10),
+    left, right = st.columns([1, 1.25])
+    with left:
+        st.markdown("**Pooled doubly robust validation loss**")
+        st.dataframe(
+            selection.assign(learner=selection.learner.map(learner_label)),
+            hide_index=True,
+            width="stretch",
+            column_config={
+                "learner": "Learner",
+                "pooled_loss": st.column_config.NumberColumn("Loss", format="%.2f"),
+                "gap_to_best": st.column_config.NumberColumn("Gap to best", format="%.2f"),
+                "se": st.column_config.NumberColumn("Paired SE", format="%.2f"),
+                "member": st.column_config.CheckboxColumn("In ensemble"),
+            },
         )
+    with right:
+        st.markdown("**Rank correlation with the true value, by offer (simulation check)**")
+        value_cols = [c for c in learners if c.endswith("_value_spearman")]
+        grid = learners.set_index("offer_id")[value_cols].rename(
+            columns=lambda c: learner_label(c.replace("_value_spearman", ""))
+        )
+        grid.index = [names[o] for o in grid.index]
+        fig = go.Figure(
+            go.Heatmap(
+                z=grid.to_numpy(),
+                x=grid.columns,
+                y=grid.index,
+                colorscale=DIVERGING,
+                zmid=0,
+                zmin=-1,
+                zmax=1,
+                text=np.round(grid.to_numpy(), 2),
+                texttemplate="%{text}",
+                hovertemplate="%{y} · %{x}<br>rank correlation %{z:.2f}<extra></extra>",
+                colorbar=dict(title="ρ", thickness=10),
+            )
+        )
+        chart(fig, 360, legend=False)
+    st.caption(
+        "A loss gap smaller than its paired standard error is noise, so every learner inside it is averaged rather "
+        "than one being picked on luck. The best-scoring learner on the truth check is not always the one the "
+        "observable rule picks; that gap is the honest cost of not having the truth in production."
     )
-    chart(fig, 360, legend=False)
-    st.dataframe(learners, hide_index=True, width="stretch")
+    with st.expander("Every learner, every offer"):
+        st.dataframe(learners, hide_index=True, width="stretch")
     persistence = metrics["persistence"]
     st.caption(
         "Carry-over into days 31-90 per dollar of in-window gross contribution, regression-adjusted on pre-period "

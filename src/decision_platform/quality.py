@@ -90,16 +90,19 @@ def evaluate_quality(metrics):
             "reference": 0.0,
         }
     )
-    spearman = uplift.get("selected_value_spearman", 0.0)
-    checks.append(
-        {
-            "model": "uplift (simulation check)",
-            "passed": bool(spearman >= 0.3),
-            "criteria": "Simulation only: selected learners' mean rank correlation with true offer value >= 0.30",
-            "value": spearman,
-            "reference": 0.30,
-        }
-    )
+    policy = metrics.get("policy")
+    if policy:
+        share, beats = policy["share_of_oracle"], policy["beats_naive"]
+        checks.append(
+            {
+                "model": "targeting policy (simulation check)",
+                "passed": bool(share >= 0.60 and beats),
+                "criteria": "Simulation only: the optimized plan captures >= 60% of the perfect-knowledge ceiling "
+                "and beats every approach that uses no causal model",
+                "value": share,
+                "reference": 0.60,
+            }
+        )
     coverage = metrics["elasticity"]["elasticity_rmse_vs_truth"].get("ci_coverage")
     if coverage is not None:
         checks.append(

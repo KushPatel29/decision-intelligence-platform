@@ -40,20 +40,33 @@ table dim_offer
 		summarizeBy: sum
 		sourceColumn: offer_order
 
+	column offer_color
+		dataType: string
+		lineageTag: 06f00baa-84ca-50ff-91e1-80af1d8ba859
+		summarizeBy: none
+		sourceColumn: offer_color
+
+	column offer_fill
+		dataType: string
+		lineageTag: a5be01ce-0158-590d-a682-22089e2a8d79
+		summarizeBy: none
+		sourceColumn: offer_fill
+
 	partition dim_offer = m
 		mode: import
 		source =
 				let
-				    Source = #table(type table [#"offer_id" = nullable text, #"offer_name" = nullable text, #"offer_type" = nullable text, #"period" = nullable text, #"inventory" = nullable text, #"offer_order" = nullable text], {
-				        {"offpeak_15", "Off-peak 15% off", "Off-peak discount", "Off-peak", "9000", "1"},
-				        {"pct_10", "10% off every trip", "Percentage discount", "Mixed", "9000", "2"},
-				        {"weekend_20", "Weekend 20% off", "Weekend incentive", "Weekend", "9000", "3"},
-				        {"spend_10", "Spend & get $10", "Spend threshold reward", "Mixed", "9000", "4"},
-				        {"free_trip", "Fifth trip free", "Free-trip reward", "Mixed", "3000", "5"},
-				        {"offpeak_pass", "Off-peak pass ($30 cap)", "Driving pass", "Off-peak", "9000", "6"},
-				        {"loyalty_500", "500 bonus points", "Loyalty reward", "Mixed", "9000", "7"},
-				        {"loyalty_1500", "1,500 bonus points", "Loyalty reward", "Mixed", "1200", "8"}
+				    Source = #table(type table [#"offer_id" = nullable text, #"offer_name" = nullable text, #"offer_type" = nullable text, #"period" = nullable text, #"inventory" = nullable text, #"offer_order" = nullable text, #"offer_color" = nullable text, #"offer_fill" = nullable text], {
+				        {"rush_hour_25", "Rush-hour 25% off", "Rush-hour offer", "Peak", "9000", "1", "#3987e5", "#3987e5"},
+				        {"offpeak_15", "Off-peak 15% off", "Off-peak discount", "Off-peak", "9000", "2", "#d95926", "#d95926"},
+				        {"pct_10", "10% off every trip", "Percentage discount", "Mixed", "9000", "3", "#199e70", "#199e70"},
+				        {"weekend_20", "Weekend 20% off", "Weekend incentive", "Weekend", "9000", "4", "#c98500", "#c98500"},
+				        {"spend_10", "Spend & get $10", "Spend threshold reward", "Mixed", "9000", "5", "#d55181", "#d55181"},
+				        {"free_trip", "Fifth trip free", "Free-trip reward", "Mixed", "3000", "6", "#008300", "#008300"},
+				        {"offpeak_pass", "Off-peak pass ($30 cap)", "Driving pass", "Off-peak", "9000", "7", "#e66767", "#e66767"},
+				        {"loyalty_500", "500 bonus points", "Loyalty reward", "Mixed", "9000", "8", "#9085e9", "#9085e9"},
+				        {"loyalty_1500", "1,500 bonus points", "Loyalty reward", "Mixed", "1200", "9", "#9085e9", "repeating-linear-gradient(45deg,#9085e9 0 4px,#081522 4px 6px)"}
 				    }),
-				    Typed = Table.TransformColumnTypes(Source, {{"offer_id", type text}, {"offer_name", type text}, {"offer_type", type text}, {"period", type text}, {"inventory", Int64.Type}, {"offer_order", Int64.Type}})
+				    Typed = Table.TransformColumnTypes(Source, {{"offer_id", type text}, {"offer_name", type text}, {"offer_type", type text}, {"period", type text}, {"inventory", Int64.Type}, {"offer_order", Int64.Type}, {"offer_color", type text}, {"offer_fill", type text}})
 				in
 				    Typed

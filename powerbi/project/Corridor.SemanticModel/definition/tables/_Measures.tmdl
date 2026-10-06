@@ -103,6 +103,24 @@ table _Measures
 		lineageTag: 4d36f508-58e9-5ce1-bb69-1b3fa0bb81cb
 		displayFolder: 01 Plan
 
+	/// Customer-offer binaries in the mixed-integer program the plan solves.
+	measure 'Decision variables' = MAX(plan_summary[decision_variables])
+		formatString: #,0
+		lineageTag: acf7c05e-500a-5a15-8365-007c31109b30
+		displayFolder: 01 Plan
+
+	/// Congestion-relief value of the net rush-hour trips the plan moves onto the 407 (included in Expected value).
+	measure 'Relief value' = SUM(plan_contacts[relief_value])
+		formatString: \$#,0
+		lineageTag: cdb47460-f17a-5227-bd37-5721ea7bb88f
+		displayFolder: 01 Plan
+
+	/// Net incremental peak trips per workday over a 22-workday month; negative where off-peak offers move commuters out of the peak.
+	measure 'Rush-hour trips per workday' = DIVIDE([Extra peak trips], 22)
+		formatString: #,0.0
+		lineageTag: 476ae1eb-f62b-5f14-afed-e9e7bbded049
+		displayFolder: 01 Plan
+
 	/// Customers in the October snapshot.
 	measure 'Customers' = SUM(customer_segments[customers])
 		formatString: #,0
@@ -230,7 +248,7 @@ table _Measures
 		displayFolder: 04 Policy value
 
 	/// Predicted minus true: how much the selected customers' value was overestimated.
-	measure 'Winner's curse' = [Predicted value] - [True value]
+	measure 'Winner''s curse' = [Predicted value] - [True value]
 		formatString: \$#,0
 		lineageTag: 90353c1d-7088-5b3a-be5e-da2dc9f06477
 		displayFolder: 04 Policy value
@@ -519,7 +537,7 @@ table _Measures
 		displayFolder: 08 Captions
 
 	/// Tile caption: trial size.
-	measure 'Trial caption' = FORMAT([Customers per arm], "#,0") & " customers per arm, 9 arms"
+	measure 'Trial caption' = FORMAT([Customers per arm], "#,0") & " customers per arm, 10 arms"
 		lineageTag: 07e7e2d8-c8cf-5754-bc45-572678387249
 		displayFolder: 08 Captions
 
@@ -537,12 +555,27 @@ table _Measures
 			        & FORMAT(vTrue, "$#,0") & ", " & FORMAT(DIVIDE(vTrue, vCeiling), "0%")
 			        & " of what a perfectly informed planner could reach. Giving 10% off to the most frequent travellers "
 			        & "would create " & FORMAT(vPropensity, "$#,0") & ": the customers most likely to travel are not the "
-			        & "ones an offer moves."
+			        & "ones an offer moves. The plan also moves a net " & FORMAT([Rush-hour trips per workday], "#,0")
+			        & " rush-hour trips per workday onto the 407, worth " & FORMAT([Relief value], "$#,0")
+			        & " in congestion relief at the planning rate."
 		lineageTag: e4227c00-8051-5d98-be14-5cc2edd32ce3
 		displayFolder: 10 Narrative
 
+	measure 'Header SVG - Command centre' =
+			VAR vContext = "Page 1 of 9"
+			VAR vSvg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='720' height='56' viewBox='0 0 720 56'>"
+			        & "<text x='0' y='24' font-family='Segoe UI Semibold' font-size='18' fill='#eef8ff'>Command centre</text>"
+			        & "<text x='0' y='46' font-family='Segoe UI' font-size='11' fill='#8faebf'>" & vContext & "</text>"
+			        & "</svg>"
+			RETURN
+			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
+		lineageTag: 6567b69f-c3b4-52ec-bded-e6e2dcc7e030
+		dataCategory: ImageUrl
+		displayFolder: Report UI
+
 	measure 'Header SVG - October plan' =
-			VAR vContext = "Page 1 of 8"
+			VAR vContext = "Page 2 of 9"
 			VAR vSvg =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='720' height='56' viewBox='0 0 720 56'>"
 			        & "<text x='0' y='24' font-family='Segoe UI Semibold' font-size='18' fill='#eef8ff'>October plan</text>"
@@ -645,7 +678,7 @@ table _Measures
 		displayFolder: Report UI
 
 	measure 'Header SVG - Campaign contacts' =
-			VAR vContext = "Page 2 of 8 · " & SUBSTITUTE(SUBSTITUTE([Filter Context - Campaign contacts], "&", "&amp;"), "<", "&lt;")
+			VAR vContext = "Page 3 of 9 · " & SUBSTITUTE(SUBSTITUTE([Filter Context - Campaign contacts], "&", "&amp;"), "<", "&lt;")
 			VAR vSvg =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='720' height='56' viewBox='0 0 720 56'>"
 			        & "<text x='0' y='24' font-family='Segoe UI Semibold' font-size='18' fill='#eef8ff'>Campaign contacts</text>"
@@ -755,7 +788,7 @@ table _Measures
 		displayFolder: Report UI
 
 	measure 'Header SVG - Customers' =
-			VAR vContext = "Page 3 of 8 · " & SUBSTITUTE(SUBSTITUTE([Filter Context - Customers], "&", "&amp;"), "<", "&lt;")
+			VAR vContext = "Page 4 of 9 · " & SUBSTITUTE(SUBSTITUTE([Filter Context - Customers], "&", "&amp;"), "<", "&lt;")
 			VAR vSvg =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='720' height='56' viewBox='0 0 720 56'>"
 			        & "<text x='0' y='24' font-family='Segoe UI Semibold' font-size='18' fill='#eef8ff'>Customers</text>"
@@ -867,7 +900,7 @@ table _Measures
 		displayFolder: Report UI
 
 	measure 'Header SVG - Transportation and capacity' =
-			VAR vContext = "Page 4 of 8 · " & SUBSTITUTE(SUBSTITUTE([Filter Context - Transportation and capacity], "&", "&amp;"), "<", "&lt;")
+			VAR vContext = "Page 5 of 9 · " & SUBSTITUTE(SUBSTITUTE([Filter Context - Transportation and capacity], "&", "&amp;"), "<", "&lt;")
 			VAR vSvg =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='720' height='56' viewBox='0 0 720 56'>"
 			        & "<text x='0' y='24' font-family='Segoe UI Semibold' font-size='18' fill='#eef8ff'>Transportation and capacity</text>"
@@ -977,7 +1010,7 @@ table _Measures
 		displayFolder: Report UI
 
 	measure 'Header SVG - Pricing' =
-			VAR vContext = "Page 5 of 8 · " & SUBSTITUTE(SUBSTITUTE([Filter Context - Pricing], "&", "&amp;"), "<", "&lt;")
+			VAR vContext = "Page 6 of 9 · " & SUBSTITUTE(SUBSTITUTE([Filter Context - Pricing], "&", "&amp;"), "<", "&lt;")
 			VAR vSvg =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='720' height='56' viewBox='0 0 720 56'>"
 			        & "<text x='0' y='24' font-family='Segoe UI Semibold' font-size='18' fill='#eef8ff'>Pricing</text>"
@@ -1059,7 +1092,7 @@ table _Measures
 		displayFolder: Report UI
 
 	measure 'Header SVG - Experiments' =
-			VAR vContext = "Page 6 of 8"
+			VAR vContext = "Page 7 of 9"
 			VAR vSvg =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='720' height='56' viewBox='0 0 720 56'>"
 			        & "<text x='0' y='24' font-family='Segoe UI Semibold' font-size='18' fill='#eef8ff'>Experiments</text>"
@@ -1136,7 +1169,7 @@ table _Measures
 		displayFolder: Report UI
 
 	measure 'Header SVG - Policy value' =
-			VAR vContext = "Page 7 of 8"
+			VAR vContext = "Page 8 of 9"
 			VAR vSvg =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='720' height='56' viewBox='0 0 720 56'>"
 			        & "<text x='0' y='24' font-family='Segoe UI Semibold' font-size='18' fill='#eef8ff'>Policy value</text>"
@@ -1212,7 +1245,7 @@ table _Measures
 		displayFolder: Report UI
 
 	measure 'Header SVG - Operations' =
-			VAR vContext = "Page 8 of 8"
+			VAR vContext = "Page 9 of 9"
 			VAR vSvg =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='720' height='56' viewBox='0 0 720 56'>"
 			        & "<text x='0' y='24' font-family='Segoe UI Semibold' font-size='18' fill='#eef8ff'>Operations</text>"
@@ -1307,6 +1340,143 @@ table _Measures
 		lineageTag: 2728faf6-fb55-5562-b65e-1bed4a9c6c66
 		dataCategory: ImageUrl
 		displayFolder: Report UI
+
+	/// Command-centre banner with the plan's headline KPIs.
+	measure 'HTML Hero' =
+			VAR vShare = DIVIDE([Optimized true value], [Value ceiling])
+			VAR vCertified = SELECTEDVALUE(plan_summary[proven_optimal])
+			RETURN
+			"<div class='w'><div class='hero'><div class='left'>"
+			    & "<div class='eyebrow'>October 2025 · campaign plan</div>"
+			    & "<div class='headline'>" & FORMAT([Contacts], "#,0") & " customers · " & FORMAT([Incentive spend], "$#,0") & " of incentives</div>"
+			    & "<div class='sub'>One mixed-integer plan across " & FORMAT([Decision variables], "#,0") & " customer-offer decisions, inside budget, contact, ROI, points, inventory and 407 free-flow capacity guardrails.</div>"
+			    & "<span class='badge'>" & IF(vCertified, "✓ Proven optimal", "Within solver gap") & "</span>"
+			    & "<span class='badge blue'>10-arm blocked trial</span><span class='badge blue'>Synthetic data</span>"
+			    & "</div><div class='kpis'>"
+			    & "<div class='kpi accent'><div class='l'>Expected value</div><div class='v'>" & IF(ISBLANK([Expected value]), "—", FORMAT([Expected value], "$#,0")) & "</div><div class='d'>" & FORMAT([Value per incentive dollar], "0.0") & "x the incentive spend" & "</div></div>"
+			    & "<div class='kpi'><div class='l'>True value · simulation</div><div class='v'>" & IF(ISBLANK([Optimized true value]), "—", FORMAT([Optimized true value], "$#,0")) & "</div><div class='d'>" & FORMAT(vShare, "0%") & " of the perfect-knowledge ceiling" & "</div></div>"
+			    & "<div class='kpi'><div class='l'>Net ROI · 30 days</div><div class='v'>" & IF(ISBLANK([Net ROI]), "—", FORMAT([Net ROI], "0%")) & "</div><div class='d'>" & "floor 15%" & "</div></div>"
+			    & "<div class='kpi'><div class='l'>Rush-hour trips / workday</div><div class='v'>" & IF(ISBLANK([Rush-hour trips per workday]), "—", FORMAT([Rush-hour trips per workday], "+#,0;-#,0")) & "</div><div class='d'>" & "moved onto the 407" & "</div></div>"
+			    & "</div></div></div>"
+		lineageTag: 3dea072f-071c-5160-87fb-fe33cbb2b7a0
+		displayFolder: 11 HTML panels
+
+	/// One card per offer: contacts, expected value, spend.
+	measure 'HTML Offer cards' =
+			VAR vMax = MAXX(ALL(dim_offer), [Expected value])
+			RETURN
+			"<div class='w'><div class='h'>Offers in the plan · contacts, expected value and spend</div><div class='cards'>"
+			    & CONCATENATEX(
+			        ALL(dim_offer),
+			        "<div class='card" & IF(COALESCE([Contacts], 0) = 0, " idle", "") & "'><div class='top'><div><div class='n'><span class='dot' style='background:" & dim_offer[offer_fill] & "'></span>" & dim_offer[offer_name] & "</div>"
+			            & "<div class='t'>" & dim_offer[offer_type] & " · " & IF(dim_offer[period] = "Mixed", "any period", "fills " & dim_offer[period]) & "</div></div>"
+			            & "<div class='big'>" & FORMAT(COALESCE([Expected value], 0), "$#,0") & "</div></div>"
+			            & "<div class='t'>" & FORMAT(COALESCE([Contacts], 0), "#,0") & " contacts · " & FORMAT(COALESCE([Incentive spend], 0), "$#,0") & " spend" & IF(COALESCE([Contacts], 0) = 0, " · not worth a contact under these limits", "") & "</div>"
+			            & "<div class='track'><div class='fill' style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE(COALESCE([Expected value], 0), vMax)) * 100)), "0") & "%;background:" & dim_offer[offer_fill] & "'></div></div></div>",
+			        "", dim_offer[offer_order], ASC)
+			    & "</div></div>"
+		lineageTag: 3cb65860-eabb-5b1a-a8e4-6fca331695b3
+		displayFolder: 11 HTML panels
+
+	/// Binding guardrails with their LP shadow prices.
+	measure 'HTML Guardrails' =
+			VAR vTop = TOPN(1, guardrails, guardrails[shadow_price], DESC)
+			RETURN
+			"<div class='w'><div class='h'>Binding guardrails · what one more unit is worth (LP duals)</div>"
+			    & "<table class='t'><tr><th>Guardrail</th><th class='num'>Limit</th><th class='num'>Value of +1</th></tr>"
+			    & CONCATENATEX(
+			        guardrails,
+			        "<tr><td>" & guardrails[constraint_label] & "</td><td class='num'>" & FORMAT(guardrails[limit], "#,0") & "</td><td class='num'>" & FORMAT(guardrails[shadow_price], "$#,0.00") & "</td></tr>",
+			        "", guardrails[shadow_price], DESC)
+			    & "</table><div class='note'>Relax first: <b>" & MAXX(vTop, guardrails[constraint_label]) & "</b>, worth " & FORMAT(MAXX(vTop, guardrails[shadow_price]), "$#,0.00") & " per extra unit. Guardrails that do not bind are worth nothing at the margin and are not listed.</div></div>"
+		lineageTag: 54a0df24-7690-50af-ad7d-241e34ecbe12
+		displayFolder: 11 HTML panels
+
+	/// Targeting approaches ranked by true value.
+	measure 'HTML Policy leaderboard' =
+			VAR vCeiling = [Value ceiling]
+			RETURN
+			"<div class='w'><div class='h'>Targeting approaches scored against the simulator's truth</div>"
+			    & "<table class='t'><tr><th>Approach</th><th class='num'>True value</th><th></th><th class='num'>Ceiling</th></tr>"
+			    & CONCATENATEX(
+			        ALL(policy_comparison),
+			        "<tr" & IF(policy_comparison[policy] = "Optimized (MIP)", " class='hl'", "") & "><td>" & policy_comparison[policy] & "</td><td class='num'>" & FORMAT(policy_comparison[true_value], "$#,0") & "</td><td style='width:34%'><div class='track'><div class='fill' style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE(policy_comparison[true_value], vCeiling)) * 100)), "0") & "%;background:" & SWITCH(TRUE(), policy_comparison[policy] = "Optimized (MIP)", "#3987e5", LEFT(policy_comparison[policy], 6) = "Oracle", "#86b6ef", "#5b7486") & "'></div></div></td><td class='num'>" & FORMAT(DIVIDE(policy_comparison[true_value], vCeiling), "0%") & "</td></tr>",
+			        "", policy_comparison[true_value], DESC)
+			    & "</table></div>"
+		lineageTag: 7fee8619-ed13-57e3-9427-7ca5e743f518
+		displayFolder: 11 HTML panels
+
+	/// Trial effects with Bonferroni intervals.
+	measure 'HTML Experiment forest' =
+			VAR vLow = MINX(ALL(experiment_effects), experiment_effects[value_low])
+			VAR vHigh = MAXX(ALL(experiment_effects), experiment_effects[value_high])
+			VAR vSpan = MAX(vHigh - vLow, 0.01)
+			VAR vZero = FORMAT(MAX(0, MIN(100, (DIVIDE(0 - vLow, vSpan)) * 100)), "0")
+			RETURN
+			"<div class='w'><div class='h'>30-day net contribution per randomised customer · CUPED, Bonferroni 95%</div>"
+			    & CONCATENATEX(
+			        ALL(experiment_effects),
+			        "<div class='fr'><span>" & RELATED(dim_offer[offer_name]) & "</span><div class='lane'>"
+			            & "<div class='zero' style='left:" & vZero & "%'></div>"
+			            & "<div class='ci' style='left:" & FORMAT(MAX(0, MIN(100, (DIVIDE(experiment_effects[value_low] - vLow, vSpan)) * 100)), "0") & "%;width:" & FORMAT(MAX(0, MIN(100, (DIVIDE(experiment_effects[value_high] - experiment_effects[value_low], vSpan)) * 100)), "0") & "%'></div>"
+			            & "<div class='pt' style='left:" & FORMAT(MAX(0, MIN(100, (DIVIDE(experiment_effects[value_effect] - vLow, vSpan)) * 100)), "0") & "%;background:" & IF(experiment_effects[value_effect] < 0, "#e66767", "#3987e5") & "'></div></div><span class='num'>" & FORMAT(experiment_effects[value_effect], "+$0.00;-$0.00") & "</span></div>",
+			        "", experiment_effects[value_effect], DESC)
+			    & "<div class='note'>Red: loses money on the average randomised customer. The plan still uses an offer where the models find customers it moves.</div></div>"
+		lineageTag: ed68dc5f-9ba4-5bff-9184-e6925d82c07f
+		displayFolder: 11 HTML panels
+
+	/// Zone x period load heat grid.
+	measure 'HTML Capacity grid' =
+			VAR vColumns = COUNTROWS(VALUES(dim_period[period]))
+			RETURN
+			"<div class='w'><div class='h'>Load by zone and period, with the campaign (share of free-flow capacity)</div><div class='grid' style='grid-template-columns:96px repeat(" & vColumns & ",1fr)'><div></div>"
+			    & CONCATENATEX(VALUES(dim_period[period]), "<div class='gh'>" & dim_period[period] & "</div>", "", CALCULATE(MAX(dim_period[period_order])), ASC)
+			    & CONCATENATEX(
+			        VALUES(dim_zone[zone_name]),
+			        "<div class='gz'>" & dim_zone[zone_name] & "</div>" & CONCATENATEX(
+			            VALUES(dim_period[period]),
+			            VAR vLoad = CALCULATE([Load])
+			            VAR vTone = IF(vLoad >= 0.8, "201,133,0", "57,135,229")
+			            RETURN "<div class='cell' style='background:rgba(" & vTone & "," & FORMAT(MAX(0.12, MIN(0.95, vLoad)), "0.00") & ")'>" & FORMAT(vLoad, "0%") & "<small>" & FORMAT(CALCULATE([Free after campaign]), "#,0") & " free</small></div>",
+			            "", CALCULATE(MAX(dim_period[period_order])), ASC),
+			        "", CALCULATE(MAX(dim_zone[zone_order])), ASC)
+			    & "</div><div class='note'>Amber: 80% of capacity or more, where rush-hour offers are held back.</div></div>"
+		lineageTag: 8529f9eb-e645-5b58-9c23-01554746d0e3
+		displayFolder: 11 HTML panels
+
+	/// Segment table with plan share bars.
+	measure 'HTML Segments' =
+			"<div class='w'><div class='h'>Segments · risk, value and what the plan does with them</div>"
+			    & "<table class='t'><tr><th>Segment</th><th class='num'>Customers</th><th class='num'>Propensity</th><th class='num'>Inactivity</th><th class='num'>Best-offer value</th><th>In plan</th></tr>"
+			    & CONCATENATEX(
+			        VALUES(customer_segments[rfm_segment]),
+			        "<tr><td>" & customer_segments[rfm_segment] & "</td><td class='num'>" & FORMAT([Customers], "#,0") & "</td><td class='num'>" & FORMAT([Mean travel propensity], "0%") & "</td><td class='num'>" & IF(ISBLANK([Mean inactivity risk]), "—", FORMAT([Mean inactivity risk], "0%")) & "</td><td class='num'>" & FORMAT([Mean best-offer value], "$0.00") & "</td><td style='width:24%'><div class='track'><div class='fill' style='width:" & FORMAT(MAX(0, MIN(100, ([Share in plan]) * 100)), "0") & "%;background:#4bdcd5'></div></div></td></tr>",
+			        "", CALCULATE(MAX(customer_segments[segment_order])), ASC)
+			    & "</table></div>"
+		lineageTag: a1da1406-36d6-5113-89a4-57cc8984d797
+		displayFolder: 11 HTML panels
+
+	/// Acceptance gate and model quality.
+	measure 'HTML Scorecard' =
+			"<div class='w'><div class='h'>Release acceptance gate</div><table class='t'>"
+			    & CONCATENATEX(
+			        quality_gate,
+			        "<tr><td>" & IF(quality_gate[passed], "<span class='ok'>✓</span>", "<span class='no'>✕</span>") & " " & quality_gate[check_name] & "</td><td class='note'>" & quality_gate[criteria] & "</td></tr>",
+			        "")
+			    & "</table><div class='h' style='margin-top:10px'>Customer models · July 2025 test fold</div><table class='t'><tr><th>Model</th><th>Champion</th><th class='num'>AUC</th><th class='num'>Brier</th><th class='num'>ECE</th></tr>"
+			    & CONCATENATEX(
+			        model_quality,
+			        "<tr><td>" & model_quality[model] & "</td><td>" & model_quality[champion] & "</td><td class='num'>" & FORMAT(model_quality[auc], "0.000") & "</td><td class='num'>" & FORMAT(model_quality[brier], "0.000") & "</td><td class='num'>" & FORMAT(model_quality[ece], "0.000") & "</td></tr>",
+			        "")
+			    & "</table></div>"
+		lineageTag: 8853c8e3-803b-5df3-8596-033b8b151266
+		displayFolder: 11 HTML panels
+
+	/// The executive summary as a styled paragraph.
+	measure 'HTML Narrative' =
+			"<div class='w'><div class='eyebrow'>In plain language</div><div style='font-size:14px;line-height:1.55;margin-top:8px;color:#d8ecf4'>" & [Executive summary] & "</div></div>"
+		lineageTag: edecda25-e864-58f5-b6dd-44db30ccca4c
+		displayFolder: 11 HTML panels
 
 	column _placeholder
 		dataType: int64

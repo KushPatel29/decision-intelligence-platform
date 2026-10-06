@@ -7,6 +7,7 @@ recorded rather than tuned away.
 
 from __future__ import annotations
 
+import os
 import time
 import warnings
 
@@ -104,13 +105,22 @@ def log_experiment(cfg, name, model, metrics, params, tracking, artifact=None):
     try:
         import mlflow
 
-        mlflow.set_tracking_uri("sqlite:///" + str(cfg.path("outputs", "mlflow.db")).replace("\\", "/"))
-        mlflow.set_experiment("transportation-decision-intelligence")
+        # A local SQLite store by default; on Databricks the job sets MLFLOW_TRACKING_URI=databricks
+        # and a workspace experiment path, and the same runs land in the workspace tracking server.
+        local = "sqlite:///" + str(cfg.path("outputs", "mlflow.db")).replace("\\", "/")
+        mlflow.set_tracking_uri(os.environ.get("MLFLOW_TRACKING_URI") or local)
+        mlflow.set_experiment(
+            os.environ.get("CORRIDOR_MLFLOW_EXPERIMENT", "transportation-decision-intelligence")
+        )
         with mlflow.start_run(run_name=name) as run:
             mlflow.log_params({k: str(v)[:250] for k, v in params.items()})
             mlflow.log_metrics({k: float(v) for k, v in metrics.items() if isinstance(v, int | float)})
             mlflow.set_tags(
-                {"data_kind": "synthetic", "feature_version": "2.0", "artifact_status": "local-candidate"}
+                {
+                    "data_kind": "synthetic",
+                    "feature_version": "2.0",
+                    "artifact_status": os.environ.get("CORRIDOR_ARTIFACT_STATUS", "local-candidate"),
+                }
             )
             if artifact is not None:
                 mlflow.log_artifact(str(artifact), artifact_path="models")
@@ -638,6 +648,18 @@ def fit_demand(cfg, trips, context, tracking=True):
             np.expm1(np.log1p(future.sdw4) + final.predict(future[inputs])), 0
         )
         metrics["refit_rows"] = int(len(history))
+        # The registry should hold the model that produced the plan's forecast, not the selection-time fit.
+        joblib.dump(
+            {
+                "model": final,
+                "features": inputs,
+                "selected": serving,
+                "interval_radius": radius,
+                "refit": True,
+            },
+            cfg.path("outputs", "models", "demand.joblib"),
+            compress=3,
+        )
     else:
         future["baseline_forecast"] = forecaster(future)
     future["forecast_low"], future["forecast_high"] = bounds(future.baseline_forecast, future.period, radius)

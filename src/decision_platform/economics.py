@@ -52,7 +52,9 @@ def incentive_cost(offer_id, base, trips, tolls, threshold_spend=None):
     total = treated.sum(axis=1)
     mu = base.sum(axis=1)
     avg_toll = np.where(mu > 1e-9, (base * tolls).sum(axis=1) / np.maximum(mu, 1e-9), tolls[:, 1])
-    if offer_id == "offpeak_15":
+    if offer_id == "rush_hour_25":
+        cost = 0.25 * tolls[:, 0] * treated[:, 0]
+    elif offer_id == "offpeak_15":
         cost = 0.15 * tolls[:, 1] * treated[:, 1]
     elif offer_id == "pct_10":
         cost = 0.10 * (treated * tolls).sum(axis=1)

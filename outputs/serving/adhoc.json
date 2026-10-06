@@ -24,7 +24,7 @@
       "arm",
       "subsidy_share"
     ],
-    "conclusion": "Yes. In the Off-peak pass ($30 cap) arm 94% of rewarded trips would have happened anyway, so most of its 8.56 CAD incentive per customer subsidised baseline travel. Discounts paid on every eligible trip are expensive for heavy travellers. That is why the plan prices each offer on incremental trips and includes the cost of baseline trips."
+    "conclusion": "Yes. In the 500 bonus points arm 94% of rewarded trips would have happened anyway, so most of its 5.35 CAD incentive per customer subsidised baseline travel. Discounts paid on every eligible trip are expensive for heavy travellers. That is why the plan prices each offer on incremental trips and includes the cost of baseline trips."
   },
   "unused_capacity": {
     "question": "Which zones have the highest unused off-peak capacity?",
@@ -33,7 +33,7 @@
       "zone_name",
       "free_after_campaign"
     ],
-    "conclusion": "East keeps the most off-peak room: 6,581 trips free after the campaign and the safety reserve (18% of all off-peak headroom). Off-peak offers aimed at this zone add trips where the road has capacity. Validate engineering capacity before raising offer volume further."
+    "conclusion": "West keeps the most off-peak room: 6,940 trips free after the campaign and the safety reserve (18% of all off-peak headroom). Off-peak offers aimed at this zone add trips where the road has capacity. Validate engineering capacity before raising offer volume further."
   },
   "enrollment_vs_value": {
     "question": "Why did campaign ROI decline despite increased enrollment?",
@@ -42,6 +42,6 @@
       "arm",
       "net_contribution_per_customer"
     ],
-    "conclusion": "Enrollment and value are different things: Weekend 20% off has the highest enrollment (42%) but earns +0.35 CAD per customer, while Fifth trip free earns the most (+4.71 CAD). Enrollment is an intermediate metric. Optimise incremental net value per incentive dollar instead."
+    "conclusion": "Enrollment and value are different things: 10% off every trip has the highest enrollment (42%) but earns -0.49 CAD per customer, while Spend & get $10 earns the most (+2.17 CAD). Enrollment is an intermediate metric. Optimise incremental net value per incentive dollar instead."
   }
 }

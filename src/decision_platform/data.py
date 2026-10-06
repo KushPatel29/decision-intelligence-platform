@@ -292,7 +292,9 @@ def _bronze_feed(rng, trips):
     feed.loc[feed.index[bad[60:]], "final_charge"] = (
         feed.loc[feed.index[bad[60:]], "toll"] - feed.loc[feed.index[bad[60:]], "discount"]
     )
-    resent = feed[day.eq("2025-09-09")].sample(2500, random_state=int(rng.integers(1_000_000))).copy()
+    # A resent batch of 2,500 trips, or the whole day where a small population travels less than that.
+    resend_day = feed[day.eq("2025-09-09")]
+    resent = resend_day.sample(min(2500, len(resend_day)), random_state=int(rng.integers(1_000_000))).copy()
     resent["ingested_at"] = pd.Timestamp("2025-09-10 23:30")
     feed = pd.concat([feed, resent], ignore_index=True)
     feed["batch_id"] = "B" + feed.ingested_at.dt.strftime("%Y%m%d")
@@ -475,7 +477,11 @@ def _status_history(customers, seed):
         columns={"created_at": "effective_from"}
     )
     later = later.assign(effective_from=pd.Timestamp("2025-03-01"), effective_to=pd.NaT)
-    return pd.concat([initial, later], ignore_index=True)
+    # A column created from pd.NaT is nanosecond precision, and Spark refuses to read nanosecond Parquet
+    # timestamps; microseconds match every other timestamp in the lake.
+    return pd.concat([initial, later], ignore_index=True).astype(
+        {"effective_from": "datetime64[us]", "effective_to": "datetime64[us]"}
+    )
 
 
 def validate(frames):

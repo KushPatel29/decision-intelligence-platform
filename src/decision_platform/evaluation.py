@@ -45,6 +45,9 @@ def decision_truth(cfg, current, hidden, context, customers):
         mu > 0, (base * tolls).sum(axis=1).to_numpy() / np.maximum(mu, 1e-9), tolls["Off-peak"]
     )
     truth["true_baseline_trips"] = np.tile(mu, len(OFFERS))
+    # The same relief value the planner uses, applied to the true rush-hour trips.
+    truth["true_relief_value"] = cfg.relief_value * truth.true_trips_peak
+    truth["true_value"] = truth.true_value + truth.true_relief_value
     truth["true_avg_toll"] = np.tile(avg_toll, len(OFFERS))
     return truth
 

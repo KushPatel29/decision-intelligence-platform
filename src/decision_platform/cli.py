@@ -84,7 +84,7 @@ def _run(cfg, solver="auto", tracking=True):
         )
         capacity, demand_metrics = fit_demand(cfg, frames["fact_trip"], context, tracking)
         mark("pricing_demand")
-        _step(7, "Learn incremental trips for all eight offers (S, T, X, DR learners) and cost them")
+        _step(7, "Learn incremental trips for all nine offers (S, T, X, DR learners) and cost them")
         totals = capacity.groupby("period").baseline_forecast.sum().to_dict()
         uplift, uplift_metrics = fit_uplift(cfg, trial, scored, totals, tracking)
         mark("causal")
@@ -127,6 +127,7 @@ def _run(cfg, solver="auto", tracking=True):
             "uplift": uplift_metrics,
             "demand": demand_metrics,
             "elasticity": elasticity_metrics,
+            "policy": _policy_summary(policy_value),
         }
         write_json(cfg.path("outputs", "model_metrics.json"), metrics)
         write_json(cfg.path("outputs", "quality_gate.json"), evaluate_quality(metrics))
@@ -153,6 +154,21 @@ def _run(cfg, solver="auto", tracking=True):
         print(json.dumps(summary, indent=2), flush=True)
     finally:
         db.close()
+
+
+def _policy_summary(policy_value):
+    rows = {p["policy"]: p for p in policy_value["policies"]}
+    optimized = rows["Optimized (MIP)"]
+    naive = [
+        p
+        for name, p in rows.items()
+        if name in ("Random targeting", "RFM segment playbook") or name.startswith("Propensity")
+    ]
+    return {
+        "share_of_oracle": optimized["share_of_oracle"],
+        "beats_naive": all(optimized["true_value"] > p["true_value"] for p in naive),
+        "true_value": optimized["true_value"],
+    }
 
 
 def run(cfg, solver="auto", tracking=True):
@@ -191,7 +207,7 @@ def main():
         print(get(Config(), args.refresh).shape)
     else:
         if args.customers < 3000:
-            parser.error("At least 3,000 customers are needed for a nine-arm trial and stable folds")
+            parser.error("At least 3,000 customers are needed for a ten-arm trial and stable folds")
         scale = args.customers / Config().customers
         cfg = Config(
             seed=args.seed,

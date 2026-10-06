@@ -19,7 +19,7 @@
       "account_status": "str",
       "marketing_consent": "bool",
       "effective_from": "datetime64[us]",
-      "effective_to": "datetime64[ns]"
+      "effective_to": "datetime64[us]"
     }
   },
   {
@@ -49,10 +49,10 @@
       "past_due": "bool",
       "autopay": "bool",
       "transponder_flag": "bool",
-      "home_zone": "int64",
       "vehicle_class": "str",
       "created_at": "datetime64[us]",
-      "eligible": "bool"
+      "eligible": "bool",
+      "home_zone": "int64"
     }
   },
   {
@@ -82,8 +82,11 @@
     "columns": {
       "offer_id": "str",
       "offer_name": "str",
+      "offer_type": "str",
       "period": "str",
       "discount_pct": "float64",
+      "reward_value": "float64",
+      "points": "int64",
       "inventory": "int64"
     }
   },
@@ -95,7 +98,8 @@
       "zone_id": "int64",
       "period": "str",
       "vehicle_class": "str",
-      "rate_per_km": "float64"
+      "rate_per_km": "float64",
+      "trip_charge": "float64"
     }
   },
   {
@@ -181,6 +185,7 @@
       "business_flag": "int32",
       "autopay": "int32",
       "transponder_flag": "int32",
+      "heavy_vehicle": "int32",
       "home_zone": "int64",
       "trips_7d": "int64",
       "trips_30d": "int64",
@@ -190,15 +195,31 @@
       "spend_90d": "float64",
       "spend_365d": "float64",
       "avg_toll": "float64",
+      "avg_toll_peak": "float64",
+      "avg_toll_offpeak": "float64",
+      "avg_toll_weekend": "float64",
       "avg_distance_km": "float64",
       "peak_share": "float64",
       "weekend_share": "float64",
+      "night_share_30d": "float64",
+      "zones_visited_30d": "int64",
+      "active_days_30d": "int64",
+      "max_daily_trips_30d": "int64",
       "discount_90d": "float64",
       "recency_days": "int64",
       "digital_events_30d": "int64",
       "app_logins_30d": "int64",
       "offer_views_30d": "int64",
       "email_opens_30d": "int64",
+      "sessions_30d": "int64",
+      "offer_views_90d": "int64",
+      "offer_click_rate_90d": "float64",
+      "enroll_rate_90d": "float64",
+      "email_click_rate_90d": "float64",
+      "pricing_views_90d": "int64",
+      "loyalty_views_90d": "int64",
+      "app_share_90d": "float64",
+      "days_since_last_login": "int64",
       "points_earned_to_date": "float64",
       "feature_max_timestamp": "datetime64[us]",
       "account_status": "str",
@@ -208,18 +229,30 @@
       "eligible": "bool",
       "frequency_trend": "float64",
       "digital_engagement_score": "float64",
+      "stratum": "int64",
       "arm": "str",
       "treated": "int64",
-      "response": "int64",
-      "enrolled": "int64",
-      "redeemed": "int64",
+      "offer_id": "str",
+      "trips_by_day10": "int64",
+      "trips_by_day20": "int64",
+      "trips_by_day30": "int64",
+      "trips_peak": "int64",
+      "trips_offpeak": "int64",
+      "trips_weekend": "int64",
       "trip_count": "int64",
       "incentive_cost": "float64",
       "gross_contribution": "float64",
       "net_contribution": "float64",
+      "response": "int64",
+      "enrolled": "int64",
+      "redeemed": "int64",
       "retained_90d": "int64",
+      "trips_days31_90": "int64",
       "margin_days31_90": "float64",
-      "split": "str"
+      "pre_trips_30d": "int64",
+      "pre_spend_30d": "float64",
+      "split": "str",
+      "spend_threshold": "float64"
     }
   },
   {
@@ -257,6 +290,7 @@
     "grain": "one randomized loyalty-group customer award",
     "columns": {
       "customer_id": "str",
+      "offer_id": "str",
       "points_awarded": "int64",
       "awarded_at": "datetime64[us]",
       "award_id": "str"
@@ -279,10 +313,10 @@
     "grain": "one loyalty redemption event",
     "columns": {
       "customer_id": "str",
+      "reward_id": "str",
       "points_redeemed": "int64",
       "reward_cost": "float64",
-      "redeemed_at": "datetime64[us]",
-      "reward_id": "str"
+      "redeemed_at": "datetime64[us]"
     }
   },
   {
@@ -302,6 +336,7 @@
     "columns": {
       "customer_id": "str",
       "arm": "str",
+      "offer_id": "str",
       "enrolled_at": "datetime64[us]",
       "campaign_id": "str"
     }
@@ -313,6 +348,7 @@
     "columns": {
       "customer_id": "str",
       "arm": "str",
+      "offer_id": "str",
       "exposed_at": "datetime64[us]",
       "campaign_id": "str"
     }
@@ -324,6 +360,7 @@
     "columns": {
       "customer_id": "str",
       "arm": "str",
+      "offer_id": "str",
       "incentive_cost": "float64",
       "redeemed_at": "datetime64[us]",
       "campaign_id": "str"
@@ -337,6 +374,7 @@
       "date": "datetime64[us]",
       "zone_id": "int64",
       "period": "str",
+      "segment": "str",
       "effective_price": "float64",
       "assigned_price_multiplier": "float64",
       "demand": "int64",
@@ -353,17 +391,42 @@
     "version": "2.0",
     "grain": "one generated trip",
     "columns": {
-      "trip_id": "str",
       "customer_id": "str",
       "timestamp": "datetime64[us]",
       "zone_id": "int64",
+      "entry_zone": "int64",
+      "exit_zone": "int64",
       "direction": "str",
       "period": "str",
       "distance_km": "float64",
       "duration_min": "float64",
       "toll": "float64",
       "discount": "float64",
-      "final_charge": "float64"
+      "final_charge": "float64",
+      "trip_id": "str"
+    }
+  },
+  {
+    "table": "quarantine_trip",
+    "version": "2.0",
+    "grain": "one bronze trip rejected by the silver contract, with its reason",
+    "columns": {
+      "customer_id": "str",
+      "timestamp": "datetime64[us]",
+      "zone_id": "int64",
+      "entry_zone": "int64",
+      "exit_zone": "int64",
+      "direction": "str",
+      "period": "str",
+      "distance_km": "float64",
+      "duration_min": "float64",
+      "toll": "float64",
+      "discount": "float64",
+      "final_charge": "float64",
+      "ingested_at": "datetime64[us]",
+      "batch_id": "str",
+      "trip_id": "str",
+      "reason": "str"
     }
   }
 ]

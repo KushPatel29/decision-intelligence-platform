@@ -40,6 +40,7 @@ def rate_per_km(zone, period, year=2025):
 # offers marked "Mixed" add trips in proportion to the customer's own travel mix.
 OFFER_CATALOG = pd.DataFrame(
     [
+        ("rush_hour_25", "Rush-hour 25% off", "Rush-hour offer", "Peak", 0.25, 0.0, 0, 9000),
         ("offpeak_15", "Off-peak 15% off", "Off-peak discount", "Off-peak", 0.15, 0.0, 0, 9000),
         ("pct_10", "10% off every trip", "Percentage discount", "Mixed", 0.10, 0.0, 0, 9000),
         ("weekend_20", "Weekend 20% off", "Weekend incentive", "Weekend", 0.20, 0.0, 0, 9000),
@@ -197,7 +198,9 @@ def offer_truth(population, base, tolls, offer_id, margin, later_discount=1.10**
     trips = pd.DataFrame({p: zero.copy() for p in PERIODS})
     persistence, retention = 0.25, 0.01 + 0.025 * s / 2
 
-    if offer_id == "offpeak_15":
+    if offer_id == "rush_hour_25":
+        trips["Peak"] = (0.10 + 0.22 * s) * (0.4 + 0.9 * c) * (base["Peak"].to_numpy() + 0.5)
+    elif offer_id == "offpeak_15":
         off = (0.08 + 0.20 * s) * (1.25 - c) * (base["Off-peak"].to_numpy() + 0.6)
         trips["Off-peak"] = off
         trips["Peak"] = -np.minimum(0.15 * off * c, base["Peak"].to_numpy())  # Flexible commuters shift.

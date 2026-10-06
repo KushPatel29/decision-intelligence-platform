@@ -21,7 +21,7 @@
     "dim_account": 25000,
     "dim_vehicle": 25000,
     "dim_zone": 6,
-    "dim_offer": 8,
+    "dim_offer": 9,
     "fact_trip": 3680249,
     "fact_digital_event": 1412304,
     "fact_loyalty_points": 3680249,

@@ -13,6 +13,7 @@ import json
 import pandas as pd
 
 from .config import write_json
+from .palette import OFFER_COLORS, offer_fill
 from .simulation import OFFER_CATALOG
 
 CUSTOMER_COLUMNS = [
@@ -86,6 +87,7 @@ DECISION_COLUMNS = [
     "value_lcb",
     "later_value_uplift",
     "net_contribution",
+    "relief_value",
     "objective_value",
     "incremental_gross_contribution",
     "trips_peak",
@@ -335,6 +337,10 @@ def _powerbi(cfg, tables, metrics, experiment, monitoring, policy, optimization)
         guardrails["constraint_label"] = guardrails.constraint_label.str.replace(
             f"Capacity {zone_id} ", f"Capacity {zone_name} "
         )
+    inventory = {
+        f"Inventory {o}": f"Inventory: {n}" for o, n in zip(offers.offer_id, offers.offer_name, strict=True)
+    }
+    guardrails["constraint_label"] = guardrails.constraint_label.replace(inventory)
     effects, looks = [], []
     for row in experiment["results"]:
         cuped_value, cuped_trips = row["incremental_net_contribution_cuped"], row["incremental_trips_cuped"]
@@ -398,7 +404,9 @@ def _powerbi(cfg, tables, metrics, experiment, monitoring, policy, optimization)
     exports = {
         "dim_zone": zones,
         "dim_offer": offers[["offer_id", "offer_name", "offer_type", "period", "inventory"]].assign(
-            offer_order=range(1, len(offers) + 1)
+            offer_order=range(1, len(offers) + 1),
+            offer_color=offers.offer_id.map(OFFER_COLORS),
+            offer_fill=offers.offer_id.map(offer_fill),
         ),
         "dim_period": pd.DataFrame({"period": PERIODS, "period_order": [1, 2, 3]}),
         "plan_summary": pd.DataFrame(
@@ -409,6 +417,9 @@ def _powerbi(cfg, tables, metrics, experiment, monitoring, policy, optimization)
                     "points_limit": combined["points_limit"],
                     "eligible_customers": int(customers.eligible.sum()),
                     "proven_optimal": bool(optimization["certification"].get("proven_optimal", False)),
+                    "decision_variables": int(optimization["certification"].get("variables", 0)),
+                    "free_variables": int(optimization["certification"].get("free_variables", 0)),
+                    "relief_value_per_trip": cfg.relief_value,
                 }
             ]
         ),
@@ -428,6 +439,7 @@ def _powerbi(cfg, tables, metrics, experiment, monitoring, policy, optimization)
                 "trips_offpeak",
                 "trips_weekend",
                 "points",
+                "relief_value",
             ]
         ].rename(
             columns={

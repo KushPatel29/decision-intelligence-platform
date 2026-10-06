@@ -17,7 +17,7 @@ jobs:
           python-version: "3.12"
       - run: pip install "ruff>=0.15"
       - run: ruff check src views tests app.py scripts aws databricks
-      - run: ruff format --check src views tests app.py
+      - run: ruff format --check src views tests app.py scripts databricks
 
   unit:
     runs-on: ubuntu-24.04
@@ -29,7 +29,7 @@ jobs:
           cache: pip
       - run: pip install -e '.[dev,api,app,ml]'
       - name: Hermetic tests (no pipeline run needed)
-        run: pytest -q tests/test_contracts.py tests/test_hardening.py tests/test_planning.py tests/test_methods.py tests/test_api.py -k "not local_model_gate and not production_refuses"
+        run: pytest -q tests/test_contracts.py tests/test_hardening.py tests/test_planning.py tests/test_methods.py tests/test_api.py tests/test_powerbi.py tests/test_databricks.py -k "not local_model_gate and not production_refuses"
 
   powerbi:
     runs-on: ubuntu-24.04

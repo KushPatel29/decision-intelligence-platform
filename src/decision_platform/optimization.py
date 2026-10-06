@@ -71,7 +71,8 @@ def candidates(cfg, current, uplift, offers, risk_aversion=0.0, keep_all=False):
     frame["value_lcb"] = frame.value_uplift - frame.value_uplift_sd
     frame["net_contribution"] = frame.value_uplift - risk_aversion * frame.value_uplift_sd
     frame["incremental_gross_contribution"] = frame.value_uplift + frame.cost
-    frame["objective_value"] = frame.net_contribution + frame.later_value_uplift
+    frame["relief_value"] = cfg.relief_value * frame.trips_peak
+    frame["objective_value"] = frame.net_contribution + frame.later_value_uplift + frame.relief_value
     frame["points"] = frame.points.astype(int)
     # Pairs with no upside are never chosen in an optimal plan unless they free capacity.
     useful = (frame.objective_value > 0) | (frame[list(PERIOD_COLUMNS.values())] < 0).any(axis=1)
@@ -642,6 +643,8 @@ def allocate(cfg, current, uplift, offers, capacity, solver="auto"):
             "offpeak_trips": float(selected.trips_offpeak.sum()),
             "weekend_trips": float(selected.trips_weekend.sum()),
             "points_awarded": int(selected.points.sum()),
+            "relief_value": float(selected.relief_value.sum()),
+            "rush_hour_trips_per_workday": float(selected.trips_peak.sum() / 22),
             "all_constraints_passed": True,
         },
         "by_offer": {offer: subtotal(group) for offer, group in selected.groupby("offer_id")},

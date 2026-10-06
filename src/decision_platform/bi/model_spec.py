@@ -202,6 +202,28 @@ MEASURES: list[tuple[str, str, str, str, str]] = [
         "Customers with consent, My Account, no past-due balance and an active account.",
     ),
     ("Budget used", "DIVIDE([Incentive spend], [Budget])", PCT_0, "01 Plan", "Incentive spend / budget."),
+    (
+        "Decision variables",
+        "MAX(plan_summary[decision_variables])",
+        COUNT,
+        "01 Plan",
+        "Customer-offer binaries in the mixed-integer program the plan solves.",
+    ),
+    (
+        "Relief value",
+        f"SUM({P}[relief_value])",
+        MONEY,
+        "01 Plan",
+        "Congestion-relief value of the net rush-hour trips the plan moves onto the 407 (included in Expected value).",
+    ),
+    (
+        "Rush-hour trips per workday",
+        "DIVIDE([Extra peak trips], 22)",
+        DEC_1,
+        "01 Plan",
+        "Net incremental peak trips per workday over a 22-workday month; negative where off-peak offers move "
+        "commuters out of the peak.",
+    ),
     # --- Customers ----------------------------------------------------------------------------
     ("Customers", f"SUM({S}[customers])", COUNT, "02 Customers", "Customers in the October snapshot."),
     (
@@ -661,7 +683,7 @@ MEASURES += [
     ),
     (
         "Trial caption",
-        'FORMAT([Customers per arm], "#,0") & " customers per arm, 9 arms"',
+        'FORMAT([Customers per arm], "#,0") & " customers per arm, 10 arms"',
         "",
         "08 Captions",
         "Tile caption: trial size.",
@@ -684,7 +706,9 @@ MEASURES.append(
             '        & FORMAT(vTrue, "$#,0") & ", " & FORMAT(DIVIDE(vTrue, vCeiling), "0%")\n'
             '        & " of what a perfectly informed planner could reach. Giving 10% off to the most frequent travellers "\n'
             '        & "would create " & FORMAT(vPropensity, "$#,0") & ": the customers most likely to travel are not the "\n'
-            '        & "ones an offer moves."'
+            '        & "ones an offer moves. The plan also moves a net " & FORMAT([Rush-hour trips per workday], "#,0")\n'
+            '        & " rush-hour trips per workday onto the 407, worth " & FORMAT([Relief value], "$#,0")\n'
+            '        & " in congestion relief at the planning rate."'
         ),
         "",
         "10 Narrative",

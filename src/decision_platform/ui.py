@@ -14,13 +14,17 @@ import math
 import plotly.graph_objects as go
 import streamlit as st
 
+from .palette import (  # noqa: F401 (NEUTRAL re-exported)
+    NEUTRAL,
+    OFFER_TEXTURE,
+    SERIES,
+    offer_color,
+    offer_fill,
+)
 from .planning import zone_summary
 
-# Categorical slots, fixed order: blue, orange, aqua, yellow, magenta, green, violet, red.
-SERIES = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300", "#9085e9", "#e66767"]
 COLORS = SERIES  # Backwards-compatible name.
 STATUS = {"good": "#0ca30c", "warning": "#fab219", "serious": "#ec835a", "critical": "#d03b3b"}
-NEUTRAL = "#5b7486"
 ACCENT = "#4bdcd5"
 # Sequential blue on a dark surface: the step nearest the surface means "near zero".
 SEQUENTIAL = [[0.0, "#0d366b"], [0.35, "#1c5cab"], [0.7, "#3987e5"], [1.0, "#86b6ef"]]
@@ -294,7 +298,7 @@ def campaign_deck(capacity, zone_names, combined, eligible, solver, certified):
     tag = f"{solver} · {'certified optimal' if certified else 'optimal within 0.01% gap'}"
     st.markdown(
         '<section class="campaign-deck" aria-label="October campaign plan"><div class="deck-heading"><div>'
-        "<h2>October campaign plan</h2><p>One optimized allocation of eight offers across every eligible "
+        "<h2>October campaign plan</h2><p>One optimized allocation of nine offers across every eligible "
         "customer, within budget, contact, ROI, points, inventory and roadway-capacity guardrails.</p></div>"
         f"{badge(tag, 'good')}</div>"
         f'<div class="network">{corridor(capacity, zone_names)}</div>'
@@ -323,6 +327,16 @@ def resource_ledger(items, note=None):
     st.markdown(content, unsafe_allow_html=True)
 
 
+def offer_marker(offer_ids, **extra) -> dict:
+    """A bar marker for a list of offers: slot colour, plus the hatch that separates the shared slot."""
+    offer_ids = list(offer_ids)
+    return dict(
+        color=[offer_color(o) for o in offer_ids],
+        pattern=dict(shape=[OFFER_TEXTURE.get(o, "") for o in offer_ids], fgcolor=INK, solidity=0.35),
+        **extra,
+    )
+
+
 def offer_mix(frame, offer_names, offer_order):
     """One row per offer in catalogue order: contacts, value and a share bar in the offer's slot colour."""
     total = len(frame)
@@ -330,7 +344,7 @@ def offer_mix(frame, offer_names, offer_order):
         contacts=("customer_id", "size"), value=("objective_value", "sum"), spend=("cost", "sum")
     )
     rows = []
-    for i, offer in enumerate(offer_order):
+    for offer in offer_order:
         if offer not in grouped.index:
             continue
         row = grouped.loc[offer]
@@ -340,7 +354,7 @@ def offer_mix(frame, offer_names, offer_order):
             f'<span class="offer-value">{int(row.contacts):,} contacts</span>'
             f'<span class="offer-detail">{money(row.value)} expected value · {money(row.spend)} spend</span>'
             f'<span class="offer-detail">{share:.0%} of contacts</span>'
-            f'<div class="offer-track"><i style="width:{share * 100:.1f}%;background:{SERIES[i % len(SERIES)]}">'
+            f'<div class="offer-track"><i style="width:{share * 100:.1f}%;background:{offer_fill(offer)}">'
             "</i></div></div>"
         )
     if not rows:

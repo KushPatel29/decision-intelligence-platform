@@ -1,7 +1,7 @@
 # Power BI measures
 
 Generated from `src/decision_platform/bi/model_spec.py` by `python -m decision_platform.bi.build_pbip`; do not edit by hand.
-91 business measures in 10 display folders. The report's own SVG tile, header and button measures live in the *Report UI* folder and are not listed.
+94 business measures in 10 display folders. The report's own SVG tile, header and button measures live in the *Report UI* folder and are not listed.
 
 
 ## 01 Plan
@@ -25,6 +25,9 @@ Generated from `src/decision_platform/bi/model_spec.py` by `python -m decision_p
 | Contact limit | Maximum contacts. | `#,0` | `MAX(plan_summary[contact_limit])` |
 | Eligible customers | Customers with consent, My Account, no past-due balance and an active account. | `#,0` | `MAX(plan_summary[eligible_customers])` |
 | Budget used | Incentive spend / budget. | `0%` | `DIVIDE([Incentive spend], [Budget])` |
+| Decision variables | Customer-offer binaries in the mixed-integer program the plan solves. | `#,0` | `MAX(plan_summary[decision_variables])` |
+| Relief value | Congestion-relief value of the net rush-hour trips the plan moves onto the 407 (included in Expected value). | `\$#,0` | `SUM(plan_contacts[relief_value])` |
+| Rush-hour trips per workday | Net incremental peak trips per workday over a 22-workday month; negative where off-peak offers move commuters out of the peak. | `#,0.0` | `DIVIDE([Extra peak trips], 22)` |
 
 ## 02 Customers
 
@@ -137,10 +140,10 @@ Generated from `src/decision_platform/bi/model_spec.py` by `python -m decision_p
 | Drift caption | Tile caption: drift review count. | `text` | `FORMAT([Features to review], "0") & " features above PSI 0.2"` |
 | Feed caption | Tile caption: feed anomalies. | `text` | `FORMAT([Flagged days], "0") & " ingestion days flagged"` |
 | Elasticity caption | Tile caption: elasticity interval. | `text` | `"95% interval " & FORMAT([Elasticity low], "0.00") & " to " & FORMAT([Elasticity high], "0.00")` |
-| Trial caption | Tile caption: trial size. | `text` | `FORMAT([Customers per arm], "#,0") & " customers per arm, 9 arms"` |
+| Trial caption | Tile caption: trial size. | `text` | `FORMAT([Customers per arm], "#,0") & " customers per arm, 10 arms"` |
 
 ## 10 Narrative
 
 | Measure | Definition | Format | DAX |
 |---|---|---|---|
-| Executive summary | One-paragraph summary of the plan and its truth-based evaluation, built from the measures. | `text` | `VAR vValue = [Expected value] VAR vSpend = [Incentive spend] VAR vTrue = [Optimized true value] VAR vCeiling = [Value ceiling] VAR vPropensity = [Propensity true value] RETURN "The October plan contacts " & FORMAT([Contacts], "#,0") & " of " & FORMAT([Eligible customers], "#,0") & " eligible customers for " & FORMAT(vSpend, "$#,0") & " of incentives. The models expect " & FORMAT(vValue, "$#,0") & "; scored against the simulator's true responses it creates " & FORMAT(vTrue, "$#,0") & ", " & FORMAT(DIVIDE(vTrue, vCeiling), "0%") & " of what a perfectly informed planner could reach. Giving 10% off to the most frequent travellers " & "would create " & FORMAT(vPropensity, "$#,0") & ": the customers most likely to travel are not the " & "ones an offer moves."` |
+| Executive summary | One-paragraph summary of the plan and its truth-based evaluation, built from the measures. | `text` | `VAR vValue = [Expected value] VAR vSpend = [Incentive spend] VAR vTrue = [Optimized true value] VAR vCeiling = [Value ceiling] VAR vPropensity = [Propensity true value] RETURN "The October plan contacts " & FORMAT([Contacts], "#,0") & " of " & FORMAT([Eligible customers], "#,0") & " eligible customers for " & FORMAT(vSpend, "$#,0") & " of incentives. The models expect " & FORMAT(vValue, "$#,0") & "; scored against the simulator's true responses it creates " & FORMAT(vTrue, "$#,0") & ", " & FORMAT(DIVIDE(vTrue, vCeiling), "0%") & " of what a perfectly informed planner could reach. Giving 10% off to the most frequent travellers " & "would create " & FORMAT(vPropensity, "$#,0") & ": the customers most likely to travel are not the " & "ones an offer moves. The plan also moves a net " & FORMAT([Rush-hour trips per workday], "#,0") & " rush-hour trips per workday onto the 407, worth " & FORMAT([Relief value], "$#,0") & " in congestion relief at the planning rate."` |

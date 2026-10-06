@@ -153,7 +153,9 @@ def test_tampered_snapshot_is_never_served(tmp_path, client):
 
 def test_sample_size_endpoint_matches_library(client):
     test_client, _ = client
-    body = test_client.post("/v1/experiments/sample-size", json={"baseline": 0.35, "mde": 0.05, "comparisons": 2}).json()
+    body = test_client.post(
+        "/v1/experiments/sample-size", json={"baseline": 0.35, "mde": 0.05, "comparisons": 2}
+    ).json()
     from decision_platform.experiments import sample_size
 
     assert body["customers_per_arm"] == sample_size(0.35, 0.05, comparisons=2)

@@ -1,4 +1,4 @@
-"""What the Corridor report contains: eight pages, and every visual on them.
+"""What the Corridor report contains: nine pages, and every visual on them.
 
 Each page answers one question a planning team would ask about the October plan,
 from the same verified outputs the app serves.
@@ -8,6 +8,7 @@ Fields are written ``table[column]`` for a column and ``[Measure]`` for a measur
 
 from __future__ import annotations
 
+from decision_platform.bi.html_spec import HTML_VISUAL
 from decision_platform.bi.report_chrome import add_chrome
 
 CARD_Y, CARD_H = 20, 118
@@ -55,7 +56,45 @@ OFFER = ("dim_offer[offer_name]", "Offer")
 ZONE = ("dim_zone[zone_name]", "Zone")
 PERIOD = ("dim_period[period]", "Travel period")
 
+
+def html(measure: str, pos: tuple[int, int, int, int], alt: str, *, framed: bool = True) -> dict:
+    """A panel drawn by the HTML Content visual from one of html_spec's measures."""
+    return {"type": "html", "measure": f"[{measure}]", "pos": pos, "alt": alt, "framed": framed}
+
+
 PAGES: list[dict] = [
+    {
+        # Written in body coordinates (88-704), so the chrome's vertical reflow is
+        # the identity and every panel keeps the height its markup was sized for.
+        "name": "p0_command",
+        "display": "Command centre",
+        "visuals": [
+            html(
+                "HTML Hero",
+                (20, 88, 1240, 140),
+                "Banner. The October plan's size and spend, its certificate, and four headline figures: expected "
+                "value, true value against the ceiling, net ROI and rush-hour trips moved onto the 407.",
+                framed=False,
+            ),
+            html(
+                "HTML Offer cards",
+                (20, 240, 1240, 212),
+                "Nine offer cards in catalogue order. Each shows the offer's mechanic, the period it fills, its "
+                "expected value, contacts and spend, and a bar scaled to the largest offer.",
+            ),
+            html(
+                "HTML Policy leaderboard",
+                (20, 464, 620, 240),
+                "Leaderboard of targeting approaches ranked by simulator-true value, with each approach's share of "
+                "the perfect-knowledge ceiling; the production plan is highlighted.",
+            ),
+            html(
+                "HTML Narrative",
+                (654, 464, 606, 240),
+                "The executive summary paragraph, built from the measures.",
+            ),
+        ],
+    },
     {
         "name": "p1_plan",
         "display": "October plan",
@@ -197,23 +236,12 @@ PAGES: list[dict] = [
                 "pos": (654, ROW1_Y, 606, 272),
                 "alt": "Column chart titled Share of each segment the plan contacts. Plots Share in plan by segment.",
             },
-            {
-                "type": "table",
-                "columns": [
-                    "customer_segments[rfm_segment]",
-                    "[Customers]",
-                    "[Mean travel propensity]",
-                    "[Mean inactivity risk]",
-                    "[Mean projected value]",
-                    "[Mean best-offer value]",
-                    "[Share in plan]",
-                ],
-                "sort": ("customer_segments[rfm_segment]", "Ascending"),
-                "title": "Segments: risk, value and what the plan does with them",
-                "pos": (20, ROW2_Y, 1044, 258),
-                "alt": "Table titled Segments. Lists segment, Customers, Mean travel propensity, Mean inactivity "
-                "risk, Mean projected value, Mean best-offer value and Share in plan.",
-            },
+            html(
+                "HTML Segments",
+                (20, ROW2_Y, 1044, 258),
+                "Table of segments with customers, travel propensity, inactivity risk, best-offer value and a bar "
+                "for the share of each segment the plan contacts. Responds to the zone and tier filters.",
+            ),
             *slicers(ZONE, ("customer_segments[tier]", "Loyalty tier")),
         ],
     },
@@ -229,16 +257,12 @@ PAGES: list[dict] = [
                 ),
                 tile("[Planning capacity]", "Card. Planning capacity over the window."),
             ),
-            {
-                "type": "matrix",
-                "rows": "dim_zone[zone_name]",
-                "columns_by": "dim_period[period]",
-                "values": ["[Load]"],
-                "totals": False,
-                "title": "Load by zone and travel period, with the campaign",
-                "pos": (20, ROW1_Y, 620, 272),
-                "alt": "Matrix titled Load by zone and travel period. Shows Load by zone name and period.",
-            },
+            html(
+                "HTML Capacity grid",
+                (20, ROW1_Y, 620, 272),
+                "Heat grid of load by zone and travel period with the campaign, as a share of free-flow capacity, "
+                "with the trips left free in each cell; cells at 80% or more are amber.",
+            ),
             {
                 "type": "stacked_column",
                 "x": "dim_zone[zone_name]",
@@ -339,17 +363,12 @@ PAGES: list[dict] = [
                     rail=False,
                 ),
             ),
-            {
-                "type": "bar",
-                "x": "dim_offer[offer_name]",
-                "y": ["[Trial value effect]"],
-                "color": "[Effect colour]",
-                "sort": ("[Trial value effect]", "Descending"),
-                "title": "30-day net contribution per randomised customer (CUPED; red: loses money)",
-                "pos": (20, ROW1_Y, 620, 272),
-                "alt": "Bar chart titled 30-day net contribution per randomised customer. Plots Trial value effect by "
-                "offer; negative effects are red.",
-            },
+            html(
+                "HTML Experiment forest",
+                (20, ROW1_Y, 620, 272),
+                "Forest plot of each offer's CUPED-adjusted 30-day net contribution per randomised customer with "
+                "its Bonferroni 95% interval and a zero line; negative estimates are red.",
+            ),
             {
                 "type": "table",
                 "columns": [
@@ -420,15 +439,11 @@ PAGES: list[dict] = [
                 "pos": (20, ROW1_Y, 760, 272),
                 "alt": "Bar chart titled Predicted against true value. Plots Predicted value and True value by approach.",
             },
-            {
-                "type": "table",
-                "columns": ["guardrails[constraint_label]", "guardrails[limit]", "[Shadow price]"],
-                "totals": False,
-                "sort": ("[Shadow price]", "Descending"),
-                "title": "Binding guardrails: value of one more unit",
-                "pos": (794, ROW1_Y, 466, 272),
-                "alt": "Table titled Binding guardrails. Lists guardrail, limit and Shadow price.",
-            },
+            html(
+                "HTML Guardrails",
+                (794, ROW1_Y, 466, 272),
+                "Table of binding guardrails with their limits and LP shadow prices, and the one most worth relaxing.",
+            ),
             {
                 "type": "table",
                 "columns": [
@@ -484,36 +499,20 @@ PAGES: list[dict] = [
                 "pos": (20, ROW1_Y, 760, 272),
                 "alt": "Line chart titled Bronze trip feed. Plots Feed rows and Expected feed rows by day.",
             },
-            {
-                "type": "table",
-                "columns": ["quality_gate[check_name]", "quality_gate[passed]", "quality_gate[criteria]"],
-                "totals": False,
-                "title": "Release acceptance gate",
-                "pos": (794, ROW1_Y, 466, 272),
-                "alt": "Table titled Release acceptance gate. Lists check, passed and criteria.",
-            },
+            html(
+                "HTML Scorecard",
+                (794, ROW1_Y, 466, 548),
+                "Scorecard of the release acceptance gate, one line per check with its criterion and a pass or fail "
+                "mark, then the customer models' champion, AUC, Brier score and calibration error on the test fold.",
+            ),
             {
                 "type": "bar",
                 "x": "feature_drift[feature]",
                 "y": ["[Mean PSI]"],
                 "sort": ("[Mean PSI]", "Descending"),
                 "title": "Feature drift (PSI), January to October 2025",
-                "pos": (20, ROW2_Y, 620, 258),
+                "pos": (20, ROW2_Y, 760, 258),
                 "alt": "Bar chart titled Feature drift. Plots Mean PSI by feature.",
-            },
-            {
-                "type": "table",
-                "columns": [
-                    "model_quality[model]",
-                    "model_quality[champion]",
-                    "model_quality[auc]",
-                    "model_quality[brier]",
-                    "model_quality[ece]",
-                ],
-                "totals": False,
-                "title": "Customer models on the July 2025 test fold",
-                "pos": (654, ROW2_Y, 410, 258),
-                "alt": "Table titled Customer models. Lists model, champion, AUC, Brier and ECE.",
             },
         ],
     },
@@ -543,6 +542,7 @@ VISUAL_TYPES: dict[str, str] = {
     "panel_clear": "actionButton",
     "panel_background": "shape",
     "panel_title": "textbox",
+    "html": HTML_VISUAL,
 }
 
 PAGES = add_chrome(PAGES)

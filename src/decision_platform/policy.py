@@ -129,7 +129,9 @@ def summarise(plans, truth):
             {
                 "policy": name,
                 "contacts": len(plan),
-                "predicted_value": float((plan.value_uplift + plan.later_value_uplift).sum())
+                "predicted_value": float(
+                    (plan.value_uplift + plan.later_value_uplift + plan.relief_value).sum()
+                )
                 if len(plan)
                 else 0.0,
                 "planned_spend": float(plan.cost.sum()) if len(plan) else 0.0,
@@ -138,6 +140,7 @@ def summarise(plans, truth):
                 "true_spend": float(actual.true_cost.sum()),
                 "true_incremental_trips": float(actual.true_incremental_trips.sum()),
                 "true_peak_trips": float(actual.true_trips_peak.sum()),
+                "true_relief_value": float(actual.true_relief_value.sum()),
                 "customers_losing_money": int((actual.true_value < 0).sum()),
             }
         )

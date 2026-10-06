@@ -1,6 +1,5 @@
 """Point-in-time customer snapshots: end-exclusive features, forward labels, purged folds."""
 
-import duckdb
 import numpy as np
 import pandas as pd
 
@@ -52,6 +51,10 @@ FEATURES = [
 
 
 def connect(cfg, frames):
+    # Imported here so the feature list (FEATURES) loads without the engine: the lakehouse and
+    # registry tasks, and a registered model's serving environment, need the names, not DuckDB.
+    import duckdb
+
     db = duckdb.connect(str(cfg.path("data", "platform.duckdb")))
     # Stable floating-point reductions keep histogram split candidates identical
     # across complete seeded reruns on the same data and runtime.

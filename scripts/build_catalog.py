@@ -73,6 +73,60 @@ DEFINITIONS = {
         "log1p(digital_events_30d)",
         "customer_features",
     ),
+    "heavy_vehicle": ("Heavy-vehicle account", "vehicle_class = Heavy", "dim_customer"),
+    "night_share_30d": ("Share of recent trips before 06:00", "avg(hour < 6) over trailing 30d", "fact_trip"),
+    "zones_visited_30d": (
+        "Distinct zones travelled recently",
+        "count distinct zone_id over trailing 30d",
+        "fact_trip",
+    ),
+    "active_days_30d": (
+        "Days with at least one trip",
+        "count distinct trip dates over trailing 30d",
+        "fact_trip",
+    ),
+    "max_daily_trips_30d": ("Busiest recent day", "max trips in one day over trailing 30d", "fact_trip"),
+    "sessions_30d": (
+        "Days with a digital session",
+        "count distinct event dates over trailing 30d",
+        "fact_digital_event",
+    ),
+    "offer_views_90d": ("Offer views", "count event_type=offer_view over trailing 90d", "fact_digital_event"),
+    "offer_click_rate_90d": (
+        "Smoothed offer click-through",
+        "(offer clicks + 0.5) / (offer views + 3) over trailing 90d",
+        "fact_digital_event",
+    ),
+    "enroll_rate_90d": (
+        "Smoothed enrolment after a click",
+        "(enrolments + 0.5) / (offer clicks + 2) over trailing 90d",
+        "fact_digital_event",
+    ),
+    "email_click_rate_90d": (
+        "Smoothed email click-through",
+        "(email clicks + 0.5) / (email opens + 3) over trailing 90d",
+        "fact_digital_event",
+    ),
+    "pricing_views_90d": (
+        "Pricing page views",
+        "count event_type=pricing_page_view over trailing 90d",
+        "fact_digital_event",
+    ),
+    "loyalty_views_90d": (
+        "Loyalty page views",
+        "count event_type=loyalty_page_view over trailing 90d",
+        "fact_digital_event",
+    ),
+    "app_share_90d": (
+        "Share of logins in the app",
+        "app logins / all logins over trailing 90d; 0 if none",
+        "fact_digital_event",
+    ),
+    "days_since_last_login": (
+        "Days since the last login",
+        "date_diff(max(login), as_of), capped at 365",
+        "fact_digital_event",
+    ),
 }
 
 
@@ -82,7 +136,7 @@ def main():
     snapshot = pd.read_parquet(ROOT / "data" / "gold" / "customer_360.parquet")
     lines = [
         "# Feature catalog",
-        "Version 1.0. Refresh: monthly batch. Owner: project analytics. Privacy class: synthetic, non-PII. Model usage: customer prediction and causal outcome models unless a model card narrows it.",
+        "Contract version 2.0. Refresh: monthly batch. Owner: project analytics. Privacy class: synthetic, non-PII. Model usage: customer prediction and causal outcome models unless a model card narrows it.",
         "All windows are end-exclusive at the snapshot date; timestamps are Toronto wall-clock. Status and marketing consent resolve their effective-dated history. Other account attributes remain static synthetic flags.",
         "| Feature | Business definition | Formula | Source | Nullable |",
         "|---|---|---|---|---|",
@@ -130,6 +184,7 @@ def main():
             "fact_offer_redemption": "one treated customer redemption",
             "fact_loyalty_award": "one randomized loyalty-group customer award",
             "fact_loyalty_redemption": "one loyalty redemption event",
+            "quarantine_trip": "one bronze trip rejected by the silver contract, with its reason",
         }
     )
     registry = []
@@ -163,73 +218,8 @@ def main():
         "# Schema registry\n\nMachine-readable schema: `schema_registry.json`. Version 1.0. Table names and keys are recorded in the data dictionary. Breaking changes require a version increment and regeneration of features/models. Customer and event primary keys must be unique; trip/customer and trip/zone foreign keys must be valid. Date/event cutoffs must follow the feature contract.\n",
         encoding="utf-8",
     )
-    metrics = json.loads((ROOT / "outputs" / "model_metrics.json").read_text())
-    targets = {
-        "propensity": "At least one trip in following 30 days",
-        "churn": "No trips in following 90 days, among customers with >=3 trips in prior 90 days",
-        "attrition": "Future 90-day trips <50% of prior 90-day trips, among historically active customers",
-    }
-    cards = docs / "model_cards"
-    cards.mkdir(exist_ok=True)
-    for name, target in targets.items():
-        info = metrics["customer"][name]
-        card = f"""# {name.title()} model card
-
-Purpose: support travel/retention planning. Target: {target}.
-
-Training population: synthetic customer-month snapshots July 2024–January 2025. Validation/calibration: April 2025. Held-out test: July 2025. Label overlap is purged. The same customer may recur across time.
-
-Features: the version 1.0 allowlist in `feature_catalog.md`; no targets, future events or latent simulator parameters. Algorithm selected by validation Brier score: {info["champion"]}. Separate validation-fold logistic calibration is used before test/current scoring.
-
-Measured synthetic held-out metrics:
-
-```json
-{json.dumps(info["test_calibrated"], indent=2)}
-```
-
-Deployment: local batch scoring and saved joblib artifacts with local MLflow run lineage. SageMaker execution is pending. Churn/attrition scores are blank outside their historically active population.
-
-Limitations and bias: designed synthetic behaviour; no real-world performance or fairness validation. Static account flags and overlapping customer identities limit population generalization. No protected attributes are used, but geographic and behavioural proxies would require review in a real system.
-
-Monitoring: feature PSI/KS review, delayed-label discrimination and calibration once labels mature. Retraining trigger: validated decline relative to the champion plus confirmed data quality; PSI alone does not automatically retrain or approve a model.
-"""
-        (cards / f"{name}.md").write_text(card, encoding="utf-8")
-    others = {
-        "clv": (
-            "Future contribution and projected customer value",
-            metrics["customer"]["clv"],
-            "Historical-margin and learned forecasts compete only on validation. The retained baseline matches the held-out reference. Quarterly survival decay is heuristic. BG/NBD plus constrained Gamma-Gamma is evaluated on 90-day purchase-days, not 12-month value. Frequency/monetary correlation challenges its independence assumption.",
-        ),
-        "uplift": (
-            "Incremental response, trips, 90-day retention and days31-90 margin",
-            metrics["uplift"],
-            "Four-arm July randomized simulation with held-out identities. T/S/X comparisons are exploratory; negative Qini is retained. Signed later margin uses 25% planning shrinkage, not an individual confidence bound. Retention is not monetized twice. A fresh October constrained-policy trial reports ITT uncertainty separately; its wide interval does not prove benefit.",
-        ),
-        "demand": (
-            "Daily zone-period trip demand",
-            metrics["demand"],
-            "Validation-selected learned candidate failed the untouched promotion gate; the seasonal baseline remains the serving model. Six fixed-origin 30-day backtests report marginal interval coverage from validation residuals. Origins overlap and cells are dependent. Hour/direction values disaggregate daily forecasts and have no independent hourly validation.",
-        ),
-        "segmentation": (
-            "Behavioural customer clustering",
-            metrics["customer"]["segmentation"],
-            "Fitted on the January 2025 training snapshot, with three bootstrap adjusted-Rand comparisons. Bootstrap stability does not establish temporal stability or business actionability.",
-        ),
-        "anomaly": (
-            "Customer behavioural review",
-            metrics["customer"]["anomaly"],
-            "Unsupervised historical baseline. No labelled fraud evaluation; flags never automatically disqualify customers.",
-        ),
-        "elasticity": (
-            "Demand response to price",
-            pd.read_csv(ROOT / "outputs" / "elasticity.csv").to_dict(orient="records"),
-            "Log-log OLS using independent randomized synthetic prices; coefficients are not observational estimates of actual company demand.",
-        ),
-    }
-    for name, (purpose, evidence, limits) in others.items():
-        card = f"# {name.title()} model card\n\nPurpose: {purpose}.\n\nEvidence from actual local run:\n\n```json\n{json.dumps(evidence, indent=2)}\n```\n\nLimitations: {limits}\n\nTraining/inference: local synthetic data, explicit feature cutoffs and model-specific folds. Artifacts are local; hosted deployment is pending. Monitor input distributions, realized outcomes when available, and business validity before promotion. Retrain only after data QA and a validated evaluation against the existing candidate. Synthetic data cannot establish real-world bias or fairness.\n"
-        (cards / f"{name}.md").write_text(card, encoding="utf-8")
-    print("Generated data dictionary, schema registry, feature catalog and nine model cards")
+    # Model cards are written by scripts/build_model_cards.py from the same run.
+    print("Generated data dictionary, schema registry and feature catalog")
 
 
 if __name__ == "__main__":

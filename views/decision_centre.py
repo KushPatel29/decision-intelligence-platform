@@ -174,6 +174,15 @@ with studio:
             key="scenario_risk",
             help="Optimize value minus this many bootstrap standard deviations: fewer, surer bets.",
         )
+        relief = st.slider(
+            "Value per rush-hour trip moved onto the 407 (CAD)",
+            0.0,
+            3.0,
+            step=0.25,
+            key="scenario_relief",
+            help="Strategic value of taking a rush-hour trip off a congested alternate route. Peak capacity on the "
+            "407 itself stays a hard limit.",
+        )
         solver = st.radio(
             "Core solver",
             ["Auto (Gurobi core, HiGHS fallback)", "HiGHS only"],
@@ -185,11 +194,13 @@ with studio:
     if submitted:
         try:
             candidates = table("candidates")
-            if risk > 0:
-                candidates["net_contribution"] = candidates.value_uplift - risk * candidates.value_uplift_sd
-                candidates["objective_value"] = candidates.net_contribution + candidates.later_value_uplift
-                keep = (candidates.objective_value > 0) | (candidates.trips_peak < 0)
-                candidates = candidates[keep].reset_index(drop=True)
+            candidates["net_contribution"] = candidates.value_uplift - risk * candidates.value_uplift_sd
+            candidates["relief_value"] = relief * candidates.trips_peak
+            candidates["objective_value"] = (
+                candidates.net_contribution + candidates.later_value_uplift + candidates.relief_value
+            )
+            keep = (candidates.objective_value > 0) | (candidates.trips_peak < 0)
+            candidates = candidates[keep].reset_index(drop=True)
             base = with_reserve(capacity, reserve)
             mode = "highs" if solver.startswith("HiGHS") else "auto"
             with st.spinner("Solving the LP relaxation and the exact core…"):
@@ -208,6 +219,7 @@ with studio:
                     "points": points,
                     "reserve": reserve,
                     "risk": risk,
+                    "relief": relief,
                 },
                 "stamp": ctx["stamp"],
             }
@@ -224,6 +236,8 @@ with studio:
                     "points": int(allocation.selected.points.sum()),
                     "reserve": reserve,
                     "risk_aversion": risk,
+                    "relief_value": relief,
+                    "rush_hour_trips_per_workday": float(allocation.selected.trips_peak.sum() / 22),
                 }
             )
             st.session_state["scenario_history"] = history[-20:]
@@ -240,12 +254,16 @@ with studio:
             )
         except Exception as exc:  # Surface solver or input problems; never crash the page.
             st.error(f"The scenario did not solve: {exc}")
-            st.caption("Lower the capacity reserve if forecast plus reserve exceeds capacity, or relax a limit.")
+            st.caption(
+                "Lower the capacity reserve if forecast plus reserve exceeds capacity, or relax a limit."
+            )
     scenario = st.session_state.get("scenario")
     if scenario and scenario["stamp"] == ctx["stamp"]:
         d, view = scenario["diagnostics"], scenario["frame"]
         st.subheader("Scenario result")
-        st.caption(f"{scenario['solver']} · {scenario['status']}. Changes compare with the saved October plan.")
+        st.caption(
+            f"{scenario['solver']} · {scenario['status']}. Changes compare with the saved October plan."
+        )
         cols = st.columns(4)
         cols[0].metric("Contacts", f"{len(view):,}", f"{len(view) - combined['contacts']:+,} vs plan")
         cols[1].metric(
@@ -314,7 +332,9 @@ with studio:
                     "solver": scenario["solver"],
                     "limits": scenario["limits"],
                     "outcomes": {k: v for k, v in d.items() if k != "certificate"},
-                    "allocation": json.loads(view[["customer_id", "offer_id", "cost", "objective_value"]].to_json(orient="records")),
+                    "allocation": json.loads(
+                        view[["customer_id", "offer_id", "cost", "objective_value"]].to_json(orient="records")
+                    ),
                 },
             )
             st.success(f"Scenario saved with audit reference {identifier[:12]}.")
@@ -351,10 +371,27 @@ with evidence:
     if certificate:
         tiles(
             [
-                ("Decisions considered", f"{certificate.get('variables', 0):,}", "Eligible customer-offer pairs", True),
-                ("Settled by reduced costs", f"{certificate.get('variables', 0) - certificate.get('free_variables', 0):,}", "Provably fixed"),
-                ("Exact core", f"{certificate.get('free_variables', 0):,}", f"Solved by {certificate.get('core_solver', '–')}"),
-                ("Gap to LP bound", f"{certificate.get('relative_gap_to_lp_bound', 0):.4%}", "Proven optimal" if certificate.get("proven_optimal") else "Feasible"),
+                (
+                    "Decisions considered",
+                    f"{certificate.get('variables', 0):,}",
+                    "Eligible customer-offer pairs",
+                    True,
+                ),
+                (
+                    "Settled by reduced costs",
+                    f"{certificate.get('variables', 0) - certificate.get('free_variables', 0):,}",
+                    "Provably fixed",
+                ),
+                (
+                    "Exact core",
+                    f"{certificate.get('free_variables', 0):,}",
+                    f"Solved by {certificate.get('core_solver', '–')}",
+                ),
+                (
+                    "Gap to LP bound",
+                    f"{certificate.get('relative_gap_to_lp_bound', 0):.4%}",
+                    "Proven optimal" if certificate.get("proven_optimal") else "Feasible",
+                ),
             ]
         )
         st.caption(

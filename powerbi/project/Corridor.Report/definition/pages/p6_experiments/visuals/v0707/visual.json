@@ -1,0 +1,135 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "v0707",
+  "position": {
+    "x": 654,
+    "y": 470,
+    "z": 1609,
+    "height": 234,
+    "width": 606,
+    "tabOrder": 1609
+  },
+  "visual": {
+    "visualType": "pivotTable",
+    "query": {
+      "queryState": {
+        "Rows": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_offer"
+                    }
+                  },
+                  "Property": "offer_name"
+                }
+              },
+              "queryRef": "dim_offer.offer_name",
+              "nativeQueryRef": "offer_name",
+              "displayName": "Offer",
+              "active": true
+            }
+          ]
+        },
+        "Columns": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "learner_comparison"
+                    }
+                  },
+                  "Property": "learner"
+                }
+              },
+              "queryRef": "learner_comparison.learner",
+              "nativeQueryRef": "learner",
+              "displayName": "Learner",
+              "active": true
+            }
+          ]
+        },
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Learner rank correlation"
+                }
+              },
+              "queryRef": "_Measures.Learner rank correlation",
+              "nativeQueryRef": "Learner rank correlation"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Causal learners: rank correlation with true value'"
+                }
+              }
+            },
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Matrix titled Causal learners. Shows Learner rank correlation by offer and learner.'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "objects": {
+      "subTotals": [
+        {
+          "properties": {
+            "rowSubtotals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "columnSubtotals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

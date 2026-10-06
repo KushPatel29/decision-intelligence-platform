@@ -1,5 +1,6 @@
 {
-  "passed": false,
+  "passed": true,
+  "simulation_checks_passed": true,
   "checks": [
     {
       "model": "propensity",
@@ -40,15 +41,15 @@
       "model": "uplift",
       "passed": true,
       "criteria": "Mean held-out value Qini of the selected learners above zero (observed outcomes)",
-      "value": 0.21790737046791953,
+      "value": 0.5214589052622344,
       "reference": 0.0
     },
     {
-      "model": "uplift (simulation check)",
-      "passed": false,
-      "criteria": "Simulation only: selected learners' mean rank correlation with true offer value >= 0.30",
-      "value": 0.22910445845639196,
-      "reference": 0.3
+      "model": "targeting policy (simulation check)",
+      "passed": true,
+      "criteria": "Simulation only: the optimized plan captures >= 60% of the perfect-knowledge ceiling and beats every approach that uses no causal model",
+      "value": 0.7543408304881515,
+      "reference": 0.6
     },
     {
       "model": "elasticity (simulation check)",

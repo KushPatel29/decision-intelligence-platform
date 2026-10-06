@@ -1,6 +1,6 @@
 """July 2025 customer-randomised offer trial: design, simulation and analysis.
 
-Design: nine equal arms (control plus eight offers), customer-level
+Design: ten equal arms (control plus nine offers), customer-level
 randomisation, intention-to-treat. Primary metrics are trips and net
 contribution per customer over the 30-day offer window; the binary "travelled"
 response is kept for the classic proportion test.
@@ -10,7 +10,7 @@ Analysis adds three things a production experimentation team uses:
   without biasing the treatment effect.
 - Group-sequential monitoring: O'Brien-Fleming boundaries at days 10/20/30,
   calibrated by simulation to the per-comparison alpha.
-- Multiplicity control: Bonferroni for the eight primary comparisons and
+- Multiplicity control: Bonferroni for the nine primary comparisons and
   Benjamini-Hochberg for exploratory subgroups.
 """
 
@@ -226,6 +226,7 @@ def simulate(cfg, features, hidden, context, customers):
     offer = trial.offer_id.fillna("").to_numpy()
     spend_threshold = np.maximum(25.0, 5 * np.ceil(1.3 * (base * tolls).sum(axis=1).to_numpy() / 5))
     reached = np.zeros(n, dtype=bool)
+    cost += np.where(offer == "rush_hour_25", 0.25 * counts["Peak"] * tolls["Peak"].to_numpy(), 0)
     cost += np.where(offer == "offpeak_15", 0.15 * counts["Off-peak"] * tolls["Off-peak"].to_numpy(), 0)
     cost += np.where(offer == "pct_10", 0.10 * revenue, 0)
     cost += np.where(offer == "weekend_20", 0.20 * counts["Weekend"] * tolls["Weekend"].to_numpy(), 0)
@@ -248,7 +249,7 @@ def simulate(cfg, features, hidden, context, customers):
     a = population.col("latent_digital_affinity")
     s = population.col("latent_sensitivity")
     trial["enrolled"] = trial.treated.to_numpy() * rng.binomial(1, np.clip(0.15 + 0.40 * a + 0.05 * s, 0, 1))
-    discount_offer = np.isin(offer, ["offpeak_15", "pct_10", "weekend_20"]) | np.isin(
+    discount_offer = np.isin(offer, ["rush_hour_25", "offpeak_15", "pct_10", "weekend_20"]) | np.isin(
         offer, list(LOYALTY_OFFERS)
     )
     trial["redeemed"] = trial.enrolled.to_numpy() * np.where(
