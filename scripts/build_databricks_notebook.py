@@ -1,9 +1,12 @@
 """Build a portable Databricks source notebook from the tested Spark kernel."""
+
 from decision_platform.config import ROOT
 
+
 def main():
-    kernel=(ROOT/"src/decision_platform/spark_features.py").read_text()
-    source='''# Databricks notebook source
+    kernel = (ROOT / "src/decision_platform/spark_features.py").read_text()
+    source = (
+        """# Databricks notebook source
 # Complete synthetic bronze/silver/gold feature pipeline. No hidden simulator inputs.
 from pyspark.sql import functions as F
 dbutils.widgets.text("catalog","workspace")
@@ -37,7 +40,9 @@ if trip.join(spark.table(f"{prefix}.bronze_dim_zone").select("zone_id"),"zone_id
 for name in domains:
     spark.table(f"{prefix}.bronze_{name}").drop("ingested_at").write.format("delta").mode("errorifexists").saveAsTable(f"{prefix}.silver_{name}")
 # COMMAND ----------
-'''+kernel+'''
+"""
+        + kernel
+        + """
 # COMMAND ----------
 gold=build_features(spark,raw_path,as_of,table_reader=lambda name:spark.table(f"{prefix}.silver_{name}"))
 if gold.filter(F.col("feature_max_timestamp")>=F.col("as_of")).limit(1).count():raise ValueError("Point-in-time leakage")
@@ -64,7 +69,13 @@ engagement=events.groupBy("customer_id",F.to_date("timestamp").alias("date"),"ch
 engagement.write.format("delta").mode("errorifexists").saveAsTable(f"{prefix}.gold_digital_customer_day")
 display(gold.select("customer_id","as_of","trips_30d","spend_30d","digital_events_30d","frequency_trend"))
 print({"trip_rows":trip.count(),"customer_rows":gold.count(),"features":"complete local reference allowlist","mart_grains":mart_grains,"tables":prefix,"scored_marts":"Imported from upstream scoring stage; not hosted training"})
-'''
-    path=ROOT/"databricks/medallion.py";path.write_text(source,encoding="utf-8");compile(source,str(path),"exec");print("Portable full-feature Databricks notebook authored and syntax checked")
+"""
+    )
+    path = ROOT / "databricks/medallion.py"
+    path.write_text(source, encoding="utf-8")
+    compile(source, str(path), "exec")
+    print("Portable full-feature Databricks notebook authored and syntax checked")
 
-if __name__=="__main__":main()
+
+if __name__ == "__main__":
+    main()

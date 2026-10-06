@@ -1,12 +1,14 @@
 """Extract the portable archive and execute its own app in an isolated workspace."""
+
 import hashlib
 import json
 import os
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import zipfile
+from pathlib import Path
+
 from decision_platform.config import ROOT, write_json
 
 
@@ -24,8 +26,13 @@ def main():
                     raise ValueError("Unsafe archive member")
             bundle.extractall(extracted)
         environment = os.environ.copy()
-        environment.update(CORRIDOR_ROOT=str(extracted), CORRIDOR_ENV="local", CORRIDOR_AUTH="local", PYTHONPATH=str(extracted / "src"))
-        code = '''
+        environment.update(
+            CORRIDOR_ROOT=str(extracted),
+            CORRIDOR_ENV="local",
+            CORRIDOR_AUTH="local",
+            PYTHONPATH=str(extracted / "src"),
+        )
+        code = """
 import json,os
 from pathlib import Path
 from streamlit.testing.v1 import AppTest
@@ -64,14 +71,23 @@ try:
 except ValueError:pass
 finally:target.write_bytes(original)
 print(json.dumps({"status":"passed","release_id":release["release_id"],"workspaces":len(pages),"highs_campaign":True,"joint_price_campaign":True,"persisted_plan":True,"corruption_rejected":True}))
-'''
-        result = subprocess.run([sys.executable, "-c", code], cwd=extracted, env=environment, capture_output=True, text=True, timeout=180)
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            cwd=extracted,
+            env=environment,
+            capture_output=True,
+            text=True,
+            timeout=180,
+        )
         (ROOT / "outputs/release_smoke.log").write_text(result.stdout + result.stderr, encoding="utf-8")
         if result.returncode:
             raise RuntimeError("Extracted release failed; inspect outputs/release_smoke.log")
         receipt = json.loads(result.stdout.strip().splitlines()[-1])
         receipt["archive_sha256"] = hashlib.sha256(archive.read_bytes()).hexdigest()
-        receipt["scope"] = "Extracted precomputed app; installed local runtime reused. No hosted or clean container execution claimed."
+        receipt["scope"] = (
+            "Extracted precomputed app; installed local runtime reused. No hosted or clean container execution claimed."
+        )
         write_json(ROOT / "release/package_smoke.json", receipt)
         print(json.dumps(receipt, indent=2))
 

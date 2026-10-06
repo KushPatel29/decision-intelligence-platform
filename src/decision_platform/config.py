@@ -1,14 +1,15 @@
-from dataclasses import dataclass, asdict
-from pathlib import Path
 import hashlib
+import importlib.metadata
 import json
+import os
 import platform
 import subprocess
-import importlib.metadata
-import os
 import tempfile
+from dataclasses import asdict, dataclass
+from pathlib import Path
 
 ROOT = Path(os.environ.get("CORRIDOR_ROOT", Path(__file__).resolve().parents[2])).resolve()
+
 
 @dataclass(frozen=True)
 class Config:
@@ -26,6 +27,7 @@ class Config:
     def path(self, *parts):
         return self.root.joinpath(*parts)
 
+
 def write_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -40,15 +42,28 @@ def write_json(path, value):
     finally:
         temporary.unlink(missing_ok=True)
 
+
 def frame_hash(frame):
     import pandas as pd
+
     return hashlib.sha256(pd.util.hash_pandas_object(frame, index=True).values.tobytes()).hexdigest()
+
 
 def manifest(cfg, frames):
     try:
-        sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=cfg.root, stderr=subprocess.DEVNULL, text=True).strip()
+        sha = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=cfg.root, stderr=subprocess.DEVNULL, text=True
+        ).strip()
     except (OSError, subprocess.CalledProcessError):
         sha = "uncommitted"
-    versions = {p: importlib.metadata.version(p) for p in ["numpy", "pandas", "scipy", "scikit-learn", "duckdb", "pyarrow"]}
-    return {"config": asdict(cfg), "git_sha": sha, "python": platform.python_version(),
-            "packages": versions, "datasets": {k: {"rows": len(v), "sha256": frame_hash(v)} for k,v in frames.items()}}
+    versions = {
+        p: importlib.metadata.version(p)
+        for p in ["numpy", "pandas", "scipy", "scikit-learn", "duckdb", "pyarrow"]
+    }
+    return {
+        "config": asdict(cfg),
+        "git_sha": sha,
+        "python": platform.python_version(),
+        "packages": versions,
+        "datasets": {k: {"rows": len(v), "sha256": frame_hash(v)} for k, v in frames.items()},
+    }

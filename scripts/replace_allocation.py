@@ -1,6 +1,10 @@
 from pathlib import Path
-p=Path(__file__).resolve().parents[1]/"src"/"decision_platform"/"optimization.py"
-s=p.read_text();s=s[:s.index('def allocate(')]+'''def allocate(cfg,current,uplift,offers,capacity,solver="auto"):
+
+p = Path(__file__).resolve().parents[1] / "src" / "decision_platform" / "optimization.py"
+s = p.read_text()
+s = (
+    s[: s.index("def allocate(")]
+    + """def allocate(cfg,current,uplift,offers,capacity,solver="auto"):
     frame=candidates(cfg,current,uplift,offers,kind="joint")
     joint=solve(frame,capacity,cfg.budget,cfg.campaign_limit,cfg.min_roi,solver,points_budget=35000)
     all_selected=joint.selected
@@ -31,4 +35,6 @@ s=p.read_text();s=s[:s.index('def allocate(')]+'''def allocate(cfg,current,uplif
         "economics":"Expected synthetic 30-day outcomes. Dedicated randomized loyalty arm; full $5 reward liability plus $0.35 contact cost is reserved. Promotion costs include subsidies on baseline trips. Effects use a declared 25% planning shrinkage; no measured real-world impact."}
     write_json(cfg.path("outputs","optimization_results.json"),result)
     return all_selected,capacity,result
-''';p.write_text(s,encoding="utf-8")
+"""
+)
+p.write_text(s, encoding="utf-8")
