@@ -1,0 +1,16 @@
+model Model
+	culture: en-CA
+	defaultPowerBIDataSourceVersion: powerBI_V3
+
+annotation PBI_ProTooling = ["MCP-PBIModeling"]
+
+ref table customer_360
+ref table decision_table
+ref table zone_capacity
+ref table monthly_performance
+ref table pricing_scenarios
+ref table dim_zone
+ref table dim_offer
+ref table model_metrics
+ref table feature_drift
+ref table experiment_results

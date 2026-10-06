@@ -1,0 +1,66 @@
+table experiment_results
+	lineageTag: 69c8b189-7e79-46d3-9a8e-049e3c24d74f
+
+	column difference
+		dataType: double
+		lineageTag: 11935bd3-6d6d-4a3a-971a-fe0a1dba0fb9
+		summarizeBy: none
+		sourceColumn: difference
+
+	column ci_low
+		dataType: double
+		lineageTag: aa1ea97e-d6a4-4ade-b989-06da9c53eb20
+		summarizeBy: none
+		sourceColumn: ci_low
+
+	column ci_high
+		dataType: double
+		lineageTag: fdc6a34d-acef-4920-8d28-dc0de50e31c9
+		summarizeBy: none
+		sourceColumn: ci_high
+
+	column p_value
+		dataType: double
+		lineageTag: c13725fc-ceaa-483a-ad0c-d3471cc3f3d0
+		summarizeBy: none
+		sourceColumn: p_value
+
+	column p_adjusted
+		dataType: double
+		lineageTag: 15251fad-bda9-42b1-b059-01d0b7f27fe0
+		summarizeBy: none
+		sourceColumn: p_adjusted
+
+	column arm
+		dataType: string
+		lineageTag: 1426a9c3-d637-4d60-8db1-f25fc9d83ca3
+		summarizeBy: none
+		sourceColumn: arm
+
+	column n
+		dataType: int64
+		lineageTag: afce618c-70bf-409f-93f1-aa67a276380f
+		summarizeBy: none
+		sourceColumn: n
+
+	column conversion
+		dataType: double
+		lineageTag: 4749947e-f44a-4f33-a6c9-89250c2d4d69
+		summarizeBy: none
+		sourceColumn: conversion
+
+	column relative_lift
+		dataType: double
+		lineageTag: e88e9e4c-9e28-4cdc-98b3-ba4b654d97a2
+		summarizeBy: none
+		sourceColumn: relative_lift
+
+	partition experiment_results = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/experiment_results.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"difference", type number}, {"ci_low", type number}, {"ci_high", type number}, {"p_value", type number}, {"p_adjusted", type number}, {"arm", type text}, {"n", Int64.Type}, {"conversion", type number}, {"relative_lift", type number}}, "en-CA")
+				in
+				    Typed

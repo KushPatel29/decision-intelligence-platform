@@ -1,0 +1,17 @@
+.git
+.venv
+data
+mlruns
+runtime
+tmp
+release
+**/__pycache__
+**/*.pyc
+**/.pbi
+**/secrets.toml
+.env*
+outputs/cloud_portfolio
+outputs/sagemaker_channels
+outputs/models/*.joblib
+outputs/mlflow.db
+outputs/*.log

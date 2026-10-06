@@ -1,0 +1,1 @@
+SELECT arm, count(*) AS customers, avg(enrolled) AS enrollment_rate, avg(response) AS travel_response, avg(net_contribution) AS mean_net_contribution FROM gold.campaign_performance GROUP BY 1 ORDER BY 1;

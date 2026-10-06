@@ -1,0 +1,30 @@
+table dim_zone
+	lineageTag: c989c1b4-ab96-4427-b5a1-b386d4ad5569
+
+	column zone_id
+		dataType: int64
+		lineageTag: 5da2d611-8db2-4165-9621-3e443fd49a7d
+		summarizeBy: none
+		sourceColumn: zone_id
+
+	column zone_name
+		dataType: string
+		lineageTag: f3af1a40-0c6d-4d09-bdf9-c9303780b190
+		summarizeBy: none
+		sourceColumn: zone_name
+
+	column is_synthetic
+		dataType: boolean
+		lineageTag: 107151c4-a91e-4cdf-b681-a051adbad8e6
+		summarizeBy: none
+		sourceColumn: is_synthetic
+
+	partition dim_zone = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/dim_zone.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"zone_id", Int64.Type}, {"zone_name", type text}, {"is_synthetic", type logical}}, "en-CA")
+				in
+				    Typed

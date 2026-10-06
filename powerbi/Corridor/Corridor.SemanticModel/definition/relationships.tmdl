@@ -1,0 +1,19 @@
+relationship decision_table_customer_id
+	fromColumn: decision_table.customer_id
+	toColumn: customer_360.customer_id
+
+relationship customer_360_home_zone
+	fromColumn: customer_360.home_zone
+	toColumn: dim_zone.zone_id
+
+relationship zone_capacity_zone_id
+	fromColumn: zone_capacity.zone_id
+	toColumn: dim_zone.zone_id
+
+relationship pricing_scenarios_zone_id
+	fromColumn: pricing_scenarios.zone_id
+	toColumn: dim_zone.zone_id
+
+relationship decision_table_offer_id
+	fromColumn: decision_table.offer_id
+	toColumn: dim_offer.offer_id

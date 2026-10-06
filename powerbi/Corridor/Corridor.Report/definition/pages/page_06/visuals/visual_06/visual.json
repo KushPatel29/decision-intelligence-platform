@@ -1,0 +1,78 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.1.0/schema.json",
+  "name": "visual_06",
+  "position": {
+    "x": 655,
+    "y": 630,
+    "z": 5,
+    "height": 380,
+    "width": 590,
+    "tabOrder": 5
+  },
+  "visual": {
+    "visualType": "clusteredColumnChart",
+    "query": {
+      "queryState": {
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "decision_table"
+                    }
+                  },
+                  "Property": "Hourly forecast trips"
+                }
+              },
+              "queryRef": "decision_table.Hourly forecast trips",
+              "nativeQueryRef": "Hourly forecast trips"
+            }
+          ]
+        },
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "zone_hour_forecast"
+                    }
+                  },
+                  "Property": "direction"
+                }
+              },
+              "queryRef": "zone_hour_forecast.direction",
+              "nativeQueryRef": "direction"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Hourly forecast trips'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

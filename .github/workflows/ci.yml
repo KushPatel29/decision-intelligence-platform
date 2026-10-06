@@ -1,0 +1,49 @@
+name: release acceptance
+on: [push, pull_request]
+jobs:
+  source-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pip-audit cfn-lint
+      - run: pip-audit -r requirements-runtime.txt
+      - run: cfn-lint aws/infrastructure.json
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -e '.[dev]'
+      - run: pytest -q tests/test_contracts.py tests/test_planning.py tests/test_hardening.py -k 'not local_model_gate and not production_refuses'
+  generated-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -e '.[dev,app,advanced]' mlflow
+      - run: python -m decision_platform.cli demo --customers 8000 --solver highs
+      - run: pytest -q
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: synthetic-acceptance-evidence
+          path: |
+            outputs/quality_gate.json
+            outputs/run_status.json
+            outputs/summary.json
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: mkdir -p outputs
+      - run: docker build -t corridor-app:${{ github.sha }} .
+      - run: docker build -f aws/Dockerfile -t corridor-model:${{ github.sha }} .

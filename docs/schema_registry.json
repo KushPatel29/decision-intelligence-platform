@@ -1,0 +1,369 @@
+[
+  {
+    "table": "customer_preferences",
+    "version": "2.0",
+    "grain": "one static customer preference record",
+    "columns": {
+      "customer_id": "str",
+      "marketing_consent": "bool",
+      "autopay": "bool",
+      "has_my_account": "bool"
+    }
+  },
+  {
+    "table": "customer_status_history",
+    "version": "2.0",
+    "grain": "customer \u00d7 effective_from state/consent transition; intervals end at the next transition",
+    "columns": {
+      "customer_id": "str",
+      "account_status": "str",
+      "marketing_consent": "bool",
+      "effective_from": "datetime64[us]",
+      "effective_to": "datetime64[ns]"
+    }
+  },
+  {
+    "table": "dim_account",
+    "version": "2.0",
+    "grain": "one account",
+    "columns": {
+      "account_id": "str",
+      "customer_id": "str",
+      "account_status": "str",
+      "autopay": "bool",
+      "past_due": "bool",
+      "created_at": "datetime64[us]"
+    }
+  },
+  {
+    "table": "dim_customer",
+    "version": "2.0",
+    "grain": "one synthetic customer",
+    "columns": {
+      "customer_id": "str",
+      "account_id": "str",
+      "customer_type": "str",
+      "account_status": "str",
+      "marketing_consent": "bool",
+      "has_my_account": "bool",
+      "past_due": "bool",
+      "autopay": "bool",
+      "transponder_flag": "bool",
+      "home_zone": "int64",
+      "vehicle_class": "str",
+      "created_at": "datetime64[us]",
+      "eligible": "bool"
+    }
+  },
+  {
+    "table": "dim_entry_point",
+    "version": "2.0",
+    "grain": "one invented entry point per zone",
+    "columns": {
+      "zone_id": "int64",
+      "zone_name": "str",
+      "entry_point_id": "str"
+    }
+  },
+  {
+    "table": "dim_exit_point",
+    "version": "2.0",
+    "grain": "one invented exit point per zone",
+    "columns": {
+      "zone_id": "int64",
+      "zone_name": "str",
+      "exit_point_id": "str"
+    }
+  },
+  {
+    "table": "dim_offer",
+    "version": "2.0",
+    "grain": "one offer template",
+    "columns": {
+      "offer_id": "str",
+      "offer_name": "str",
+      "period": "str",
+      "discount_pct": "float64",
+      "inventory": "int64"
+    }
+  },
+  {
+    "table": "dim_rate",
+    "version": "2.0",
+    "grain": "zone \u00d7 period \u00d7 vehicle class, illustrative 2025 tariff",
+    "columns": {
+      "zone_id": "int64",
+      "period": "str",
+      "vehicle_class": "str",
+      "rate_per_km": "float64"
+    }
+  },
+  {
+    "table": "dim_reward",
+    "version": "2.0",
+    "grain": "one reward template",
+    "columns": {
+      "reward_id": "str",
+      "reward_name": "str",
+      "points_cost": "int64",
+      "max_value_cad": "float64"
+    }
+  },
+  {
+    "table": "dim_time",
+    "version": "2.0",
+    "grain": "one calendar day",
+    "columns": {
+      "date": "datetime64[us]",
+      "weekend": "int64",
+      "holiday": "int64",
+      "day_of_week": "int32",
+      "month": "int32",
+      "year": "int32"
+    }
+  },
+  {
+    "table": "dim_transponder",
+    "version": "2.0",
+    "grain": "one synthetic equipped account",
+    "columns": {
+      "customer_id": "str",
+      "account_id": "str",
+      "transponder_id": "str"
+    }
+  },
+  {
+    "table": "dim_vehicle",
+    "version": "2.0",
+    "grain": "one vehicle",
+    "columns": {
+      "vehicle_id": "str",
+      "customer_id": "str",
+      "vehicle_class": "str",
+      "transponder_flag": "bool"
+    }
+  },
+  {
+    "table": "dim_zone",
+    "version": "2.0",
+    "grain": "one invented zone",
+    "columns": {
+      "zone_id": "int64",
+      "zone_name": "str",
+      "is_synthetic": "bool"
+    }
+  },
+  {
+    "table": "external_context",
+    "version": "2.0",
+    "grain": "one Toronto/Ontario context day",
+    "columns": {
+      "date": "datetime64[us]",
+      "temperature_c": "float64",
+      "precipitation_mm": "float64",
+      "daylight_hours": "float64",
+      "cad_usd": "float64",
+      "holiday_name": "str",
+      "holiday": "int64",
+      "weekend": "int64",
+      "month_sin": "float64",
+      "month_cos": "float64"
+    }
+  },
+  {
+    "table": "fact_campaign_result",
+    "version": "2.0",
+    "grain": "one randomized customer trial outcome",
+    "columns": {
+      "customer_id": "str",
+      "as_of": "datetime64[us]",
+      "tenure_days": "int64",
+      "business_flag": "int32",
+      "autopay": "int32",
+      "transponder_flag": "int32",
+      "home_zone": "int64",
+      "trips_7d": "int64",
+      "trips_30d": "int64",
+      "trips_90d": "int64",
+      "trips_previous90d": "int64",
+      "spend_30d": "float64",
+      "spend_90d": "float64",
+      "spend_365d": "float64",
+      "avg_toll": "float64",
+      "avg_distance_km": "float64",
+      "peak_share": "float64",
+      "weekend_share": "float64",
+      "discount_90d": "float64",
+      "recency_days": "int64",
+      "digital_events_30d": "int64",
+      "app_logins_30d": "int64",
+      "offer_views_30d": "int64",
+      "email_opens_30d": "int64",
+      "points_earned_to_date": "float64",
+      "feature_max_timestamp": "datetime64[us]",
+      "account_status": "str",
+      "marketing_consent": "bool",
+      "has_my_account": "bool",
+      "past_due": "bool",
+      "eligible": "bool",
+      "frequency_trend": "float64",
+      "digital_engagement_score": "float64",
+      "arm": "str",
+      "treated": "int64",
+      "response": "int64",
+      "enrolled": "int64",
+      "redeemed": "int64",
+      "trip_count": "int64",
+      "incentive_cost": "float64",
+      "gross_contribution": "float64",
+      "net_contribution": "float64",
+      "retained_90d": "int64",
+      "margin_days31_90": "float64",
+      "split": "str"
+    }
+  },
+  {
+    "table": "fact_digital_event",
+    "version": "2.0",
+    "grain": "one interaction event",
+    "columns": {
+      "event_id": "str",
+      "customer_id": "str",
+      "timestamp": "datetime64[us]",
+      "event_type": "str",
+      "channel": "str"
+    }
+  },
+  {
+    "table": "fact_effective_price",
+    "version": "2.0",
+    "grain": "one realized price per synthetic trip",
+    "columns": {
+      "trip_id": "str",
+      "customer_id": "str",
+      "timestamp": "datetime64[us]",
+      "zone_id": "int64",
+      "period": "str",
+      "distance_km": "float64",
+      "toll": "float64",
+      "discount": "float64",
+      "final_charge": "float64",
+      "effective_price_per_km": "float64"
+    }
+  },
+  {
+    "table": "fact_loyalty_award",
+    "version": "2.0",
+    "grain": "one randomized loyalty-group customer award",
+    "columns": {
+      "customer_id": "str",
+      "points_awarded": "int64",
+      "awarded_at": "datetime64[us]",
+      "award_id": "str"
+    }
+  },
+  {
+    "table": "fact_loyalty_points",
+    "version": "2.0",
+    "grain": "one trip earning entry",
+    "columns": {
+      "trip_id": "str",
+      "customer_id": "str",
+      "timestamp": "datetime64[us]",
+      "points_earned": "int64"
+    }
+  },
+  {
+    "table": "fact_loyalty_redemption",
+    "version": "2.0",
+    "grain": "one loyalty redemption event",
+    "columns": {
+      "customer_id": "str",
+      "points_redeemed": "int64",
+      "reward_cost": "float64",
+      "redeemed_at": "datetime64[us]",
+      "reward_id": "str"
+    }
+  },
+  {
+    "table": "fact_loyalty_tier",
+    "version": "2.0",
+    "grain": "one customer tier at the decision date",
+    "columns": {
+      "customer_id": "str",
+      "as_of": "str",
+      "tier": "str"
+    }
+  },
+  {
+    "table": "fact_offer_enrollment",
+    "version": "2.0",
+    "grain": "one treated customer enrollment",
+    "columns": {
+      "customer_id": "str",
+      "arm": "str",
+      "enrolled_at": "datetime64[us]",
+      "campaign_id": "str"
+    }
+  },
+  {
+    "table": "fact_offer_exposure",
+    "version": "2.0",
+    "grain": "one assigned treated customer exposure",
+    "columns": {
+      "customer_id": "str",
+      "arm": "str",
+      "exposed_at": "datetime64[us]",
+      "campaign_id": "str"
+    }
+  },
+  {
+    "table": "fact_offer_redemption",
+    "version": "2.0",
+    "grain": "one treated customer redemption",
+    "columns": {
+      "customer_id": "str",
+      "arm": "str",
+      "incentive_cost": "float64",
+      "redeemed_at": "datetime64[us]",
+      "campaign_id": "str"
+    }
+  },
+  {
+    "table": "fact_pricing_scenario",
+    "version": "2.0",
+    "grain": "zone \u00d7 period \u00d7 day randomized price assignment",
+    "columns": {
+      "date": "datetime64[us]",
+      "zone_id": "int64",
+      "period": "str",
+      "effective_price": "float64",
+      "assigned_price_multiplier": "float64",
+      "demand": "int64",
+      "temperature_c": "float64",
+      "precipitation_mm": "float64",
+      "weekend": "int64",
+      "holiday": "int64",
+      "month_sin": "float64",
+      "month_cos": "float64"
+    }
+  },
+  {
+    "table": "fact_trip",
+    "version": "2.0",
+    "grain": "one generated trip",
+    "columns": {
+      "trip_id": "str",
+      "customer_id": "str",
+      "timestamp": "datetime64[us]",
+      "zone_id": "int64",
+      "direction": "str",
+      "period": "str",
+      "distance_km": "float64",
+      "duration_min": "float64",
+      "toll": "float64",
+      "discount": "float64",
+      "final_charge": "float64"
+    }
+  }
+]

@@ -1,0 +1,289 @@
+table decision_table
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Selected contacts' = DISTINCTCOUNT(decision_table[customer_id])
+		formatString: #,0
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Expected additional trips' = SUM(decision_table[incremental_trips])
+		formatString: #,0.0
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Expected incentive costs' = SUM(decision_table[cost])
+		formatString: $#,0.00
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Expected net contribution' = SUM(decision_table[net_contribution])
+		formatString: $#,0.00
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Net ROI' = DIVIDE([Expected net contribution], [Expected incentive costs])
+		formatString: 0.0%
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Points awarded' = SUM(decision_table[points])
+		formatString: #,0
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure Customers = COUNTROWS(customer_360)
+		formatString: #,0
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Average projected value' = AVERAGE(customer_360[clv_12m])
+		formatString: $#,0.00
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure Trips = SUM(monthly_performance[trips])
+		formatString: #,0
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure Revenue = SUM(monthly_performance[revenue])
+		formatString: $#,0
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure Utilization = DIVIDE(SUM(zone_capacity[baseline_forecast])+SUM(zone_capacity[allocated_trips]),SUM(zone_capacity[capacity_trips]))
+		formatString: 0.0%
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Remaining headroom' = SUM(zone_capacity[remaining_with_reserve])
+		formatString: #,0.0
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Mean price demand index' = AVERAGE(pricing_scenarios[demand_index])
+		formatString: 0.0
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Mean response lift' = AVERAGE(experiment_results[difference])
+		formatString: 0.0%
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Test AUC' = AVERAGE(model_metrics[roc_auc])
+		formatString: 0.000
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Mean price revenue index' = AVERAGE(pricing_scenarios[revenue_index])
+		formatString: 0.0
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Loyalty additional trips' = CALCULATE([Expected additional trips], decision_table[offer_id] = "loyalty_500")
+		formatString: #,0.0
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Mean test Brier' = AVERAGE(model_metrics[brier])
+		formatString: 0.000
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'High inactivity risk' = COUNTROWS(FILTER(customer_360, customer_360[churn_probability] > 0.5))
+		formatString: #,0
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Digital engagements' = SUM(customer_360[digital_events_30d])
+		formatString: #,0
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Points redeemed' = SUM(loyalty_ledger[points_redeemed])
+		formatString: #,0
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Points balance' = SUM(loyalty_ledger[points_balance])
+		formatString: #,0
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Hourly forecast trips' = SUM(zone_hour_forecast[forecast_trips])
+		formatString: #,0.0
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Price contribution change' = SUM(price_allocation[incremental_contribution])
+		formatString: $#,0.00
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Consumer surplus change' = SUM(price_allocation[consumer_surplus_change])
+		formatString: $#,0.00
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Effect interval lower' = AVERAGE(experiment_results[ci_low])
+		formatString: 0.0%
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Effect interval upper' = AVERAGE(experiment_results[ci_high])
+		formatString: 0.0%
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Minimum adjusted p' = MIN(experiment_results[p_adjusted])
+		formatString: 0.0000
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Mean feature PSI' = AVERAGE(feature_drift[psi])
+		formatString: 0.000
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Registered models' = COUNTROWS(model_registry)
+		formatString: #,0
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Model acceptance passes' = COUNTROWS(FILTER(quality_gate, quality_gate[passed] = TRUE()))
+		formatString: #,0
+
+	/// Synthetic portfolio result. Forecasts do not represent measured business impact.
+	measure 'Candidate version' = MAX(model_registry[version])
+		formatString: #,0
+
+	column customer_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: customer_id
+
+	column offer_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: offer_id
+
+	column incremental_response
+		dataType: double
+		summarizeBy: none
+		sourceColumn: incremental_response
+
+	column predicted_treated_trips
+		dataType: double
+		summarizeBy: none
+		sourceColumn: predicted_treated_trips
+
+	column predicted_baseline_trips
+		dataType: double
+		summarizeBy: none
+		sourceColumn: predicted_baseline_trips
+
+	column incremental_trips_raw
+		dataType: double
+		summarizeBy: none
+		sourceColumn: incremental_trips_raw
+
+	column incremental_retention_90d
+		dataType: double
+		summarizeBy: none
+		sourceColumn: incremental_retention_90d
+
+	column incremental_value_days31_90
+		dataType: double
+		summarizeBy: none
+		sourceColumn: incremental_value_days31_90
+
+	column enrollment_probability
+		dataType: double
+		summarizeBy: none
+		sourceColumn: enrollment_probability
+
+	column redemption_probability
+		dataType: double
+		summarizeBy: none
+		sourceColumn: redemption_probability
+
+	column eligible
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: eligible
+
+	column home_zone
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: home_zone
+
+	column avg_toll
+		dataType: double
+		summarizeBy: none
+		sourceColumn: avg_toll
+
+	column clv_12m
+		dataType: double
+		summarizeBy: none
+		sourceColumn: clv_12m
+
+	column rfm_segment
+		dataType: string
+		summarizeBy: none
+		sourceColumn: rfm_segment
+
+	column propensity_probability
+		dataType: double
+		summarizeBy: none
+		sourceColumn: propensity_probability
+
+	column trips_90d
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: trips_90d
+
+	column offer_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: offer_name
+
+	column period
+		dataType: string
+		summarizeBy: none
+		sourceColumn: period
+
+	column discount_pct
+		dataType: double
+		summarizeBy: none
+		sourceColumn: discount_pct
+
+	column inventory
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: inventory
+
+	column incremental_trips
+		dataType: double
+		summarizeBy: none
+		sourceColumn: incremental_trips
+
+	column cost
+		dataType: double
+		summarizeBy: none
+		sourceColumn: cost
+
+	column points
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: points
+
+	column zone_id
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: zone_id
+
+	column incremental_gross_contribution
+		dataType: double
+		summarizeBy: none
+		sourceColumn: incremental_gross_contribution
+
+	column net_contribution
+		dataType: double
+		summarizeBy: none
+		sourceColumn: net_contribution
+
+	column network_value
+		dataType: double
+		summarizeBy: none
+		sourceColumn: network_value
+
+	column objective_value
+		dataType: double
+		summarizeBy: none
+		sourceColumn: objective_value
+
+	column candidate_id
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: candidate_id
+
+	partition decision_table = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/decision_table.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"customer_id", type text}, {"offer_id", type text}, {"incremental_response", type number}, {"predicted_treated_trips", type number}, {"predicted_baseline_trips", type number}, {"incremental_trips_raw", type number}, {"incremental_retention_90d", type number}, {"incremental_value_days31_90", type number}, {"enrollment_probability", type number}, {"redemption_probability", type number}, {"eligible", type logical}, {"home_zone", Int64.Type}, {"avg_toll", type number}, {"clv_12m", type number}, {"rfm_segment", type text}, {"propensity_probability", type number}, {"trips_90d", Int64.Type}, {"offer_name", type text}, {"period", type text}, {"discount_pct", type number}, {"inventory", Int64.Type}, {"incremental_trips", type number}, {"cost", type number}, {"points", Int64.Type}, {"zone_id", Int64.Type}, {"incremental_gross_contribution", type number}, {"net_contribution", type number}, {"network_value", type number}, {"objective_value", type number}, {"candidate_id", Int64.Type}}, "en-CA")
+				in
+				    Typed

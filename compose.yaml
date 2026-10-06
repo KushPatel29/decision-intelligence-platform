@@ -1,0 +1,22 @@
+services:
+  corridor:
+    build: .
+    ports:
+      - "127.0.0.1:8501:8501"
+    environment:
+      CORRIDOR_ENV: production
+      CORRIDOR_AUTH: oidc
+      CORRIDOR_ALLOWED_SUBJECTS: ${CORRIDOR_ALLOWED_SUBJECTS:?Set authorized OIDC subjects}
+    volumes:
+      - ./runtime:/app/runtime
+      - ./.streamlit/secrets.toml:/home/corridor/.streamlit/secrets.toml:ro
+    read_only: true
+    tmpfs:
+      - /tmp:size=128M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 2g
+    cpus: 2
+    restart: unless-stopped

@@ -1,0 +1,72 @@
+table model_metrics
+	lineageTag: 7aadda75-cabd-4090-ac73-a6ae003f8822
+
+	column model
+		dataType: string
+		lineageTag: a335a6d5-1b01-4a7c-83ea-4ac784c996d7
+		summarizeBy: none
+		sourceColumn: model
+
+	column roc_auc
+		dataType: double
+		lineageTag: c51aa1e7-21bf-430b-b527-e1f90f146302
+		summarizeBy: none
+		sourceColumn: roc_auc
+
+	column pr_auc
+		dataType: double
+		lineageTag: 4eeaf660-7feb-4ed6-a5c8-0ccfaf6f674e
+		summarizeBy: none
+		sourceColumn: pr_auc
+
+	column brier
+		dataType: double
+		lineageTag: e88850b6-3941-4795-9958-d25392a9b443
+		summarizeBy: none
+		sourceColumn: brier
+
+	column ece_10bins
+		dataType: double
+		lineageTag: e3d1e996-9aa8-43ca-9f60-25b7d8876306
+		summarizeBy: none
+		sourceColumn: ece_10bins
+
+	column lift_at_10
+		dataType: double
+		lineageTag: 241e3640-d520-42cf-ab00-f99327d05d61
+		summarizeBy: none
+		sourceColumn: lift_at_10
+
+	column lift_at_20
+		dataType: double
+		lineageTag: 119f8d18-b908-4332-802c-caa80149f352
+		summarizeBy: none
+		sourceColumn: lift_at_20
+
+	column n
+		dataType: int64
+		lineageTag: 6e27a111-53f1-4690-b022-756a7499138c
+		summarizeBy: none
+		sourceColumn: n
+
+	column prevalence
+		dataType: double
+		lineageTag: 58db0558-6e70-4721-8db5-0879f492634f
+		summarizeBy: none
+		sourceColumn: prevalence
+
+	column training_seconds
+		dataType: double
+		lineageTag: 0bfadaf5-0714-49c0-bd28-d211e9498629
+		summarizeBy: none
+		sourceColumn: training_seconds
+
+	partition model_metrics = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/model_metrics.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"model", type text}, {"roc_auc", type number}, {"pr_auc", type number}, {"brier", type number}, {"ece_10bins", type number}, {"lift_at_10", type number}, {"lift_at_20", type number}, {"n", Int64.Type}, {"prevalence", type number}, {"training_seconds", type number}}, "en-CA")
+				in
+				    Typed

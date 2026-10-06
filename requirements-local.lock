@@ -1,0 +1,20 @@
+# Tested top-level versions; not a full transitive environment lock.
+numpy==2.5.3
+pandas==3.0.6
+scipy==1.18.1
+scikit-learn==1.9.0
+duckdb==1.5.4
+pyarrow==24.0.0
+joblib==1.6.0
+streamlit==1.64.0
+plotly==6.3.1
+gurobipy==13.0.3
+mlflow==3.14.0
+shap==0.52.0
+lifetimes==0.11.3
+reportlab==5.0.1
+boto3==1.43.108
+sagemaker==2.257.6
+pyspark==4.0.1
+delta-spark==4.0.0
+deltalake==1.6.2

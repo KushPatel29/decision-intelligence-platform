@@ -1,0 +1,1798 @@
+{
+  "name": "Corridor",
+  "compatibilityLevel": 1600,
+  "model": {
+    "culture": "en-CA",
+    "defaultPowerBIDataSourceVersion": "powerBI_V3",
+    "tables": [
+      {
+        "name": "customer_360",
+        "columns": [
+          {
+            "name": "customer_id",
+            "dataType": "string",
+            "sourceColumn": "customer_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "as_of",
+            "dataType": "string",
+            "sourceColumn": "as_of",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "tenure_days",
+            "dataType": "int64",
+            "sourceColumn": "tenure_days",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "business_flag",
+            "dataType": "int64",
+            "sourceColumn": "business_flag",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "autopay",
+            "dataType": "int64",
+            "sourceColumn": "autopay",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "transponder_flag",
+            "dataType": "int64",
+            "sourceColumn": "transponder_flag",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "home_zone",
+            "dataType": "int64",
+            "sourceColumn": "home_zone",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "trips_7d",
+            "dataType": "int64",
+            "sourceColumn": "trips_7d",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "trips_30d",
+            "dataType": "int64",
+            "sourceColumn": "trips_30d",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "trips_90d",
+            "dataType": "int64",
+            "sourceColumn": "trips_90d",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "trips_previous90d",
+            "dataType": "int64",
+            "sourceColumn": "trips_previous90d",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "spend_30d",
+            "dataType": "double",
+            "sourceColumn": "spend_30d",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "spend_90d",
+            "dataType": "double",
+            "sourceColumn": "spend_90d",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "spend_365d",
+            "dataType": "double",
+            "sourceColumn": "spend_365d",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "avg_toll",
+            "dataType": "double",
+            "sourceColumn": "avg_toll",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "avg_distance_km",
+            "dataType": "double",
+            "sourceColumn": "avg_distance_km",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "peak_share",
+            "dataType": "double",
+            "sourceColumn": "peak_share",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "weekend_share",
+            "dataType": "double",
+            "sourceColumn": "weekend_share",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "discount_90d",
+            "dataType": "double",
+            "sourceColumn": "discount_90d",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "recency_days",
+            "dataType": "int64",
+            "sourceColumn": "recency_days",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "digital_events_30d",
+            "dataType": "int64",
+            "sourceColumn": "digital_events_30d",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "app_logins_30d",
+            "dataType": "int64",
+            "sourceColumn": "app_logins_30d",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "offer_views_30d",
+            "dataType": "int64",
+            "sourceColumn": "offer_views_30d",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "email_opens_30d",
+            "dataType": "int64",
+            "sourceColumn": "email_opens_30d",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "points_earned_to_date",
+            "dataType": "double",
+            "sourceColumn": "points_earned_to_date",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "feature_max_timestamp",
+            "dataType": "string",
+            "sourceColumn": "feature_max_timestamp",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "account_status",
+            "dataType": "string",
+            "sourceColumn": "account_status",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "marketing_consent",
+            "dataType": "boolean",
+            "sourceColumn": "marketing_consent",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "has_my_account",
+            "dataType": "boolean",
+            "sourceColumn": "has_my_account",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "past_due",
+            "dataType": "boolean",
+            "sourceColumn": "past_due",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "eligible",
+            "dataType": "boolean",
+            "sourceColumn": "eligible",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "frequency_trend",
+            "dataType": "double",
+            "sourceColumn": "frequency_trend",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "digital_engagement_score",
+            "dataType": "double",
+            "sourceColumn": "digital_engagement_score",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "propensity_probability",
+            "dataType": "double",
+            "sourceColumn": "propensity_probability",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "churn_probability",
+            "dataType": "double",
+            "sourceColumn": "churn_probability",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "attrition_probability",
+            "dataType": "double",
+            "sourceColumn": "attrition_probability",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "expected_margin_90d",
+            "dataType": "double",
+            "sourceColumn": "expected_margin_90d",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "clv_12m",
+            "dataType": "double",
+            "sourceColumn": "clv_12m",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "cluster",
+            "dataType": "int64",
+            "sourceColumn": "cluster",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "rfm_segment",
+            "dataType": "string",
+            "sourceColumn": "rfm_segment",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "anomaly_score",
+            "dataType": "double",
+            "sourceColumn": "anomaly_score",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "anomaly_flag",
+            "dataType": "boolean",
+            "sourceColumn": "anomaly_flag",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "probabilistic_clv_12m",
+            "dataType": "double",
+            "sourceColumn": "probabilistic_clv_12m",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "probability_alive",
+            "dataType": "double",
+            "sourceColumn": "probability_alive",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "points_earned",
+            "dataType": "int64",
+            "sourceColumn": "points_earned",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "points_awarded",
+            "dataType": "int64",
+            "sourceColumn": "points_awarded",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "points_redeemed",
+            "dataType": "int64",
+            "sourceColumn": "points_redeemed",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "points_balance",
+            "dataType": "int64",
+            "sourceColumn": "points_balance",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "tier",
+            "dataType": "string",
+            "sourceColumn": "tier",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "customer_type",
+            "dataType": "string",
+            "sourceColumn": "customer_type",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "campaign_exposures",
+            "dataType": "int64",
+            "sourceColumn": "campaign_exposures",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "campaign_enrollments",
+            "dataType": "int64",
+            "sourceColumn": "campaign_enrollments",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "campaign_redemptions",
+            "dataType": "int64",
+            "sourceColumn": "campaign_redemptions",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "channel_30d_App",
+            "dataType": "int64",
+            "sourceColumn": "channel_30d_App",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "channel_30d_Email",
+            "dataType": "int64",
+            "sourceColumn": "channel_30d_Email",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "channel_30d_Web",
+            "dataType": "int64",
+            "sourceColumn": "channel_30d_Web",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "engaged_days_30d",
+            "dataType": "int64",
+            "sourceColumn": "engaged_days_30d",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "home_zone_elasticity",
+            "dataType": "double",
+            "sourceColumn": "home_zone_elasticity",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "loyalty_500_redemption_probability",
+            "dataType": "double",
+            "sourceColumn": "loyalty_500_redemption_probability",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "customer_360",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(\"C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/customer_360.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"customer_id\", type text}, {\"as_of\", type text}, {\"tenure_days\", Int64.Type}, {\"business_flag\", Int64.Type}, {\"autopay\", Int64.Type}, {\"transponder_flag\", Int64.Type}, {\"home_zone\", Int64.Type}, {\"trips_7d\", Int64.Type}, {\"trips_30d\", Int64.Type}, {\"trips_90d\", Int64.Type}, {\"trips_previous90d\", Int64.Type}, {\"spend_30d\", type number}, {\"spend_90d\", type number}, {\"spend_365d\", type number}, {\"avg_toll\", type number}, {\"avg_distance_km\", type number}, {\"peak_share\", type number}, {\"weekend_share\", type number}, {\"discount_90d\", type number}, {\"recency_days\", Int64.Type}, {\"digital_events_30d\", Int64.Type}, {\"app_logins_30d\", Int64.Type}, {\"offer_views_30d\", Int64.Type}, {\"email_opens_30d\", Int64.Type}, {\"points_earned_to_date\", type number}, {\"feature_max_timestamp\", type text}, {\"account_status\", type text}, {\"marketing_consent\", type logical}, {\"has_my_account\", type logical}, {\"past_due\", type logical}, {\"eligible\", type logical}, {\"frequency_trend\", type number}, {\"digital_engagement_score\", type number}, {\"propensity_probability\", type number}, {\"churn_probability\", type number}, {\"attrition_probability\", type number}, {\"expected_margin_90d\", type number}, {\"clv_12m\", type number}, {\"cluster\", Int64.Type}, {\"rfm_segment\", type text}, {\"anomaly_score\", type number}, {\"anomaly_flag\", type logical}, {\"probabilistic_clv_12m\", type number}, {\"probability_alive\", type number}, {\"points_earned\", Int64.Type}, {\"points_awarded\", Int64.Type}, {\"points_redeemed\", Int64.Type}, {\"points_balance\", Int64.Type}, {\"tier\", type text}, {\"customer_type\", type text}, {\"campaign_exposures\", Int64.Type}, {\"campaign_enrollments\", Int64.Type}, {\"campaign_redemptions\", Int64.Type}, {\"channel_30d_App\", Int64.Type}, {\"channel_30d_Email\", Int64.Type}, {\"channel_30d_Web\", Int64.Type}, {\"engaged_days_30d\", Int64.Type}, {\"home_zone_elasticity\", type number}, {\"loyalty_500_redemption_probability\", type number}}, \"en-CA\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "decision_table",
+        "columns": [
+          {
+            "name": "customer_id",
+            "dataType": "string",
+            "sourceColumn": "customer_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "offer_id",
+            "dataType": "string",
+            "sourceColumn": "offer_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "incremental_response",
+            "dataType": "double",
+            "sourceColumn": "incremental_response",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "predicted_treated_trips",
+            "dataType": "double",
+            "sourceColumn": "predicted_treated_trips",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "predicted_baseline_trips",
+            "dataType": "double",
+            "sourceColumn": "predicted_baseline_trips",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "incremental_trips_raw",
+            "dataType": "double",
+            "sourceColumn": "incremental_trips_raw",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "incremental_retention_90d",
+            "dataType": "double",
+            "sourceColumn": "incremental_retention_90d",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "incremental_value_days31_90",
+            "dataType": "double",
+            "sourceColumn": "incremental_value_days31_90",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "enrollment_probability",
+            "dataType": "double",
+            "sourceColumn": "enrollment_probability",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "redemption_probability",
+            "dataType": "double",
+            "sourceColumn": "redemption_probability",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "eligible",
+            "dataType": "boolean",
+            "sourceColumn": "eligible",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "home_zone",
+            "dataType": "int64",
+            "sourceColumn": "home_zone",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "avg_toll",
+            "dataType": "double",
+            "sourceColumn": "avg_toll",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "clv_12m",
+            "dataType": "double",
+            "sourceColumn": "clv_12m",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "rfm_segment",
+            "dataType": "string",
+            "sourceColumn": "rfm_segment",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "propensity_probability",
+            "dataType": "double",
+            "sourceColumn": "propensity_probability",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "trips_90d",
+            "dataType": "int64",
+            "sourceColumn": "trips_90d",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "offer_name",
+            "dataType": "string",
+            "sourceColumn": "offer_name",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "period",
+            "dataType": "string",
+            "sourceColumn": "period",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "discount_pct",
+            "dataType": "double",
+            "sourceColumn": "discount_pct",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "inventory",
+            "dataType": "int64",
+            "sourceColumn": "inventory",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "incremental_trips",
+            "dataType": "double",
+            "sourceColumn": "incremental_trips",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "cost",
+            "dataType": "double",
+            "sourceColumn": "cost",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "points",
+            "dataType": "int64",
+            "sourceColumn": "points",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "zone_id",
+            "dataType": "int64",
+            "sourceColumn": "zone_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "incremental_gross_contribution",
+            "dataType": "double",
+            "sourceColumn": "incremental_gross_contribution",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "net_contribution",
+            "dataType": "double",
+            "sourceColumn": "net_contribution",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "network_value",
+            "dataType": "double",
+            "sourceColumn": "network_value",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "objective_value",
+            "dataType": "double",
+            "sourceColumn": "objective_value",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "candidate_id",
+            "dataType": "int64",
+            "sourceColumn": "candidate_id",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "decision_table",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(\"C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/decision_table.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"customer_id\", type text}, {\"offer_id\", type text}, {\"incremental_response\", type number}, {\"predicted_treated_trips\", type number}, {\"predicted_baseline_trips\", type number}, {\"incremental_trips_raw\", type number}, {\"incremental_retention_90d\", type number}, {\"incremental_value_days31_90\", type number}, {\"enrollment_probability\", type number}, {\"redemption_probability\", type number}, {\"eligible\", type logical}, {\"home_zone\", Int64.Type}, {\"avg_toll\", type number}, {\"clv_12m\", type number}, {\"rfm_segment\", type text}, {\"propensity_probability\", type number}, {\"trips_90d\", Int64.Type}, {\"offer_name\", type text}, {\"period\", type text}, {\"discount_pct\", type number}, {\"inventory\", Int64.Type}, {\"incremental_trips\", type number}, {\"cost\", type number}, {\"points\", Int64.Type}, {\"zone_id\", Int64.Type}, {\"incremental_gross_contribution\", type number}, {\"net_contribution\", type number}, {\"network_value\", type number}, {\"objective_value\", type number}, {\"candidate_id\", Int64.Type}}, \"en-CA\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "Selected contacts",
+            "expression": "DISTINCTCOUNT(decision_table[customer_id])",
+            "formatString": "#,0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Expected additional trips",
+            "expression": "SUM(decision_table[incremental_trips])",
+            "formatString": "#,0.0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Expected incentive costs",
+            "expression": "SUM(decision_table[cost])",
+            "formatString": "$#,0.00",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Expected net contribution",
+            "expression": "SUM(decision_table[net_contribution])",
+            "formatString": "$#,0.00",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Net ROI",
+            "expression": "DIVIDE([Expected net contribution], [Expected incentive costs])",
+            "formatString": "0.0%",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Points awarded",
+            "expression": "SUM(decision_table[points])",
+            "formatString": "#,0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Customers",
+            "expression": "COUNTROWS(customer_360)",
+            "formatString": "#,0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Average projected value",
+            "expression": "AVERAGE(customer_360[clv_12m])",
+            "formatString": "$#,0.00",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Trips",
+            "expression": "SUM(monthly_performance[trips])",
+            "formatString": "#,0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Revenue",
+            "expression": "SUM(monthly_performance[revenue])",
+            "formatString": "$#,0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Utilization",
+            "expression": "DIVIDE(SUM(zone_capacity[baseline_forecast])+SUM(zone_capacity[allocated_trips]),SUM(zone_capacity[capacity_trips]))",
+            "formatString": "0.0%",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Remaining headroom",
+            "expression": "SUM(zone_capacity[remaining_with_reserve])",
+            "formatString": "#,0.0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Mean price demand index",
+            "expression": "AVERAGE(pricing_scenarios[demand_index])",
+            "formatString": "0.0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Mean response lift",
+            "expression": "AVERAGE(experiment_results[difference])",
+            "formatString": "0.0%",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Test AUC",
+            "expression": "AVERAGE(model_metrics[roc_auc])",
+            "formatString": "0.000",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Mean price revenue index",
+            "expression": "AVERAGE(pricing_scenarios[revenue_index])",
+            "formatString": "0.0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Loyalty additional trips",
+            "expression": "CALCULATE([Expected additional trips], decision_table[offer_id] = \"loyalty_500\")",
+            "formatString": "#,0.0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Mean test Brier",
+            "expression": "AVERAGE(model_metrics[brier])",
+            "formatString": "0.000",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "High inactivity risk",
+            "expression": "COUNTROWS(FILTER(customer_360, customer_360[churn_probability] > 0.5))",
+            "formatString": "#,0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Digital engagements",
+            "expression": "SUM(customer_360[digital_events_30d])",
+            "formatString": "#,0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Points redeemed",
+            "expression": "SUM(loyalty_ledger[points_redeemed])",
+            "formatString": "#,0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Points balance",
+            "expression": "SUM(loyalty_ledger[points_balance])",
+            "formatString": "#,0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Hourly forecast trips",
+            "expression": "SUM(zone_hour_forecast[forecast_trips])",
+            "formatString": "#,0.0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Price contribution change",
+            "expression": "SUM(price_allocation[incremental_contribution])",
+            "formatString": "$#,0.00",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Consumer surplus change",
+            "expression": "SUM(price_allocation[consumer_surplus_change])",
+            "formatString": "$#,0.00",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Effect interval lower",
+            "expression": "AVERAGE(experiment_results[ci_low])",
+            "formatString": "0.0%",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Effect interval upper",
+            "expression": "AVERAGE(experiment_results[ci_high])",
+            "formatString": "0.0%",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Minimum adjusted p",
+            "expression": "MIN(experiment_results[p_adjusted])",
+            "formatString": "0.0000",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Mean feature PSI",
+            "expression": "AVERAGE(feature_drift[psi])",
+            "formatString": "0.000",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Registered models",
+            "expression": "COUNTROWS(model_registry)",
+            "formatString": "#,0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Model acceptance passes",
+            "expression": "COUNTROWS(FILTER(quality_gate, quality_gate[passed] = TRUE()))",
+            "formatString": "#,0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          },
+          {
+            "name": "Candidate version",
+            "expression": "MAX(model_registry[version])",
+            "formatString": "#,0",
+            "description": "Synthetic portfolio result. Forecasts do not represent measured business impact."
+          }
+        ]
+      },
+      {
+        "name": "zone_capacity",
+        "columns": [
+          {
+            "name": "zone_id",
+            "dataType": "int64",
+            "sourceColumn": "zone_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "period",
+            "dataType": "string",
+            "sourceColumn": "period",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "baseline_forecast",
+            "dataType": "double",
+            "sourceColumn": "baseline_forecast",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "daily_capacity",
+            "dataType": "double",
+            "sourceColumn": "daily_capacity",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "capacity_trips",
+            "dataType": "double",
+            "sourceColumn": "capacity_trips",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "reserve_trips",
+            "dataType": "double",
+            "sourceColumn": "reserve_trips",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "available_trips",
+            "dataType": "double",
+            "sourceColumn": "available_trips",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "baseline_over_capacity",
+            "dataType": "boolean",
+            "sourceColumn": "baseline_over_capacity",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "allocated_trips",
+            "dataType": "double",
+            "sourceColumn": "allocated_trips",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "final_utilization",
+            "dataType": "double",
+            "sourceColumn": "final_utilization",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "remaining_with_reserve",
+            "dataType": "double",
+            "sourceColumn": "remaining_with_reserve",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "zone_capacity",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(\"C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/zone_capacity.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"zone_id\", Int64.Type}, {\"period\", type text}, {\"baseline_forecast\", type number}, {\"daily_capacity\", type number}, {\"capacity_trips\", type number}, {\"reserve_trips\", type number}, {\"available_trips\", type number}, {\"baseline_over_capacity\", type logical}, {\"allocated_trips\", type number}, {\"final_utilization\", type number}, {\"remaining_with_reserve\", type number}}, \"en-CA\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "monthly_performance",
+        "columns": [
+          {
+            "name": "month",
+            "dataType": "string",
+            "sourceColumn": "month",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "trips",
+            "dataType": "int64",
+            "sourceColumn": "trips",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "revenue",
+            "dataType": "double",
+            "sourceColumn": "revenue",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "savings",
+            "dataType": "double",
+            "sourceColumn": "savings",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "monthly_performance",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(\"C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/monthly_performance.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"month\", type text}, {\"trips\", Int64.Type}, {\"revenue\", type number}, {\"savings\", type number}}, \"en-CA\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "pricing_scenarios",
+        "columns": [
+          {
+            "name": "zone_id",
+            "dataType": "int64",
+            "sourceColumn": "zone_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "period",
+            "dataType": "string",
+            "sourceColumn": "period",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "price_change",
+            "dataType": "double",
+            "sourceColumn": "price_change",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "demand_index",
+            "dataType": "double",
+            "sourceColumn": "demand_index",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "revenue_index",
+            "dataType": "double",
+            "sourceColumn": "revenue_index",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "elasticity",
+            "dataType": "double",
+            "sourceColumn": "elasticity",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "pricing_scenarios",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(\"C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/pricing_scenarios.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"zone_id\", Int64.Type}, {\"period\", type text}, {\"price_change\", type number}, {\"demand_index\", type number}, {\"revenue_index\", type number}, {\"elasticity\", type number}}, \"en-CA\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "dim_zone",
+        "columns": [
+          {
+            "name": "zone_id",
+            "dataType": "int64",
+            "sourceColumn": "zone_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "zone_name",
+            "dataType": "string",
+            "sourceColumn": "zone_name",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "is_synthetic",
+            "dataType": "boolean",
+            "sourceColumn": "is_synthetic",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "dim_zone",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(\"C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/dim_zone.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"zone_id\", Int64.Type}, {\"zone_name\", type text}, {\"is_synthetic\", type logical}}, \"en-CA\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "dim_offer",
+        "columns": [
+          {
+            "name": "offer_id",
+            "dataType": "string",
+            "sourceColumn": "offer_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "offer_name",
+            "dataType": "string",
+            "sourceColumn": "offer_name",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "period",
+            "dataType": "string",
+            "sourceColumn": "period",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "discount_pct",
+            "dataType": "double",
+            "sourceColumn": "discount_pct",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "inventory",
+            "dataType": "int64",
+            "sourceColumn": "inventory",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "dim_offer",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(\"C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/dim_offer.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"offer_id\", type text}, {\"offer_name\", type text}, {\"period\", type text}, {\"discount_pct\", type number}, {\"inventory\", Int64.Type}}, \"en-CA\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "model_metrics",
+        "columns": [
+          {
+            "name": "model",
+            "dataType": "string",
+            "sourceColumn": "model",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "roc_auc",
+            "dataType": "double",
+            "sourceColumn": "roc_auc",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "pr_auc",
+            "dataType": "double",
+            "sourceColumn": "pr_auc",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "brier",
+            "dataType": "double",
+            "sourceColumn": "brier",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ece_10bins",
+            "dataType": "double",
+            "sourceColumn": "ece_10bins",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "lift_at_10",
+            "dataType": "double",
+            "sourceColumn": "lift_at_10",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "lift_at_20",
+            "dataType": "double",
+            "sourceColumn": "lift_at_20",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "n",
+            "dataType": "int64",
+            "sourceColumn": "n",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "prevalence",
+            "dataType": "double",
+            "sourceColumn": "prevalence",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "training_seconds",
+            "dataType": "double",
+            "sourceColumn": "training_seconds",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "model_metrics",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(\"C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/model_metrics.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"model\", type text}, {\"roc_auc\", type number}, {\"pr_auc\", type number}, {\"brier\", type number}, {\"ece_10bins\", type number}, {\"lift_at_10\", type number}, {\"lift_at_20\", type number}, {\"n\", Int64.Type}, {\"prevalence\", type number}, {\"training_seconds\", type number}}, \"en-CA\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "feature_drift",
+        "columns": [
+          {
+            "name": "feature",
+            "dataType": "string",
+            "sourceColumn": "feature",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "psi",
+            "dataType": "double",
+            "sourceColumn": "psi",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ks_statistic",
+            "dataType": "double",
+            "sourceColumn": "ks_statistic",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ks_p_value",
+            "dataType": "double",
+            "sourceColumn": "ks_p_value",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "status",
+            "dataType": "string",
+            "sourceColumn": "status",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "feature_drift",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(\"C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/feature_drift.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"feature\", type text}, {\"psi\", type number}, {\"ks_statistic\", type number}, {\"ks_p_value\", type number}, {\"status\", type text}}, \"en-CA\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "experiment_results",
+        "columns": [
+          {
+            "name": "difference",
+            "dataType": "double",
+            "sourceColumn": "difference",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ci_low",
+            "dataType": "double",
+            "sourceColumn": "ci_low",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ci_high",
+            "dataType": "double",
+            "sourceColumn": "ci_high",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "p_value",
+            "dataType": "double",
+            "sourceColumn": "p_value",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "p_adjusted",
+            "dataType": "double",
+            "sourceColumn": "p_adjusted",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "arm",
+            "dataType": "string",
+            "sourceColumn": "arm",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "n",
+            "dataType": "int64",
+            "sourceColumn": "n",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "conversion",
+            "dataType": "double",
+            "sourceColumn": "conversion",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "relative_lift",
+            "dataType": "double",
+            "sourceColumn": "relative_lift",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "experiment_results",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(\"C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/experiment_results.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"difference\", type number}, {\"ci_low\", type number}, {\"ci_high\", type number}, {\"p_value\", type number}, {\"p_adjusted\", type number}, {\"arm\", type text}, {\"n\", Int64.Type}, {\"conversion\", type number}, {\"relative_lift\", type number}}, \"en-CA\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "loyalty_ledger",
+        "columns": [
+          {
+            "name": "customer_id",
+            "dataType": "string",
+            "sourceColumn": "customer_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "points_earned",
+            "dataType": "int64",
+            "sourceColumn": "points_earned",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "points_awarded",
+            "dataType": "double",
+            "sourceColumn": "points_awarded",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "points_redeemed",
+            "dataType": "double",
+            "sourceColumn": "points_redeemed",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "points_balance",
+            "dataType": "double",
+            "sourceColumn": "points_balance",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "loyalty_ledger",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(\"C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/loyalty_ledger.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"customer_id\", type text}, {\"points_earned\", Int64.Type}, {\"points_awarded\", type number}, {\"points_redeemed\", type number}, {\"points_balance\", type number}}, \"en-CA\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "zone_hour_forecast",
+        "columns": [
+          {
+            "name": "date",
+            "dataType": "string",
+            "sourceColumn": "date",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "zone_id",
+            "dataType": "int64",
+            "sourceColumn": "zone_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "period",
+            "dataType": "string",
+            "sourceColumn": "period",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "baseline_forecast",
+            "dataType": "double",
+            "sourceColumn": "baseline_forecast",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "direction",
+            "dataType": "string",
+            "sourceColumn": "direction",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "hour",
+            "dataType": "int64",
+            "sourceColumn": "hour",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "count",
+            "dataType": "int64",
+            "sourceColumn": "count",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "share",
+            "dataType": "double",
+            "sourceColumn": "share",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "forecast_trips",
+            "dataType": "double",
+            "sourceColumn": "forecast_trips",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "method",
+            "dataType": "string",
+            "sourceColumn": "method",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "zone_hour_forecast",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(\"C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/zone_hour_forecast.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"date\", type text}, {\"zone_id\", Int64.Type}, {\"period\", type text}, {\"baseline_forecast\", type number}, {\"direction\", type text}, {\"hour\", Int64.Type}, {\"count\", Int64.Type}, {\"share\", type number}, {\"forecast_trips\", type number}, {\"method\", type text}}, \"en-CA\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "price_allocation",
+        "columns": [
+          {
+            "name": "zone_id",
+            "dataType": "int64",
+            "sourceColumn": "zone_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "period",
+            "dataType": "string",
+            "sourceColumn": "period",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "baseline_forecast",
+            "dataType": "double",
+            "sourceColumn": "baseline_forecast",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "capacity_trips",
+            "dataType": "double",
+            "sourceColumn": "capacity_trips",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "price_change",
+            "dataType": "double",
+            "sourceColumn": "price_change",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "demand_index",
+            "dataType": "double",
+            "sourceColumn": "demand_index",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "revenue_index",
+            "dataType": "double",
+            "sourceColumn": "revenue_index",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "elasticity",
+            "dataType": "double",
+            "sourceColumn": "elasticity",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "baseline_price",
+            "dataType": "double",
+            "sourceColumn": "baseline_price",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "forecast_trips",
+            "dataType": "double",
+            "sourceColumn": "forecast_trips",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "protected_load",
+            "dataType": "double",
+            "sourceColumn": "protected_load",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "available_trips",
+            "dataType": "double",
+            "sourceColumn": "available_trips",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "revenue",
+            "dataType": "double",
+            "sourceColumn": "revenue",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "baseline_revenue",
+            "dataType": "double",
+            "sourceColumn": "baseline_revenue",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "incremental_contribution",
+            "dataType": "double",
+            "sourceColumn": "incremental_contribution",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "consumer_surplus_change",
+            "dataType": "double",
+            "sourceColumn": "consumer_surplus_change",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "eligible",
+            "dataType": "boolean",
+            "sourceColumn": "eligible",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "campaign_trips",
+            "dataType": "double",
+            "sourceColumn": "campaign_trips",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "remaining_with_reserve",
+            "dataType": "double",
+            "sourceColumn": "remaining_with_reserve",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "price_allocation",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(\"C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/price_allocation.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"zone_id\", Int64.Type}, {\"period\", type text}, {\"baseline_forecast\", type number}, {\"capacity_trips\", type number}, {\"price_change\", type number}, {\"demand_index\", type number}, {\"revenue_index\", type number}, {\"elasticity\", type number}, {\"baseline_price\", type number}, {\"forecast_trips\", type number}, {\"protected_load\", type number}, {\"available_trips\", type number}, {\"revenue\", type number}, {\"baseline_revenue\", type number}, {\"incremental_contribution\", type number}, {\"consumer_surplus_change\", type number}, {\"eligible\", type logical}, {\"campaign_trips\", type number}, {\"remaining_with_reserve\", type number}}, \"en-CA\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "experiment_subgroups",
+        "columns": [
+          {
+            "name": "dimension",
+            "dataType": "string",
+            "sourceColumn": "dimension",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "group",
+            "dataType": "string",
+            "sourceColumn": "group",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "arm",
+            "dataType": "string",
+            "sourceColumn": "arm",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "n_treatment",
+            "dataType": "int64",
+            "sourceColumn": "n_treatment",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "n_control",
+            "dataType": "int64",
+            "sourceColumn": "n_control",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "difference",
+            "dataType": "double",
+            "sourceColumn": "difference",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ci_low",
+            "dataType": "double",
+            "sourceColumn": "ci_low",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ci_high",
+            "dataType": "double",
+            "sourceColumn": "ci_high",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "p_value",
+            "dataType": "double",
+            "sourceColumn": "p_value",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "p_adjusted",
+            "dataType": "double",
+            "sourceColumn": "p_adjusted",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "experiment_subgroups",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(\"C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/experiment_subgroups.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"dimension\", type text}, {\"group\", type text}, {\"arm\", type text}, {\"n_treatment\", Int64.Type}, {\"n_control\", Int64.Type}, {\"difference\", type number}, {\"ci_low\", type number}, {\"ci_high\", type number}, {\"p_value\", type number}, {\"p_adjusted\", type number}}, \"en-CA\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "model_registry",
+        "columns": [
+          {
+            "name": "model",
+            "dataType": "string",
+            "sourceColumn": "model",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "version",
+            "dataType": "int64",
+            "sourceColumn": "version",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "alias",
+            "dataType": "string",
+            "sourceColumn": "alias",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "roundtrip_predictions_match",
+            "dataType": "boolean",
+            "sourceColumn": "roundtrip_predictions_match",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "git_sha",
+            "dataType": "string",
+            "sourceColumn": "git_sha",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "scope",
+            "dataType": "string",
+            "sourceColumn": "scope",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "test_auc",
+            "dataType": "double",
+            "sourceColumn": "test_auc",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "model_registry",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(\"C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/model_registry.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"model\", type text}, {\"version\", Int64.Type}, {\"alias\", type text}, {\"roundtrip_predictions_match\", type logical}, {\"git_sha\", type text}, {\"scope\", type text}, {\"test_auc\", type number}}, \"en-CA\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "quality_gate",
+        "columns": [
+          {
+            "name": "model",
+            "dataType": "string",
+            "sourceColumn": "model",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "passed",
+            "dataType": "boolean",
+            "sourceColumn": "passed",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "criteria",
+            "dataType": "string",
+            "sourceColumn": "criteria",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "auc",
+            "dataType": "double",
+            "sourceColumn": "auc",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ece",
+            "dataType": "double",
+            "sourceColumn": "ece",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "mae",
+            "dataType": "double",
+            "sourceColumn": "mae",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "baseline_mae",
+            "dataType": "double",
+            "sourceColumn": "baseline_mae",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "quality_gate",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(\"C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/quality_gate.csv\"),[Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"model\", type text}, {\"passed\", type logical}, {\"criteria\", type text}, {\"auc\", type number}, {\"ece\", type number}, {\"mae\", type number}, {\"baseline_mae\", type number}}, \"en-CA\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "name": "decision_table_customer_id",
+        "fromTable": "decision_table",
+        "fromColumn": "customer_id",
+        "toTable": "customer_360",
+        "toColumn": "customer_id",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "customer_360_home_zone",
+        "fromTable": "customer_360",
+        "fromColumn": "home_zone",
+        "toTable": "dim_zone",
+        "toColumn": "zone_id",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "zone_capacity_zone_id",
+        "fromTable": "zone_capacity",
+        "fromColumn": "zone_id",
+        "toTable": "dim_zone",
+        "toColumn": "zone_id",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "pricing_scenarios_zone_id",
+        "fromTable": "pricing_scenarios",
+        "fromColumn": "zone_id",
+        "toTable": "dim_zone",
+        "toColumn": "zone_id",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "decision_table_offer_id",
+        "fromTable": "decision_table",
+        "fromColumn": "offer_id",
+        "toTable": "dim_offer",
+        "toColumn": "offer_id",
+        "crossFilteringBehavior": "oneDirection"
+      }
+    ]
+  }
+}

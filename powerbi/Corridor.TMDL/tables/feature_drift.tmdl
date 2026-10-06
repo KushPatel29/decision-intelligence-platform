@@ -1,0 +1,42 @@
+table feature_drift
+	lineageTag: ef497ce4-68a7-4832-9276-c28778791bfd
+
+	column feature
+		dataType: string
+		lineageTag: 5e52ade9-0803-4e94-9227-4eb553842805
+		summarizeBy: none
+		sourceColumn: feature
+
+	column psi
+		dataType: double
+		lineageTag: 27260a90-bbd3-4252-9e9a-05b48bacbf94
+		summarizeBy: none
+		sourceColumn: psi
+
+	column ks_statistic
+		dataType: double
+		lineageTag: ed826c64-1d14-4b0a-96dd-fc9bf98a9a7b
+		summarizeBy: none
+		sourceColumn: ks_statistic
+
+	column ks_p_value
+		dataType: double
+		lineageTag: 22ee18da-f6ba-47f6-abed-f1434667f17e
+		summarizeBy: none
+		sourceColumn: ks_p_value
+
+	column status
+		dataType: string
+		lineageTag: 91d3ce7d-ee64-4886-aa90-3c269114cb52
+		summarizeBy: none
+		sourceColumn: status
+
+	partition feature_drift = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/feature_drift.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"feature", type text}, {"psi", type number}, {"ks_statistic", type number}, {"ks_p_value", type number}, {"status", type text}}, "en-CA")
+				in
+				    Typed

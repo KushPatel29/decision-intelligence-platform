@@ -1,0 +1,36 @@
+table dim_offer
+
+	column offer_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: offer_id
+
+	column offer_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: offer_name
+
+	column period
+		dataType: string
+		summarizeBy: none
+		sourceColumn: period
+
+	column discount_pct
+		dataType: double
+		summarizeBy: none
+		sourceColumn: discount_pct
+
+	column inventory
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: inventory
+
+	partition dim_offer = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/dim_offer.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"offer_id", type text}, {"offer_name", type text}, {"period", type text}, {"discount_pct", type number}, {"inventory", Int64.Type}}, "en-CA")
+				in
+				    Typed

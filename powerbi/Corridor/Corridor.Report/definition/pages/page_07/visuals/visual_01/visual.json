@@ -1,0 +1,60 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.1.0/schema.json",
+  "name": "visual_01",
+  "position": {
+    "x": 30,
+    "y": 30,
+    "z": 0,
+    "height": 140,
+    "width": 285,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "decision_table"
+                    }
+                  },
+                  "Property": "Mean response lift"
+                }
+              },
+              "queryRef": "decision_table.Mean response lift",
+              "nativeQueryRef": "Mean response lift"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Mean response lift'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

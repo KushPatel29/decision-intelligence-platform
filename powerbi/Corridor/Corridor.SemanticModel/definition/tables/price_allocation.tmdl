@@ -1,0 +1,106 @@
+table price_allocation
+
+	column zone_id
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: zone_id
+
+	column period
+		dataType: string
+		summarizeBy: none
+		sourceColumn: period
+
+	column baseline_forecast
+		dataType: double
+		summarizeBy: none
+		sourceColumn: baseline_forecast
+
+	column capacity_trips
+		dataType: double
+		summarizeBy: none
+		sourceColumn: capacity_trips
+
+	column price_change
+		dataType: double
+		summarizeBy: none
+		sourceColumn: price_change
+
+	column demand_index
+		dataType: double
+		summarizeBy: none
+		sourceColumn: demand_index
+
+	column revenue_index
+		dataType: double
+		summarizeBy: none
+		sourceColumn: revenue_index
+
+	column elasticity
+		dataType: double
+		summarizeBy: none
+		sourceColumn: elasticity
+
+	column baseline_price
+		dataType: double
+		summarizeBy: none
+		sourceColumn: baseline_price
+
+	column forecast_trips
+		dataType: double
+		summarizeBy: none
+		sourceColumn: forecast_trips
+
+	column protected_load
+		dataType: double
+		summarizeBy: none
+		sourceColumn: protected_load
+
+	column available_trips
+		dataType: double
+		summarizeBy: none
+		sourceColumn: available_trips
+
+	column revenue
+		dataType: double
+		summarizeBy: none
+		sourceColumn: revenue
+
+	column baseline_revenue
+		dataType: double
+		summarizeBy: none
+		sourceColumn: baseline_revenue
+
+	column incremental_contribution
+		dataType: double
+		summarizeBy: none
+		sourceColumn: incremental_contribution
+
+	column consumer_surplus_change
+		dataType: double
+		summarizeBy: none
+		sourceColumn: consumer_surplus_change
+
+	column eligible
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: eligible
+
+	column campaign_trips
+		dataType: double
+		summarizeBy: none
+		sourceColumn: campaign_trips
+
+	column remaining_with_reserve
+		dataType: double
+		summarizeBy: none
+		sourceColumn: remaining_with_reserve
+
+	partition price_allocation = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/price_allocation.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"zone_id", Int64.Type}, {"period", type text}, {"baseline_forecast", type number}, {"capacity_trips", type number}, {"price_change", type number}, {"demand_index", type number}, {"revenue_index", type number}, {"elasticity", type number}, {"baseline_price", type number}, {"forecast_trips", type number}, {"protected_load", type number}, {"available_trips", type number}, {"revenue", type number}, {"baseline_revenue", type number}, {"incremental_contribution", type number}, {"consumer_surplus_change", type number}, {"eligible", type logical}, {"campaign_trips", type number}, {"remaining_with_reserve", type number}}, "en-CA")
+				in
+				    Typed

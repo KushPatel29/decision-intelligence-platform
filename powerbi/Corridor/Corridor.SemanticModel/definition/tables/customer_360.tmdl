@@ -1,0 +1,306 @@
+table customer_360
+
+	column customer_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: customer_id
+
+	column as_of
+		dataType: string
+		summarizeBy: none
+		sourceColumn: as_of
+
+	column tenure_days
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: tenure_days
+
+	column business_flag
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: business_flag
+
+	column autopay
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: autopay
+
+	column transponder_flag
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: transponder_flag
+
+	column home_zone
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: home_zone
+
+	column trips_7d
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: trips_7d
+
+	column trips_30d
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: trips_30d
+
+	column trips_90d
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: trips_90d
+
+	column trips_previous90d
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: trips_previous90d
+
+	column spend_30d
+		dataType: double
+		summarizeBy: none
+		sourceColumn: spend_30d
+
+	column spend_90d
+		dataType: double
+		summarizeBy: none
+		sourceColumn: spend_90d
+
+	column spend_365d
+		dataType: double
+		summarizeBy: none
+		sourceColumn: spend_365d
+
+	column avg_toll
+		dataType: double
+		summarizeBy: none
+		sourceColumn: avg_toll
+
+	column avg_distance_km
+		dataType: double
+		summarizeBy: none
+		sourceColumn: avg_distance_km
+
+	column peak_share
+		dataType: double
+		summarizeBy: none
+		sourceColumn: peak_share
+
+	column weekend_share
+		dataType: double
+		summarizeBy: none
+		sourceColumn: weekend_share
+
+	column discount_90d
+		dataType: double
+		summarizeBy: none
+		sourceColumn: discount_90d
+
+	column recency_days
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: recency_days
+
+	column digital_events_30d
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: digital_events_30d
+
+	column app_logins_30d
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: app_logins_30d
+
+	column offer_views_30d
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: offer_views_30d
+
+	column email_opens_30d
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: email_opens_30d
+
+	column points_earned_to_date
+		dataType: double
+		summarizeBy: none
+		sourceColumn: points_earned_to_date
+
+	column feature_max_timestamp
+		dataType: string
+		summarizeBy: none
+		sourceColumn: feature_max_timestamp
+
+	column account_status
+		dataType: string
+		summarizeBy: none
+		sourceColumn: account_status
+
+	column marketing_consent
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: marketing_consent
+
+	column has_my_account
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: has_my_account
+
+	column past_due
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: past_due
+
+	column eligible
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: eligible
+
+	column frequency_trend
+		dataType: double
+		summarizeBy: none
+		sourceColumn: frequency_trend
+
+	column digital_engagement_score
+		dataType: double
+		summarizeBy: none
+		sourceColumn: digital_engagement_score
+
+	column propensity_probability
+		dataType: double
+		summarizeBy: none
+		sourceColumn: propensity_probability
+
+	column churn_probability
+		dataType: double
+		summarizeBy: none
+		sourceColumn: churn_probability
+
+	column attrition_probability
+		dataType: double
+		summarizeBy: none
+		sourceColumn: attrition_probability
+
+	column expected_margin_90d
+		dataType: double
+		summarizeBy: none
+		sourceColumn: expected_margin_90d
+
+	column clv_12m
+		dataType: double
+		summarizeBy: none
+		sourceColumn: clv_12m
+
+	column cluster
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: cluster
+
+	column rfm_segment
+		dataType: string
+		summarizeBy: none
+		sourceColumn: rfm_segment
+
+	column anomaly_score
+		dataType: double
+		summarizeBy: none
+		sourceColumn: anomaly_score
+
+	column anomaly_flag
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: anomaly_flag
+
+	column probabilistic_clv_12m
+		dataType: double
+		summarizeBy: none
+		sourceColumn: probabilistic_clv_12m
+
+	column probability_alive
+		dataType: double
+		summarizeBy: none
+		sourceColumn: probability_alive
+
+	column points_earned
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: points_earned
+
+	column points_awarded
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: points_awarded
+
+	column points_redeemed
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: points_redeemed
+
+	column points_balance
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: points_balance
+
+	column tier
+		dataType: string
+		summarizeBy: none
+		sourceColumn: tier
+
+	column customer_type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: customer_type
+
+	column campaign_exposures
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: campaign_exposures
+
+	column campaign_enrollments
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: campaign_enrollments
+
+	column campaign_redemptions
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: campaign_redemptions
+
+	column channel_30d_App
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: channel_30d_App
+
+	column channel_30d_Email
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: channel_30d_Email
+
+	column channel_30d_Web
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: channel_30d_Web
+
+	column engaged_days_30d
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: engaged_days_30d
+
+	column home_zone_elasticity
+		dataType: double
+		summarizeBy: none
+		sourceColumn: home_zone_elasticity
+
+	column loyalty_500_redemption_probability
+		dataType: double
+		summarizeBy: none
+		sourceColumn: loyalty_500_redemption_probability
+
+	partition customer_360 = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/customer_360.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"customer_id", type text}, {"as_of", type text}, {"tenure_days", Int64.Type}, {"business_flag", Int64.Type}, {"autopay", Int64.Type}, {"transponder_flag", Int64.Type}, {"home_zone", Int64.Type}, {"trips_7d", Int64.Type}, {"trips_30d", Int64.Type}, {"trips_90d", Int64.Type}, {"trips_previous90d", Int64.Type}, {"spend_30d", type number}, {"spend_90d", type number}, {"spend_365d", type number}, {"avg_toll", type number}, {"avg_distance_km", type number}, {"peak_share", type number}, {"weekend_share", type number}, {"discount_90d", type number}, {"recency_days", Int64.Type}, {"digital_events_30d", Int64.Type}, {"app_logins_30d", Int64.Type}, {"offer_views_30d", Int64.Type}, {"email_opens_30d", Int64.Type}, {"points_earned_to_date", type number}, {"feature_max_timestamp", type text}, {"account_status", type text}, {"marketing_consent", type logical}, {"has_my_account", type logical}, {"past_due", type logical}, {"eligible", type logical}, {"frequency_trend", type number}, {"digital_engagement_score", type number}, {"propensity_probability", type number}, {"churn_probability", type number}, {"attrition_probability", type number}, {"expected_margin_90d", type number}, {"clv_12m", type number}, {"cluster", Int64.Type}, {"rfm_segment", type text}, {"anomaly_score", type number}, {"anomaly_flag", type logical}, {"probabilistic_clv_12m", type number}, {"probability_alive", type number}, {"points_earned", Int64.Type}, {"points_awarded", Int64.Type}, {"points_redeemed", Int64.Type}, {"points_balance", Int64.Type}, {"tier", type text}, {"customer_type", type text}, {"campaign_exposures", Int64.Type}, {"campaign_enrollments", Int64.Type}, {"campaign_redemptions", Int64.Type}, {"channel_30d_App", Int64.Type}, {"channel_30d_Email", Int64.Type}, {"channel_30d_Web", Int64.Type}, {"engaged_days_30d", Int64.Type}, {"home_zone_elasticity", type number}, {"loyalty_500_redemption_probability", type number}}, "en-CA")
+				in
+				    Typed

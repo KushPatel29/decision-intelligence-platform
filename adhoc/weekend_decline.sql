@@ -1,0 +1,1 @@
+SELECT strftime(timestamp,'%Y-%m') AS month, count(*) AS trips, sum(final_charge) AS revenue FROM silver.fact_trip WHERE period='Weekend' AND timestamp >= '2025-07-01' AND timestamp < '2025-10-01' GROUP BY 1 ORDER BY 1;

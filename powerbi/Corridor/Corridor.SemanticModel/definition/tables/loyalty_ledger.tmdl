@@ -1,0 +1,36 @@
+table loyalty_ledger
+
+	column customer_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: customer_id
+
+	column points_earned
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: points_earned
+
+	column points_awarded
+		dataType: double
+		summarizeBy: none
+		sourceColumn: points_awarded
+
+	column points_redeemed
+		dataType: double
+		summarizeBy: none
+		sourceColumn: points_redeemed
+
+	column points_balance
+		dataType: double
+		summarizeBy: none
+		sourceColumn: points_balance
+
+	partition loyalty_ledger = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/loyalty_ledger.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"customer_id", type text}, {"points_earned", Int64.Type}, {"points_awarded", type number}, {"points_redeemed", type number}, {"points_balance", type number}}, "en-CA")
+				in
+				    Typed

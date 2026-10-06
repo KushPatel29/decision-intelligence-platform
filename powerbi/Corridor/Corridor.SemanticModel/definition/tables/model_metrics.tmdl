@@ -1,0 +1,61 @@
+table model_metrics
+
+	column model
+		dataType: string
+		summarizeBy: none
+		sourceColumn: model
+
+	column roc_auc
+		dataType: double
+		summarizeBy: none
+		sourceColumn: roc_auc
+
+	column pr_auc
+		dataType: double
+		summarizeBy: none
+		sourceColumn: pr_auc
+
+	column brier
+		dataType: double
+		summarizeBy: none
+		sourceColumn: brier
+
+	column ece_10bins
+		dataType: double
+		summarizeBy: none
+		sourceColumn: ece_10bins
+
+	column lift_at_10
+		dataType: double
+		summarizeBy: none
+		sourceColumn: lift_at_10
+
+	column lift_at_20
+		dataType: double
+		summarizeBy: none
+		sourceColumn: lift_at_20
+
+	column n
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: n
+
+	column prevalence
+		dataType: double
+		summarizeBy: none
+		sourceColumn: prevalence
+
+	column training_seconds
+		dataType: double
+		summarizeBy: none
+		sourceColumn: training_seconds
+
+	partition model_metrics = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/model_metrics.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"model", type text}, {"roc_auc", type number}, {"pr_auc", type number}, {"brier", type number}, {"ece_10bins", type number}, {"lift_at_10", type number}, {"lift_at_20", type number}, {"n", Int64.Type}, {"prevalence", type number}, {"training_seconds", type number}}, "en-CA")
+				in
+				    Typed

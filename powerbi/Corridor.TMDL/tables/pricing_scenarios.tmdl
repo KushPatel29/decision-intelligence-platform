@@ -1,0 +1,48 @@
+table pricing_scenarios
+	lineageTag: 1fe85566-a6d2-4440-a933-2b6a6e8b7348
+
+	column zone_id
+		dataType: int64
+		lineageTag: be298b28-004a-49b9-8cd6-b74822b96406
+		summarizeBy: none
+		sourceColumn: zone_id
+
+	column period
+		dataType: string
+		lineageTag: 6b8ad6e8-d35f-437e-9542-81c4ab08bcfd
+		summarizeBy: none
+		sourceColumn: period
+
+	column price_change
+		dataType: double
+		lineageTag: 321e1743-471c-4c44-9ed3-e0b6fdd99930
+		summarizeBy: none
+		sourceColumn: price_change
+
+	column demand_index
+		dataType: double
+		lineageTag: f25eecf2-ccb2-4697-937b-6a322d7a4a6a
+		summarizeBy: none
+		sourceColumn: demand_index
+
+	column revenue_index
+		dataType: double
+		lineageTag: 1527799a-d3d3-48bd-bbd8-8c1f74f03d28
+		summarizeBy: none
+		sourceColumn: revenue_index
+
+	column elasticity
+		dataType: double
+		lineageTag: 8c3203e7-6351-4d0c-879a-edb9194419f3
+		summarizeBy: none
+		sourceColumn: elasticity
+
+	partition pricing_scenarios = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:/Users/kush2/decision-intelligence-platform/outputs/powerbi/pricing_scenarios.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"zone_id", Int64.Type}, {"period", type text}, {"price_change", type number}, {"demand_index", type number}, {"revenue_index", type number}, {"elasticity", type number}}, "en-CA")
+				in
+				    Typed
