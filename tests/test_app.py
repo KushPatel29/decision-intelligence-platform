@@ -100,3 +100,18 @@ def test_joint_price_action_returns_feasible_shared_capacity(app_test):
     assert not prices.duplicated(["zone_id","period"]).any()
     assert (prices.remaining_with_reserve>=-1e-6).all()
     assert campaign.cost.sum()<=1600+1e-6
+
+
+@pytest.mark.parametrize("case,conclusion",[
+    ("weekend_decline","Weekend trips changed by"),
+    ("segment_decline","segment has the lowest current-to-prior frequency ratio"),
+    ("cannibalization","The best observed treatment mean is"),
+    ("unused_capacity","has the most forecast off-peak headroom"),
+    ("enrollment_vs_value","The highest observed enrollment rate is"),
+])
+def test_analyst_case_displays_its_business_conclusion(app_test,case,conclusion):
+    app_test.radio[0].set_value("Analyst workbench").run()
+    app_test.selectbox[0].set_value(case).run()
+    assert not app_test.exception and not app_test.error
+    assert any(conclusion in item.value for item in app_test.markdown)
+    assert app_test.code

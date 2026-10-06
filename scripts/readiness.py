@@ -1,5 +1,5 @@
 """Generate evidence-based readiness without converting preparation into execution."""
-import json,shutil
+import json
 from datetime import datetime,timezone
 from decision_platform.config import ROOT,write_json
 from decision_platform.runtime import artifact_manifest
@@ -13,7 +13,7 @@ def main():
     checks=[
         {"check":"Local model acceptance","status":"Passed" if quality["passed"] else "Review required","evidence":"quality_gate.json"},
         {"check":"Six cloud model contracts","status":"Locally verified" if len(cloud.get("models",[]))==6 else "Pending","evidence":"cloud_portfolio_validation.json"},
-        {"check":"Cloud candidate acceptance","status":"Review required" if any(not r["evaluation"]["quality"]["passed"] for r in cloud.get("models",[])) else "Locally passed","evidence":"A rejected model is held before registry/batch; job execution remains separate"},
+        {"check":"Cloud candidate acceptance","status":"Pending" if len(cloud.get("models",[]))!=6 else "Review required" if any(not r["evaluation"]["quality"]["passed"] for r in cloud.get("models",[])) else "Locally passed","evidence":"A rejected model is held before registry/batch; job execution remains separate"},
         {"check":"Nine local registry scorers","status":"Passed" if len(registry)==9 and all(r["roundtrip_predictions_match"] for r in registry) else "Pending","evidence":"model_registry.json"},
         {"check":"Revised native Power BI","status":"Schema passed; Desktop refresh pending","evidence":"16 tables, 32 measures, eight pages; reload dialog blocked automated input"},
         {"check":"Private identity/access flow","status":"Prepared; hosted test pending","evidence":"OIDC allowlist and fail-closed production mode"},

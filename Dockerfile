@@ -1,5 +1,5 @@
 FROM python:3.12-slim
-ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 CORRIDOR_ENV=production CORRIDOR_AUTH=oidc
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 CORRIDOR_ROOT=/app CORRIDOR_ENV=production CORRIDOR_AUTH=oidc
 WORKDIR /app
 COPY requirements-runtime.txt ./
 RUN pip install -r requirements-runtime.txt && useradd --uid 10001 --create-home corridor
@@ -9,6 +9,7 @@ RUN pip install --no-deps .
 COPY app.py ./
 COPY .streamlit/config.toml ./.streamlit/config.toml
 COPY outputs ./outputs
+COPY output/pdf ./output/pdf
 RUN mkdir -p /app/runtime && chown -R corridor:corridor /app
 USER corridor
 EXPOSE 8501

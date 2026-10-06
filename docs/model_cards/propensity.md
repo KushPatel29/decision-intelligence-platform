@@ -18,7 +18,7 @@ Measured synthetic held-out metrics:
   "lift_at_20": 1.3682403433476393,
   "n": 8000,
   "prevalence": 0.728125,
-  "training_seconds": 0.4172827000147663
+  "training_seconds": 0.4771917999605648
 }
 ```
 

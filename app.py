@@ -1,6 +1,6 @@
 """Run: .venv/Scripts/python -m streamlit run app.py
 
-Read-only analytics plus ephemeral local Gurobi scenario solves. No automatic cloud writes.
+Read-only analytics, bounded local solves and durable reviewed plans. No automatic cloud writes.
 """
 import html
 import os
@@ -51,6 +51,7 @@ PAGE_DESCRIPTIONS={
     "Experiments":"Review randomized treatment effects and the evidence behind offer rankings.",
     "Policy lab":"Compare feasible targeting approaches and spending levels before choosing a plan.",
     "Model operations":"Review held-out quality, calibration, drift and versioned model candidates.",
+    "Analyst workbench":"Explore a business question, its data, chart, SQL and interpretation in one place.",
     "Evidence & delivery":"Export the evidence and inspect verified delivery status and external dependencies.",
 }
 
@@ -436,7 +437,7 @@ elif page=="Analyst workbench":
     findings=(ROOT/"outputs/adhoc/findings.md").read_text()
     question=CASES[name][0];section=findings.split("## "+question,1)[-1].split("\n## ",1)[0]
     st.code(CASES[name][1],language="sql")
-    st.write(section.split("\n\n")[-1])
+    st.write(section.strip().split("\n\n")[-1].strip())
     download(frame,name+".csv")
 
 elif page=="Evidence & delivery":

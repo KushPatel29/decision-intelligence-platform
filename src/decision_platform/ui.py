@@ -91,6 +91,7 @@ def bars(frame,x,ys,height=330,stack=False):
         fig.add_trace(go.Bar(x=frame[x],y=frame[y],name=y.replace("_"," ").title(),marker_color=COLORS[i%len(COLORS)],
             marker_line_width=0,hovertemplate="%{x}<br>%{y:,.1f}<extra>%{fullData.name}</extra>"))
     fig.update_layout(barmode="stack" if stack else "group",bargap=.35)
+    fig.update_xaxes(type="category")
     chart(fig,height)
 
 

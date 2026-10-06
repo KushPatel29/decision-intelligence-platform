@@ -1,5 +1,5 @@
 """Bundle runnable app results, native BI, executive brief and source evidence."""
-import hashlib,json,zipfile
+import hashlib,json,zipfile,subprocess
 from decision_platform.config import ROOT,write_json
 
 def main():
@@ -33,7 +33,9 @@ def main():
         manifest=json.loads(z.read("outputs/artifact_manifest.json"))
         for name,digest in manifest["files"].items():
             assert hashlib.sha256(z.read("outputs/"+name)).hexdigest()==digest, name
-    receipt={"status":"passed","release":"0.4.0","file_count":len(files),"archive":archive.name,"bytes":archive.stat().st_size,"sha256":hashlib.sha256(archive.read_bytes()).hexdigest(),"zip_integrity_passed":True,"excludes":["credentials","local audit records","virtual environment","simulator oracle","raw datasets","model binaries","native BI local cache","download archives"]}
+    source_sha=subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip()
+    pipeline=json.loads((out/"manifest.json").read_text())
+    receipt={"status":"passed","release":"0.4.0","source_git_sha":source_sha,"pipeline_git_sha":pipeline["git_sha"],"file_count":len(files),"archive":archive.name,"bytes":archive.stat().st_size,"sha256":hashlib.sha256(archive.read_bytes()).hexdigest(),"zip_integrity_passed":True,"excludes":["credentials","local audit records","virtual environment","simulator oracle","raw datasets","model binaries","native BI local cache","download archives"]}
     write_json(folder/"release_manifest.json",receipt);print(json.dumps(receipt,indent=2))
 
 if __name__=="__main__":main()
