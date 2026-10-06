@@ -1,0 +1,620 @@
+{
+  "reference_as_of": "2025-01-01 00:00:00",
+  "current_as_of": "2025-10-01",
+  "features": [
+    {
+      "feature": "tenure_days",
+      "psi": 1.2595916679180477,
+      "ks_statistic": 0.12976,
+      "ks_p_value": 5.804316826704605e-184,
+      "status": "Review"
+    },
+    {
+      "feature": "business_flag",
+      "psi": 0.0,
+      "ks_statistic": 0.0,
+      "ks_p_value": 1.0,
+      "status": "Stable"
+    },
+    {
+      "feature": "autopay",
+      "psi": 0.0,
+      "ks_statistic": 0.0,
+      "ks_p_value": 1.0,
+      "status": "Stable"
+    },
+    {
+      "feature": "transponder_flag",
+      "psi": 0.0,
+      "ks_statistic": 0.0,
+      "ks_p_value": 1.0,
+      "status": "Stable"
+    },
+    {
+      "feature": "heavy_vehicle",
+      "psi": 0.0,
+      "ks_statistic": 0.0,
+      "ks_p_value": 1.0,
+      "status": "Stable"
+    },
+    {
+      "feature": "home_zone",
+      "psi": 0.0,
+      "ks_statistic": 0.0,
+      "ks_p_value": 1.0,
+      "status": "Stable"
+    },
+    {
+      "feature": "trips_7d",
+      "psi": 0.066842091486469,
+      "ks_statistic": 0.12863999999999998,
+      "ks_p_value": 8.508629013489331e-181,
+      "status": "Stable"
+    },
+    {
+      "feature": "trips_30d",
+      "psi": 0.2311251768728544,
+      "ks_statistic": 0.18700000000000003,
+      "ks_p_value": 0.0,
+      "status": "Review"
+    },
+    {
+      "feature": "trips_90d",
+      "psi": 0.21938608074163352,
+      "ks_statistic": 0.15636,
+      "ks_p_value": 2.255432341439425e-267,
+      "status": "Review"
+    },
+    {
+      "feature": "trips_previous90d",
+      "psi": 0.035156890478696703,
+      "ks_statistic": 0.03764000000000001,
+      "ks_p_value": 8.001544289896647e-16,
+      "status": "Stable"
+    },
+    {
+      "feature": "spend_30d",
+      "psi": 0.15499599320262367,
+      "ks_statistic": 0.18704,
+      "ks_p_value": 0.0,
+      "status": "Stable"
+    },
+    {
+      "feature": "spend_90d",
+      "psi": 0.16209692808883266,
+      "ks_statistic": 0.15192,
+      "ks_p_value": 2.373797964268389e-252,
+      "status": "Stable"
+    },
+    {
+      "feature": "spend_365d",
+      "psi": 0.0009007752018668656,
+      "ks_statistic": 0.010160000000000002,
+      "ks_p_value": 0.1503626958028037,
+      "status": "Stable"
+    },
+    {
+      "feature": "avg_toll",
+      "psi": 0.1496972380922692,
+      "ks_statistic": 0.15164000000000002,
+      "ks_p_value": 2.032251647301146e-251,
+      "status": "Stable"
+    },
+    {
+      "feature": "avg_distance_km",
+      "psi": 0.1495699967823665,
+      "ks_statistic": 0.15232,
+      "ks_p_value": 1.0969977535439183e-253,
+      "status": "Stable"
+    },
+    {
+      "feature": "peak_share",
+      "psi": 0.1021051779791234,
+      "ks_statistic": 0.15064,
+      "ks_p_value": 4.20842663808873e-248,
+      "status": "Stable"
+    },
+    {
+      "feature": "weekend_share",
+      "psi": 0.0910603770582515,
+      "ks_statistic": 0.13468000000000002,
+      "ks_p_value": 3.351880004998013e-198,
+      "status": "Stable"
+    },
+    {
+      "feature": "night_share_30d",
+      "psi": 0.0039437259012417535,
+      "ks_statistic": 0.013000000000000012,
+      "ks_p_value": 0.028995736472321787,
+      "status": "Stable"
+    },
+    {
+      "feature": "zones_visited_30d",
+      "psi": 0.22621466019797612,
+      "ks_statistic": 0.18700000000000003,
+      "ks_p_value": 0.0,
+      "status": "Review"
+    },
+    {
+      "feature": "active_days_30d",
+      "psi": 0.23143596241651804,
+      "ks_statistic": 0.18700000000000003,
+      "ks_p_value": 0.0,
+      "status": "Review"
+    },
+    {
+      "feature": "max_daily_trips_30d",
+      "psi": 0.22561620622390346,
+      "ks_statistic": 0.18700000000000003,
+      "ks_p_value": 0.0,
+      "status": "Review"
+    },
+    {
+      "feature": "discount_90d",
+      "psi": 0.06304898087312501,
+      "ks_statistic": 0.12248000000000003,
+      "ks_p_value": 7.012480811280695e-164,
+      "status": "Stable"
+    },
+    {
+      "feature": "recency_days",
+      "psi": 0.29167007206965684,
+      "ks_statistic": 0.18699999999999994,
+      "ks_p_value": 0.0,
+      "status": "Review"
+    },
+    {
+      "feature": "digital_events_30d",
+      "psi": 0.03321622562203038,
+      "ks_statistic": 0.08600000000000002,
+      "ks_p_value": 6.981572351032901e-81,
+      "status": "Stable"
+    },
+    {
+      "feature": "app_logins_30d",
+      "psi": 0.020577304779823686,
+      "ks_statistic": 0.06988000000000005,
+      "ks_p_value": 1.6039857476702348e-53,
+      "status": "Stable"
+    },
+    {
+      "feature": "offer_views_30d",
+      "psi": 0.01024373142953207,
+      "ks_statistic": 0.04683999999999999,
+      "ks_p_value": 2.853379037676951e-24,
+      "status": "Stable"
+    },
+    {
+      "feature": "email_opens_30d",
+      "psi": 0.00298555265516713,
+      "ks_statistic": 0.017039999999999944,
+      "ks_p_value": 0.0013911936491139158,
+      "status": "Stable"
+    },
+    {
+      "feature": "sessions_30d",
+      "psi": 0.03499146247493601,
+      "ks_statistic": 0.08600000000000002,
+      "ks_p_value": 6.981572351032901e-81,
+      "status": "Stable"
+    },
+    {
+      "feature": "offer_views_90d",
+      "psi": 0.022527165490475634,
+      "ks_statistic": 0.06839999999999996,
+      "ks_p_value": 2.706061795313944e-51,
+      "status": "Stable"
+    },
+    {
+      "feature": "offer_click_rate_90d",
+      "psi": 0.01981398881042648,
+      "ks_statistic": 0.046160000000000034,
+      "ks_p_value": 1.3893930245481528e-23,
+      "status": "Stable"
+    },
+    {
+      "feature": "enroll_rate_90d",
+      "psi": 0.0029267633569144778,
+      "ks_statistic": 0.012360000000000038,
+      "ks_p_value": 0.043525635251472905,
+      "status": "Stable"
+    },
+    {
+      "feature": "email_click_rate_90d",
+      "psi": 0.006226362460481007,
+      "ks_statistic": 0.032200000000000006,
+      "ks_p_value": 1.0763707044593398e-11,
+      "status": "Stable"
+    },
+    {
+      "feature": "pricing_views_90d",
+      "psi": 0.007260285784408224,
+      "ks_statistic": 0.040120000000000045,
+      "ks_p_value": 6.416473004360419e-18,
+      "status": "Stable"
+    },
+    {
+      "feature": "loyalty_views_90d",
+      "psi": 0.0063397176016370405,
+      "ks_statistic": 0.03764000000000001,
+      "ks_p_value": 8.001544289896647e-16,
+      "status": "Stable"
+    },
+    {
+      "feature": "app_share_90d",
+      "psi": 0.029375887443075153,
+      "ks_statistic": 0.06799999999999998,
+      "ks_p_value": 1.0618184885234884e-50,
+      "status": "Stable"
+    },
+    {
+      "feature": "days_since_last_login",
+      "psi": 0.048737444500752354,
+      "ks_statistic": 0.08335999999999999,
+      "ks_p_value": 5.1836954013225334e-76,
+      "status": "Stable"
+    },
+    {
+      "feature": "points_earned_to_date",
+      "psi": 0.2759844241435986,
+      "ks_statistic": 0.20776000000000006,
+      "ks_p_value": 0.0,
+      "status": "Review"
+    },
+    {
+      "feature": "frequency_trend",
+      "psi": 0.43967752594530785,
+      "ks_statistic": 0.28700000000000003,
+      "ks_p_value": 0.0,
+      "status": "Review"
+    },
+    {
+      "feature": "digital_engagement_score",
+      "psi": 0.03321622562203038,
+      "ks_statistic": 0.08600000000000002,
+      "ks_p_value": 6.981572351032901e-81,
+      "status": "Stable"
+    }
+  ],
+  "matured_july_performance": {
+    "propensity": {
+      "roc_auc": 0.9128103215084272,
+      "pr_auc": 0.9711063554424477,
+      "brier": 0.1078343749738033,
+      "ece_10bins": 0.05706540886744004,
+      "lift_at_10": 1.3175230566534915,
+      "lift_at_20": 1.3167325428194994,
+      "n": 25000,
+      "prevalence": 0.759
+    },
+    "churn": {
+      "roc_auc": 0.910322785556224,
+      "pr_auc": 0.5219173498701939,
+      "brier": 0.038030364735242836,
+      "ece_10bins": 0.005163434419182627,
+      "lift_at_10": 6.345576428340634,
+      "lift_at_20": 4.025694649605869,
+      "n": 20468,
+      "prevalence": 0.05838381864373656
+    },
+    "attrition": {
+      "roc_auc": 0.7401422189011169,
+      "pr_auc": 0.5004565038646335,
+      "brier": 0.14814041036987713,
+      "ece_10bins": 0.07964127241409714,
+      "lift_at_10": 2.7692484618480826,
+      "lift_at_20": 2.203321788036006,
+      "n": 20468,
+      "prevalence": 0.21179401993355482
+    }
+  },
+  "prediction_drift": [
+    {
+      "model": "propensity",
+      "psi": 0.07247148891137731,
+      "reference": "July held-out scores",
+      "current": "2025-10-01",
+      "status": "Stable"
+    },
+    {
+      "model": "churn",
+      "psi": 0.07190832123829691,
+      "reference": "July held-out scores",
+      "current": "2025-10-01",
+      "status": "Stable"
+    },
+    {
+      "model": "attrition",
+      "psi": 0.012422240364106918,
+      "reference": "July held-out scores",
+      "current": "2025-10-01",
+      "status": "Stable"
+    }
+  ],
+  "data_quality": {
+    "method": "Same-weekday volume ratio with a rain/holiday adjustment fitted before June 2025; robust z-scores for duplicate, out-of-range and null rates. Flags: |volume z| >= 4 or rate z >= 6.",
+    "weather_coefficient": -0.01888253392880253,
+    "holiday_coefficient": -0.49936883051445535,
+    "evaluation_against_planted": {
+      "monitored_days": 122,
+      "planted_defect_days": 4,
+      "flagged_days": 4,
+      "caught": 4,
+      "precision": 1.0,
+      "recall": 1.0,
+      "false_alarm_days": 0
+    },
+    "flags": [
+      {
+        "day": "2025-07-23 00:00:00",
+        "rows": 1985,
+        "expected_rows": 5138.0,
+        "volume_z": -23.099105362563826,
+        "reason": "volume vs same weekday"
+      },
+      {
+        "day": "2025-07-24 00:00:00",
+        "rows": 7575,
+        "expected_rows": 5068.0,
+        "volume_z": 9.840148395287274,
+        "reason": "volume vs same weekday"
+      },
+      {
+        "day": "2025-08-21 00:00:00",
+        "rows": 4548,
+        "expected_rows": 4662.5,
+        "volume_z": -1.4576397184986039,
+        "reason": "out-of-range values"
+      },
+      {
+        "day": "2025-09-10 00:00:00",
+        "rows": 6761,
+        "expected_rows": 4309.5,
+        "volume_z": 9.64790646124453,
+        "reason": "duplicate natural keys"
+      }
+    ]
+  },
+  "volume_checks": [
+    {
+      "table": "fact_trip",
+      "date": "2025-09-24",
+      "rows": 3812,
+      "historical_median": 4098.5,
+      "review": false
+    },
+    {
+      "table": "fact_trip",
+      "date": "2025-09-25",
+      "rows": 3977,
+      "historical_median": 4098.5,
+      "review": false
+    },
+    {
+      "table": "fact_trip",
+      "date": "2025-09-26",
+      "rows": 4119,
+      "historical_median": 4098.5,
+      "review": false
+    },
+    {
+      "table": "fact_trip",
+      "date": "2025-09-27",
+      "rows": 3250,
+      "historical_median": 4098.5,
+      "review": false
+    },
+    {
+      "table": "fact_trip",
+      "date": "2025-09-28",
+      "rows": 3259,
+      "historical_median": 4098.5,
+      "review": false
+    },
+    {
+      "table": "fact_trip",
+      "date": "2025-09-29",
+      "rows": 4251,
+      "historical_median": 4098.5,
+      "review": false
+    },
+    {
+      "table": "fact_trip",
+      "date": "2025-09-30",
+      "rows": 2470,
+      "historical_median": 4098.5,
+      "review": false
+    },
+    {
+      "table": "fact_digital_event",
+      "date": "2025-09-24",
+      "rows": 1785,
+      "historical_median": 1816.0,
+      "review": false
+    },
+    {
+      "table": "fact_digital_event",
+      "date": "2025-09-25",
+      "rows": 1868,
+      "historical_median": 1816.0,
+      "review": false
+    },
+    {
+      "table": "fact_digital_event",
+      "date": "2025-09-26",
+      "rows": 1947,
+      "historical_median": 1816.0,
+      "review": false
+    },
+    {
+      "table": "fact_digital_event",
+      "date": "2025-09-27",
+      "rows": 1828,
+      "historical_median": 1816.0,
+      "review": false
+    },
+    {
+      "table": "fact_digital_event",
+      "date": "2025-09-28",
+      "rows": 1769,
+      "historical_median": 1816.0,
+      "review": false
+    },
+    {
+      "table": "fact_digital_event",
+      "date": "2025-09-29",
+      "rows": 1748,
+      "historical_median": 1816.0,
+      "review": false
+    },
+    {
+      "table": "fact_digital_event",
+      "date": "2025-09-30",
+      "rows": 1727,
+      "historical_median": 1816.0,
+      "review": false
+    }
+  ],
+  "campaign_checks": [
+    {
+      "arm": "1,500 bonus points",
+      "enrollment_rate": 0.39971191933741446,
+      "conversion": 0.814548073460569,
+      "redemption_rate": 0.32481094706517827,
+      "net_contribution": 65440.02019123999,
+      "rows": 2777
+    },
+    {
+      "arm": "10% off every trip",
+      "enrollment_rate": 0.4035277177825774,
+      "conversion": 0.7681785457163427,
+      "redemption_rate": 0.3092152627789777,
+      "net_contribution": 94801.087911332,
+      "rows": 2778
+    },
+    {
+      "arm": "500 bonus points",
+      "enrollment_rate": 0.41267554915376303,
+      "conversion": 0.7976233345336694,
+      "redemption_rate": 0.33741447605329494,
+      "net_contribution": 88617.20745090401,
+      "rows": 2777
+    },
+    {
+      "arm": "Control",
+      "enrollment_rate": 0.0,
+      "conversion": 0.7516198704103672,
+      "redemption_rate": 0.0,
+      "net_contribution": 94303.944978048,
+      "rows": 2778
+    },
+    {
+      "arm": "Fifth trip free",
+      "enrollment_rate": 0.3952483801295896,
+      "conversion": 0.9452843772498201,
+      "redemption_rate": 0.1994240460763139,
+      "net_contribution": 107399.36225160341,
+      "rows": 2778
+    },
+    {
+      "arm": "Off-peak 15% off",
+      "enrollment_rate": 0.408207343412527,
+      "conversion": 0.7901367890568755,
+      "redemption_rate": 0.3228941684665227,
+      "net_contribution": 92030.12654484899,
+      "rows": 2778
+    },
+    {
+      "arm": "Off-peak pass ($30 cap)",
+      "enrollment_rate": 0.4064074874010079,
+      "conversion": 0.7728581713462923,
+      "redemption_rate": 0.09539236861051116,
+      "net_contribution": 76657.24660391599,
+      "rows": 2778
+    },
+    {
+      "arm": "Spend & get $10",
+      "enrollment_rate": 0.4089272858171346,
+      "conversion": 0.7944564434845213,
+      "redemption_rate": 0.09467242620590353,
+      "net_contribution": 104324.86699195999,
+      "rows": 2778
+    },
+    {
+      "arm": "Weekend 20% off",
+      "enrollment_rate": 0.4164866810655148,
+      "conversion": 0.8038156947444205,
+      "redemption_rate": 0.33225341972642186,
+      "net_contribution": 95271.57711370398,
+      "rows": 2778
+    }
+  ],
+  "alerts": [
+    {
+      "category": "feature_drift",
+      "key": "tenure_days",
+      "severity": "review",
+      "value": 1.2595916679180477,
+      "action": "Review drift with business context and matured performance"
+    },
+    {
+      "category": "feature_drift",
+      "key": "trips_30d",
+      "severity": "review",
+      "value": 0.2311251768728544,
+      "action": "Review drift with business context and matured performance"
+    },
+    {
+      "category": "feature_drift",
+      "key": "trips_90d",
+      "severity": "review",
+      "value": 0.21938608074163352,
+      "action": "Review drift with business context and matured performance"
+    },
+    {
+      "category": "feature_drift",
+      "key": "zones_visited_30d",
+      "severity": "review",
+      "value": 0.22621466019797612,
+      "action": "Review drift with business context and matured performance"
+    },
+    {
+      "category": "feature_drift",
+      "key": "active_days_30d",
+      "severity": "review",
+      "value": 0.23143596241651804,
+      "action": "Review drift with business context and matured performance"
+    },
+    {
+      "category": "feature_drift",
+      "key": "max_daily_trips_30d",
+      "severity": "review",
+      "value": 0.22561620622390346,
+      "action": "Review drift with business context and matured performance"
+    },
+    {
+      "category": "feature_drift",
+      "key": "recency_days",
+      "severity": "review",
+      "value": 0.29167007206965684,
+      "action": "Review drift with business context and matured performance"
+    },
+    {
+      "category": "feature_drift",
+      "key": "points_earned_to_date",
+      "severity": "review",
+      "value": 0.2759844241435986,
+      "action": "Review drift with business context and matured performance"
+    },
+    {
+      "category": "feature_drift",
+      "key": "frequency_trend",
+      "severity": "review",
+      "value": 0.43967752594530785,
+      "action": "Review drift with business context and matured performance"
+    }
+  ],
+  "review_count": 9,
+  "threshold": 0.2,
+  "interpretation": "Drift is a review signal; seasonality and changing tenure need context. July synthetic labels are mature by October and their discrimination/calibration is recorded. Current October performance awaits later labels. No automatic retraining based on PSI alone."
+}

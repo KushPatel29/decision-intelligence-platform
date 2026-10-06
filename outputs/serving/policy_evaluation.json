@@ -1,0 +1,10 @@
+{
+  "n_test": 5000,
+  "incremental_contribution_per_customer": 3.957598901804871,
+  "ci_low": -4.605304687681334,
+  "ci_high": 12.122061873587326,
+  "bootstrap_replicates": 1000,
+  "share_recommended_control": 0.006,
+  "policy": "Each held-out customer gets the offer with the highest positive modelled value; otherwise control",
+  "interpretation": "Inverse-propensity-weighted estimate on randomised customers the models never saw. It is the estimate a real team could compute; the simulation's oracle evaluation sits alongside it."
+}

@@ -1,0 +1,61 @@
+table budget_frontier
+	lineageTag: 5371b89c-1b0e-5f9a-9c79-147dd43cf974
+
+	column budget
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 7d391602-176c-5e5f-8d8d-edad6f6ae40e
+		summarizeBy: sum
+		sourceColumn: budget
+
+	column spend
+		dataType: double
+		formatString: #,0.00
+		lineageTag: c15e165a-90aa-57c4-ac73-9b3338f3ffbc
+		summarizeBy: sum
+		sourceColumn: spend
+
+	column contacts
+		dataType: int64
+		formatString: #,0
+		lineageTag: ec37fbae-9fb1-5a93-93ac-a1a44b578ac7
+		summarizeBy: sum
+		sourceColumn: contacts
+
+	column expected_value
+		dataType: double
+		formatString: #,0.00
+		lineageTag: fa6fe002-38d7-52dc-8c73-b9087e1149ea
+		summarizeBy: sum
+		sourceColumn: expected_value
+
+	column budget_shadow_price
+		dataType: double
+		formatString: #,0.00
+		lineageTag: ae9f751b-81a3-59be-bdaa-49726c604729
+		summarizeBy: sum
+		sourceColumn: budget_shadow_price
+
+	column marginal_value_per_dollar
+		dataType: double
+		formatString: 0.0%
+		lineageTag: ef19bd07-a5ab-59fd-b010-244f16734bb5
+		summarizeBy: none
+		sourceColumn: marginal_value_per_dollar
+
+	partition budget_frontier = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [#"budget" = nullable text, #"spend" = nullable text, #"contacts" = nullable text, #"expected_value" = nullable text, #"budget_shadow_price" = nullable text, #"marginal_value_per_dollar" = nullable text], {
+				        {"2500.0", "2499.9999", "3493", "63147.067", "14.8713", null},
+				        {"5000.0", "4999.9996", "4854", "90489.0134", "8.7451", "10.9368"},
+				        {"7500.0", "7499.9977", "5000", "107722.6445", "5.1857", "6.8935"},
+				        {"10000.0", "9999.9987", "5000", "117257.3797", "2.4439", "3.8139"},
+				        {"15000.0", "14999.9239", "5000", "122426.8882", "0.3388", "1.0339"},
+				        {"20000.0", "17971.741", "5000", "122922.4259", "0.0", "0.0991"},
+				        {"30000.0", "17971.741", "5000", "122922.4259", "0.0", "0.0"}
+				    }),
+				    Typed = Table.TransformColumnTypes(Source, {{"budget", type number}, {"spend", type number}, {"contacts", Int64.Type}, {"expected_value", type number}, {"budget_shadow_price", type number}, {"marginal_value_per_dollar", type number}})
+				in
+				    Typed

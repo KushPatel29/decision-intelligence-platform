@@ -28,6 +28,7 @@ def small_db(tmp_path):
             "autopay": [True, False],
             "transponder_flag": [True, True],
             "home_zone": [0, 1],
+            "vehicle_class": ["Light", "Heavy"],
             "eligible": [True, False],
             "account_status": ["Active", "Active"],
         }
@@ -41,6 +42,7 @@ def small_db(tmp_path):
             "distance_km": [20.0, 20.0, 20.0],
             "discount": [0.0, 0.0, 0.0],
             "period": ["Peak", "Peak", "Off-peak"],
+            "zone_id": [0, 0, 1],
         }
     )
     digital = pd.DataFrame(

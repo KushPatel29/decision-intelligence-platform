@@ -1,0 +1,47 @@
+table plan_summary
+	lineageTag: 84e64996-82ef-52ca-9412-5fdb0ecc2cc7
+
+	column budget
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 0ee786c5-fc7d-5d9a-93f7-4bf2ff3ce5d8
+		summarizeBy: sum
+		sourceColumn: budget
+
+	column contact_limit
+		dataType: int64
+		formatString: #,0
+		lineageTag: a6a03d67-e6fc-53fc-998f-15b5165aeafb
+		summarizeBy: sum
+		sourceColumn: contact_limit
+
+	column points_limit
+		dataType: int64
+		formatString: #,0
+		lineageTag: 65dfc17b-4973-5952-aff8-a2e9ef39011c
+		summarizeBy: sum
+		sourceColumn: points_limit
+
+	column eligible_customers
+		dataType: int64
+		formatString: #,0
+		lineageTag: 741ac5b4-3651-5e6a-91e2-0593893df778
+		summarizeBy: sum
+		sourceColumn: eligible_customers
+
+	column proven_optimal
+		dataType: boolean
+		lineageTag: 32c99bc0-012e-5487-90b5-b5a5da91b443
+		summarizeBy: none
+		sourceColumn: proven_optimal
+
+	partition plan_summary = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [#"budget" = nullable text, #"contact_limit" = nullable text, #"points_limit" = nullable text, #"eligible_customers" = nullable text, #"proven_optimal" = nullable text], {
+				        {"10000.0", "5000", "2500000", "17059", "True"}
+				    }),
+				    Typed = Table.TransformColumnTypes(Source, {{"budget", type number}, {"contact_limit", Int64.Type}, {"points_limit", Int64.Type}, {"eligible_customers", Int64.Type}, {"proven_optimal", type logical}})
+				in
+				    Typed

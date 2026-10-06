@@ -1,74 +1,78 @@
-"""Fresh randomized constrained-policy simulation, distinct from model training."""
+"""A fresh randomised test of the optimized policy itself, separate from model training.
+
+October customers are split in half. The optimizer plans for the policy half
+with every guardrail scaled to its size; the control half receives nothing.
+Outcomes are drawn from the simulator, and the intention-to-treat difference
+is compared with what the plan predicted and what the truth says it is worth.
+"""
+
+from __future__ import annotations
 
 import numpy as np
-import pandas as pd
 
 from .config import write_json
 from .experiments import difference
 from .optimization import solve
 
 
-def policy_trial(cfg, current, hidden, capacity, solver="auto"):
+def policy_trial(cfg, current, truth, frame, capacity, solver="auto"):
     rng = np.random.default_rng(cfg.seed + 810)
-    trial = current[["customer_id", "trips_30d", "avg_toll"]].merge(
-        hidden, on="customer_id", validate="one_to_one"
-    )
-    assignment = rng.permutation(np.resize(np.array(["Control", "Optimized policy"]), len(trial)))
-    trial["arm"] = assignment
-    candidates = pd.read_csv(cfg.path("outputs", "joint_candidates.csv"))
-    eligible_ids = trial.loc[trial.arm.eq("Optimized policy"), "customer_id"]
-    candidate = candidates[candidates.customer_id.isin(eligible_ids)].copy()
-    fraction = len(eligible_ids) / len(trial)
-    candidate["inventory"] = np.floor(candidate.inventory * fraction)
+    trial = current[["customer_id", "eligible"]].copy()
+    trial["arm"] = rng.permutation(np.resize(np.array(["Control", "Optimized policy"]), len(trial)))
+    fraction = trial.arm.eq("Optimized policy").mean()
+    policy_ids = set(trial.loc[trial.arm.eq("Optimized policy"), "customer_id"])
+    pool = frame[frame.customer_id.isin(policy_ids)].copy()
+    pool["inventory"] = np.floor(pool.inventory * fraction)
     cells = capacity.copy()
-    cells["available_trips"] *= fraction
+    cells["available_trips"] = cells.available_trips * fraction
     allocation = solve(
-        candidate,
+        pool,
         cells,
-        cfg.budget * fraction,
-        int(cfg.campaign_limit * fraction),
-        cfg.min_roi,
-        solver,
-        points_budget=int(35000 * fraction),
+        budget=cfg.budget * fraction,
+        campaign_limit=int(cfg.campaign_limit * fraction),
+        min_roi=cfg.min_roi,
+        solver="highs" if solver == "highs" else "auto",
+        points_budget=int(cfg.points_budget * fraction),
     )
-    trial = trial.merge(
-        allocation.selected[["customer_id", "offer_id"]], on="customer_id", how="left", validate="one_to_one"
-    )
+    plan = allocation.selected[["customer_id", "offer_id", "objective_value"]]
+    trial = trial.merge(plan, on="customer_id", how="left", validate="one_to_one")
+    base = truth.drop_duplicates("customer_id").set_index("customer_id").loc[trial.customer_id]
+    effects = truth.set_index(["customer_id", "offer_id"])
     exposed = trial.offer_id.notna().to_numpy()
-    factor = np.where(
-        trial.offer_id.eq("loyalty_500"), 0.72, np.where(trial.offer_id.eq("weekend_20"), 1.08, 1.0)
-    )
-    mean = 0.20 + np.clip(trial.trips_30d.to_numpy() * 0.22, 0, 9)
-    effect = (
-        (0.6 + 2.3 * trial.latent_sensitivity.to_numpy() / 2)
-        * (0.6 + 0.4 * trial.latent_digital_affinity.to_numpy())
-        * factor
-    )
-    trial["trip_count"] = rng.poisson(mean + exposed * effect)
-    prices = trial.avg_toll.clip(lower=8).to_numpy()
-    discount = np.where(
-        trial.offer_id.eq("weekend_20"), 0.20, np.where(trial.offer_id.eq("offpeak_15"), 0.15, 0.0)
-    )
-    trial["cost"] = (
-        np.where(trial.offer_id.eq("loyalty_500"), 5.0, trial.trip_count * prices * discount) + exposed * 0.35
-    )
-    trial["net_contribution"] = trial.trip_count * prices * cfg.contribution_margin - trial.cost
-    trial = trial.drop(columns=[c for c in trial if c.startswith("latent_")])
+    keys = list(zip(trial.customer_id[exposed], trial.offer_id[exposed], strict=True))
+    tau = np.zeros(len(trial))
+    cost = np.zeros(len(trial))
+    later = np.zeros(len(trial))
+    if keys:
+        tau[exposed] = effects.loc[keys, "true_incremental_trips"].to_numpy()
+        cost[exposed] = effects.loc[keys, "true_cost"].to_numpy()
+        later[exposed] = effects.loc[keys, "true_later_margin"].to_numpy()
+    toll = base.true_avg_toll.to_numpy()
+    trips = rng.poisson(np.maximum(base.true_baseline_trips.to_numpy() + tau, 0))
+    trial["trip_count"] = trips
+    trial["incentive_cost"] = cost
+    trial["net_contribution"] = trips * toll * cfg.contribution_margin - cost
     treated = trial[trial.arm.eq("Optimized policy")]
     control = trial[trial.arm.eq("Control")]
     stats = difference(treated.net_contribution, control.net_contribution, comparisons=1)
+    true_effect = float(effects.loc[keys, "true_net_contribution"].sum() / len(treated) if keys else 0.0)
     result = {
         "unit": "customer",
-        "assignment": "New October 2025 balanced customer randomization, independent simulation seed; intention to treat including uncontacted customers",
+        "assignment": "New October 2025 balanced randomisation, independent seed; intention to treat including "
+        "customers the policy chose not to contact",
         "n_policy": len(treated),
         "n_control": len(control),
-        "policy_contacts": len(allocation.selected),
+        "policy_contacts": int(exposed.sum()),
         "planning_constraints_passed": allocation.diagnostics["all_constraints_passed"],
-        "expected_spend": allocation.diagnostics["spend"],
-        "realized_synthetic_spend": float(treated.cost.sum()),
+        "planned_spend": allocation.diagnostics["spend"],
+        "expected_spend": float(cost.sum()),
+        "predicted_effect_per_customer": float(allocation.selected.net_contribution.sum() / len(treated)),
+        "true_effect_per_customer": true_effect,
         "incremental_net_contribution_per_customer": stats,
         "incremental_trips_per_customer": difference(treated.trip_count, control.trip_count, comparisons=1),
-        "limitations": "Pilot uncertainty may be wide because few customers receive offers. Budget, inventory, contact, points and campaign headroom scaled to the policy half. Estimated-cost constraints do not guarantee realized stochastic spending or traffic; operational caps still required.",
+        "limitations": "Guardrails are scaled to the policy half. Only a minority of the policy half is contacted, "
+        "so the per-customer effect is diluted and its interval is wide by design. Estimated-cost constraints do "
+        "not guarantee realised spend; operational caps still apply.",
     }
     trial.to_csv(cfg.path("outputs", "policy_trial.csv"), index=False)
     write_json(cfg.path("outputs", "policy_trial_results.json"), result)

@@ -1,0 +1,194 @@
+{
+  "joint": {
+    "solver": "HiGHS LP + HiGHS core",
+    "status": "optimal",
+    "gap": 7.287855191669123e-07,
+    "candidate_count": 125820,
+    "customer_count": 17059,
+    "constraint_count": 17089,
+    "budget": 10000.0,
+    "spend": 9999.998690628949,
+    "net_contribution": 63678.850938725554,
+    "objective_value": 117257.37971980032,
+    "incremental_trips": 10993.268372538592,
+    "net_roi": 6.367885927665105,
+    "all_constraints_passed": true,
+    "fallback_reason": null,
+    "min_roi": 0.15,
+    "binding_constraints": [
+      "campaign_size",
+      "inventory:free_trip"
+    ],
+    "binding_contact_rows": 5000,
+    "certificate": {
+      "lp_bound": 117257.46517534295,
+      "rounded_incumbent": 117252.73628712929,
+      "absolute_gap_before_core": 4.728888213663595,
+      "variables": 125820,
+      "fixed_to_zero": 113207,
+      "fixed_to_one": 1737,
+      "free_variables": 10876,
+      "free_constraints": 8100,
+      "licence_limit": 2000,
+      "gurobi_check": {
+        "free_variables": 1195,
+        "free_constraints": 1215,
+        "status": "optimal",
+        "gurobi_objective": 117257.24677522137,
+        "confirmed": true
+      },
+      "core_solver": "HiGHS",
+      "core_status": "optimal",
+      "objective": 117257.37971980032,
+      "proven_optimal": true,
+      "relative_gap_to_lp_bound": 7.287855191669123e-07
+    },
+    "solve_seconds": 16.46747229999164,
+    "shadow_prices": {
+      "budget": 2.443867876839713,
+      "campaign_size": 7.229374178483619,
+      "inventory:free_trip": 5.4117009806634995,
+      "capacity:1:Peak": 2.391812872979804
+    }
+  },
+  "combined": {
+    "contacts": 5000,
+    "budget": 10000.0,
+    "contact_limit": 5000,
+    "points_limit": 2500000,
+    "min_roi": 0.15,
+    "spend": 9999.998690628949,
+    "net_contribution": 63678.850938725554,
+    "later_value": 53578.528781074754,
+    "objective_value": 117257.37971980032,
+    "incremental_trips": 10993.268372538592,
+    "peak_trips": 3859.1504311850294,
+    "offpeak_trips": 4710.597935364407,
+    "weekend_trips": 2423.520005989155,
+    "points_awarded": 307000,
+    "all_constraints_passed": true
+  },
+  "by_offer": {
+    "free_trip": {
+      "contacts": 3000,
+      "spend": 2723.512328171223,
+      "net_contribution": 30958.46652443481,
+      "objective_value": 53169.554110107034,
+      "incremental_trips": 5027.956341370184,
+      "points": 0
+    },
+    "loyalty_1500": {
+      "contacts": 1,
+      "spend": 15.35,
+      "net_contribution": 35.64319061061487,
+      "objective_value": 88.96555183489068,
+      "incremental_trips": 3.286256532770489,
+      "points": 1500
+    },
+    "loyalty_500": {
+      "contacts": 611,
+      "spend": 3268.8500000000004,
+      "net_contribution": 9604.972538542415,
+      "objective_value": 23066.821219069694,
+      "incremental_trips": 1798.8425287464818,
+      "points": 305500
+    },
+    "offpeak_pass": {
+      "contacts": 55,
+      "spend": 45.87923475239798,
+      "net_contribution": 365.8336694295362,
+      "objective_value": 637.331713382167,
+      "incremental_trips": 60.96502343572664,
+      "points": 0
+    },
+    "pct_10": {
+      "contacts": 39,
+      "spend": 145.5788870151611,
+      "net_contribution": 435.0649088992012,
+      "objective_value": 817.9619549298932,
+      "incremental_trips": 71.6258194542145,
+      "points": 0
+    },
+    "spend_10": {
+      "contacts": 1246,
+      "spend": 3667.624884871786,
+      "net_contribution": 21834.303739746218,
+      "objective_value": 38651.17702274595,
+      "incremental_trips": 3958.5956944386535,
+      "points": 0
+    },
+    "weekend_20": {
+      "contacts": 48,
+      "spend": 133.20335581838117,
+      "net_contribution": 444.5663670627531,
+      "objective_value": 825.5681477306825,
+      "incremental_trips": 71.99670856056011,
+      "points": 0
+    }
+  },
+  "robust": {
+    "risk_aversion": 1.0,
+    "solver": "HiGHS LP + HiGHS core",
+    "contacts": 5000,
+    "spend": 9999.993741401764,
+    "net_contribution": 31297.45748868201,
+    "objective_value": 82978.33020844885,
+    "incremental_trips": 10737.834831321681,
+    "points": 246000
+  },
+  "lp_relaxation": {
+    "bound": 117257.46517534295,
+    "integrality_gap": 0.08545554263400845,
+    "shadow_prices": [
+      {
+        "constraint": "budget",
+        "shadow_price": 2.443867876839713,
+        "limit": 10000.0,
+        "binding": true
+      },
+      {
+        "constraint": "campaign_size",
+        "shadow_price": 7.229374178483619,
+        "limit": 5000.0,
+        "binding": true
+      },
+      {
+        "constraint": "inventory:free_trip",
+        "shadow_price": 5.4117009806634995,
+        "limit": 3000.0,
+        "binding": true
+      },
+      {
+        "constraint": "capacity:1:Peak",
+        "shadow_price": 2.391812872979804,
+        "limit": 450.1667680072542,
+        "binding": true
+      }
+    ]
+  },
+  "certification": {
+    "lp_bound": 117257.46517534295,
+    "rounded_incumbent": 117252.73628712929,
+    "absolute_gap_before_core": 4.728888213663595,
+    "variables": 125820,
+    "fixed_to_zero": 113207,
+    "fixed_to_one": 1737,
+    "free_variables": 10876,
+    "free_constraints": 8100,
+    "licence_limit": 2000,
+    "gurobi_check": {
+      "free_variables": 1195,
+      "free_constraints": 1215,
+      "status": "optimal",
+      "gurobi_objective": 117257.24677522137,
+      "confirmed": true
+    },
+    "core_solver": "HiGHS",
+    "core_status": "optimal",
+    "objective": 117257.37971980032,
+    "proven_optimal": true,
+    "relative_gap_to_lp_bound": 7.287855191669123e-07
+  },
+  "scope": "One mixed-integer program over every eligible customer and offer, with shared budget, contacts, net-ROI floor, points liability, inventory and signed zone/period capacity.",
+  "economics": "Objective = model-estimated 30-day incremental net contribution after incentive costs (discounts paid on baseline trips included) plus the discounted incremental margin on days 31-90. Retention is reported separately to avoid double counting."
+}

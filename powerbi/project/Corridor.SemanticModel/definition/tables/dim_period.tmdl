@@ -1,0 +1,29 @@
+table dim_period
+	lineageTag: ab3cb5dd-20f2-5d03-a13e-0eee524435ba
+
+	column period
+		dataType: string
+		lineageTag: 524ae093-0ceb-544e-ae6e-c15463815c7f
+		summarizeBy: none
+		sourceColumn: period
+		sortByColumn: period_order
+
+	column period_order
+		dataType: int64
+		formatString: #,0
+		lineageTag: 44544769-716e-521d-972a-0df3b0b3ef5a
+		summarizeBy: sum
+		sourceColumn: period_order
+
+	partition dim_period = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [#"period" = nullable text, #"period_order" = nullable text], {
+				        {"Peak", "1"},
+				        {"Off-peak", "2"},
+				        {"Weekend", "3"}
+				    }),
+				    Typed = Table.TransformColumnTypes(Source, {{"period", type text}, {"period_order", Int64.Type}})
+				in
+				    Typed

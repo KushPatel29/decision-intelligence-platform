@@ -1,0 +1,2300 @@
+{
+  "unit": "customer",
+  "analysis": "Intention to treat; all randomised customers included",
+  "arms": [
+    "Control",
+    "Off-peak 15% off",
+    "10% off every trip",
+    "Weekend 20% off",
+    "Spend & get $10",
+    "Fifth trip free",
+    "Off-peak pass ($30 cap)",
+    "500 bonus points",
+    "1,500 bonus points"
+  ],
+  "comparisons": 8,
+  "design": {
+    "primary_metric": "Trips per customer over the 30-day window (CUPED on June trips)",
+    "binary_metric": "Travelled at least once in the window",
+    "binary_baseline": 0.7516198704103672,
+    "binary_mde": 0.05,
+    "power": 0.8,
+    "family_alpha": 0.05,
+    "required_per_arm_binary": 1774,
+    "achieved_mde_trips_cuped": 0.33009106505763075,
+    "achieved_mde_trips_raw": 0.7996033673360715,
+    "achieved_mde_value_cuped": 2.1778617101176585,
+    "achieved_mde_value_raw": 5.124631388306677
+  },
+  "required_per_arm": 1774,
+  "actual_per_arm": {
+    "Control": 2778,
+    "Off-peak 15% off": 2778,
+    "10% off every trip": 2778,
+    "Weekend 20% off": 2778,
+    "Spend & get $10": 2778,
+    "Fifth trip free": 2778,
+    "Off-peak pass ($30 cap)": 2778,
+    "500 bonus points": 2777,
+    "1,500 bonus points": 2777
+  },
+  "powered_for_planned_mde": true,
+  "srm_p_value": 0.9999999999999998,
+  "randomisation": "Blocked: equal allocation within 30 strata of 90-day trips x trip trend",
+  "balance": [
+    {
+      "arm": "1,500 bonus points",
+      "covariate": "trips_30d",
+      "smd": -0.00456306005692453
+    },
+    {
+      "arm": "1,500 bonus points",
+      "covariate": "trips_90d",
+      "smd": 0.009180617339646162
+    },
+    {
+      "arm": "1,500 bonus points",
+      "covariate": "spend_90d",
+      "smd": 0.012915640334465036
+    },
+    {
+      "arm": "1,500 bonus points",
+      "covariate": "recency_days",
+      "smd": -0.01813409049922958
+    },
+    {
+      "arm": "1,500 bonus points",
+      "covariate": "frequency_trend",
+      "smd": -0.027687790608514434
+    },
+    {
+      "arm": "1,500 bonus points",
+      "covariate": "digital_events_30d",
+      "smd": -0.015652869388048406
+    },
+    {
+      "arm": "10% off every trip",
+      "covariate": "trips_30d",
+      "smd": -0.02236474322445583
+    },
+    {
+      "arm": "10% off every trip",
+      "covariate": "trips_90d",
+      "smd": -0.008065146662759825
+    },
+    {
+      "arm": "10% off every trip",
+      "covariate": "spend_90d",
+      "smd": -0.0006451313601487268
+    },
+    {
+      "arm": "10% off every trip",
+      "covariate": "recency_days",
+      "smd": -0.01728787077831021
+    },
+    {
+      "arm": "10% off every trip",
+      "covariate": "frequency_trend",
+      "smd": -0.008173905622438762
+    },
+    {
+      "arm": "10% off every trip",
+      "covariate": "digital_events_30d",
+      "smd": -0.02209540507728513
+    },
+    {
+      "arm": "500 bonus points",
+      "covariate": "trips_30d",
+      "smd": -0.0016625483317266603
+    },
+    {
+      "arm": "500 bonus points",
+      "covariate": "trips_90d",
+      "smd": 0.008134234909505135
+    },
+    {
+      "arm": "500 bonus points",
+      "covariate": "spend_90d",
+      "smd": 0.005357153892044896
+    },
+    {
+      "arm": "500 bonus points",
+      "covariate": "recency_days",
+      "smd": 0.001328679489527451
+    },
+    {
+      "arm": "500 bonus points",
+      "covariate": "frequency_trend",
+      "smd": 0.005176687344738061
+    },
+    {
+      "arm": "500 bonus points",
+      "covariate": "digital_events_30d",
+      "smd": 0.001941366242272527
+    },
+    {
+      "arm": "Fifth trip free",
+      "covariate": "trips_30d",
+      "smd": 0.003440258441232117
+    },
+    {
+      "arm": "Fifth trip free",
+      "covariate": "trips_90d",
+      "smd": 0.015989396004589207
+    },
+    {
+      "arm": "Fifth trip free",
+      "covariate": "spend_90d",
+      "smd": 0.022403118063314246
+    },
+    {
+      "arm": "Fifth trip free",
+      "covariate": "recency_days",
+      "smd": 0.012012958334164704
+    },
+    {
+      "arm": "Fifth trip free",
+      "covariate": "frequency_trend",
+      "smd": -0.018822807176712027
+    },
+    {
+      "arm": "Fifth trip free",
+      "covariate": "digital_events_30d",
+      "smd": -0.008325008849058449
+    },
+    {
+      "arm": "Off-peak 15% off",
+      "covariate": "trips_30d",
+      "smd": -0.016795800373044754
+    },
+    {
+      "arm": "Off-peak 15% off",
+      "covariate": "trips_90d",
+      "smd": -0.0016239209692767093
+    },
+    {
+      "arm": "Off-peak 15% off",
+      "covariate": "spend_90d",
+      "smd": -0.00641064736059546
+    },
+    {
+      "arm": "Off-peak 15% off",
+      "covariate": "recency_days",
+      "smd": 0.0018369531723911254
+    },
+    {
+      "arm": "Off-peak 15% off",
+      "covariate": "frequency_trend",
+      "smd": -0.000775425143361958
+    },
+    {
+      "arm": "Off-peak 15% off",
+      "covariate": "digital_events_30d",
+      "smd": 0.003634406882418031
+    },
+    {
+      "arm": "Off-peak pass ($30 cap)",
+      "covariate": "trips_30d",
+      "smd": -0.0005778058342262211
+    },
+    {
+      "arm": "Off-peak pass ($30 cap)",
+      "covariate": "trips_90d",
+      "smd": 0.006764012053199703
+    },
+    {
+      "arm": "Off-peak pass ($30 cap)",
+      "covariate": "spend_90d",
+      "smd": 0.005523886172746298
+    },
+    {
+      "arm": "Off-peak pass ($30 cap)",
+      "covariate": "recency_days",
+      "smd": -0.001345039840686172
+    },
+    {
+      "arm": "Off-peak pass ($30 cap)",
+      "covariate": "frequency_trend",
+      "smd": -0.006319731938182821
+    },
+    {
+      "arm": "Off-peak pass ($30 cap)",
+      "covariate": "digital_events_30d",
+      "smd": 0.010785862266868713
+    },
+    {
+      "arm": "Spend & get $10",
+      "covariate": "trips_30d",
+      "smd": 0.014346215452713687
+    },
+    {
+      "arm": "Spend & get $10",
+      "covariate": "trips_90d",
+      "smd": 0.02581767060512933
+    },
+    {
+      "arm": "Spend & get $10",
+      "covariate": "spend_90d",
+      "smd": 0.023062752957791623
+    },
+    {
+      "arm": "Spend & get $10",
+      "covariate": "recency_days",
+      "smd": -0.0183166547727912
+    },
+    {
+      "arm": "Spend & get $10",
+      "covariate": "frequency_trend",
+      "smd": -0.02960215771066106
+    },
+    {
+      "arm": "Spend & get $10",
+      "covariate": "digital_events_30d",
+      "smd": 0.019525816230120407
+    },
+    {
+      "arm": "Weekend 20% off",
+      "covariate": "trips_30d",
+      "smd": -0.0094750606284574
+    },
+    {
+      "arm": "Weekend 20% off",
+      "covariate": "trips_90d",
+      "smd": 0.0006001523893179741
+    },
+    {
+      "arm": "Weekend 20% off",
+      "covariate": "spend_90d",
+      "smd": -0.006675672469606156
+    },
+    {
+      "arm": "Weekend 20% off",
+      "covariate": "recency_days",
+      "smd": 0.0029975429359986
+    },
+    {
+      "arm": "Weekend 20% off",
+      "covariate": "frequency_trend",
+      "smd": -0.00936806978314066
+    },
+    {
+      "arm": "Weekend 20% off",
+      "covariate": "digital_events_30d",
+      "smd": 0.0032452890490158454
+    }
+  ],
+  "max_abs_smd": 0.02960215771066106,
+  "control_conversion": 0.7516198704103672,
+  "cuped_mean_variance_reduction": 0.83578748709159,
+  "sequential_boundaries": [
+    4.774544772357521,
+    3.376112985612784,
+    2.756584709578535
+  ],
+  "results": [
+    {
+      "difference": 0.0385169186465083,
+      "se": 0.011266696639612,
+      "ci_low": 0.007709615027815017,
+      "ci_high": 0.06932422226520159,
+      "p_value": 0.0006293208229719792,
+      "p_adjusted": 0.005034566583775834,
+      "offer_id": "offpeak_15",
+      "arm": "Off-peak 15% off",
+      "n": 2778,
+      "conversion": 0.7901367890568755,
+      "relative_lift": 0.05124521072796938,
+      "enrollment_rate": 0.408207343412527,
+      "redemption_rate": 0.3228941684665227,
+      "incremental_trips_per_customer": {
+        "difference": 0.5669546436285096,
+        "se": 0.23153866718995877,
+        "ci_low": -0.0661574608112071,
+        "ci_high": 1.200066748068226,
+        "p_value": 0.014339703160809647,
+        "p_adjusted": 0.11471762528647718
+      },
+      "incremental_trips_cuped": {
+        "difference": 0.6986379363678568,
+        "se": 0.09655308770193033,
+        "ci_low": 0.4346261871122981,
+        "ci_high": 0.9626496856234155,
+        "p_value": 4.628245443690877e-13,
+        "p_adjusted": 3.7025963549527014e-12,
+        "theta": 0.8648136813945725,
+        "variance_reduction": 0.8261057285061046
+      },
+      "incremental_net_contribution_per_customer": {
+        "difference": -0.8185091552192247,
+        "se": 1.3757046679715685,
+        "ci_low": -4.5801930588086694,
+        "ci_high": 2.94317474837022,
+        "p_value": 0.551860536704172,
+        "p_adjusted": 1.0
+      },
+      "incremental_net_contribution_cuped": {
+        "difference": 0.019354581022682282,
+        "se": 0.5932807030732652,
+        "ci_low": -1.6028936551133117,
+        "ci_high": 1.6416028171586763,
+        "p_value": 0.9739752488803026,
+        "p_adjusted": 1.0,
+        "theta": 0.6113494415386843,
+        "variance_reduction": 0.814018381095801
+      },
+      "incremental_later_margin": {
+        "difference": 1.5650833467235685,
+        "se": 2.415696487842095,
+        "ci_low": -5.040321727369677,
+        "ci_high": 8.170488420816813,
+        "p_value": 0.5170620569376148,
+        "p_adjusted": 1.0
+      },
+      "retention_effect": {
+        "difference": 0.016918646508279345,
+        "se": 0.011077470476717909,
+        "ci_low": -0.013371242997000893,
+        "ci_high": 0.04720853601355958,
+        "p_value": 0.12668584950587258,
+        "p_adjusted": 1.0
+      },
+      "sequential": {
+        "looks": [
+          {
+            "day": 10,
+            "z": 5.631642800016709,
+            "boundary": 4.774544772357521,
+            "crossed": true
+          },
+          {
+            "day": 20,
+            "z": 6.870722461199201,
+            "boundary": 3.376112985612784,
+            "crossed": true
+          },
+          {
+            "day": 30,
+            "z": 7.2357907240069474,
+            "boundary": 2.756584709578535,
+            "crossed": true
+          }
+        ],
+        "stopped_at_day": 10
+      }
+    },
+    {
+      "difference": 0.016558675305975545,
+      "se": 0.01146094035926663,
+      "ci_low": -0.01477976227672146,
+      "ci_high": 0.04789711288867255,
+      "p_value": 0.1485163099687078,
+      "p_adjusted": 1.0,
+      "offer_id": "pct_10",
+      "arm": "10% off every trip",
+      "n": 2778,
+      "conversion": 0.7681785457163427,
+      "relative_lift": 0.022030651340996202,
+      "enrollment_rate": 0.4035277177825774,
+      "redemption_rate": 0.3092152627789777,
+      "incremental_trips_per_customer": {
+        "difference": 0.888768898488121,
+        "se": 0.23940665052370078,
+        "ci_low": 0.234142826007657,
+        "ci_high": 1.543394970968585,
+        "p_value": 0.00020531793254882432,
+        "p_adjusted": 0.0016425434603905946
+      },
+      "incremental_trips_cuped": {
+        "difference": 1.0700394980005754,
+        "se": 0.09974802934626152,
+        "ci_low": 0.7972916000379626,
+        "ci_high": 1.3427873959631882,
+        "p_value": 7.567562606988523e-27,
+        "p_adjusted": 6.054050085590819e-26,
+        "theta": 0.9024547050996379,
+        "variance_reduction": 0.8264053935563401
+      },
+      "incremental_net_contribution_per_customer": {
+        "difference": 0.17895713941108227,
+        "se": 1.486872157776113,
+        "ci_low": -3.8866996783771537,
+        "ci_high": 4.244613957199318,
+        "p_value": 0.9041994645995564,
+        "p_adjusted": 1.0
+      },
+      "incremental_net_contribution_cuped": {
+        "difference": 0.8091937052400198,
+        "se": 0.5939591352956827,
+        "ci_low": -0.8149096147887309,
+        "ci_high": 2.4332970252687707,
+        "p_value": 0.1730802977821424,
+        "p_adjusted": 1.0,
+        "theta": 0.6343064759547856,
+        "variance_reduction": 0.8404246248055038
+      },
+      "incremental_later_margin": {
+        "difference": 3.2544861164417043,
+        "se": 2.5470550998619714,
+        "ci_low": -3.710101846201014,
+        "ci_high": 10.219074079084422,
+        "p_value": 0.2013394638867465,
+        "p_adjusted": 1.0
+      },
+      "retention_effect": {
+        "difference": 0.016918646508279345,
+        "se": 0.011077470476717909,
+        "ci_low": -0.013371242997000893,
+        "ci_high": 0.04720853601355958,
+        "p_value": 0.12668584950587258,
+        "p_adjusted": 1.0
+      },
+      "sequential": {
+        "looks": [
+          {
+            "day": 10,
+            "z": 8.817375727283235,
+            "boundary": 4.774544772357521,
+            "crossed": true
+          },
+          {
+            "day": 20,
+            "z": 9.912966978600522,
+            "boundary": 3.376112985612784,
+            "crossed": true
+          },
+          {
+            "day": 30,
+            "z": 10.727424942763339,
+            "boundary": 2.756584709578535,
+            "crossed": true
+          }
+        ],
+        "stopped_at_day": 10
+      }
+    },
+    {
+      "difference": 0.05219582433405334,
+      "se": 0.011136102135613052,
+      "ci_low": 0.021745614250787564,
+      "ci_high": 0.08264603441731912,
+      "p_value": 2.77127894381953e-06,
+      "p_adjusted": 2.217023155055624e-05,
+      "offer_id": "weekend_20",
+      "arm": "Weekend 20% off",
+      "n": 2778,
+      "conversion": 0.8038156947444205,
+      "relative_lift": 0.06944444444444453,
+      "enrollment_rate": 0.4164866810655148,
+      "redemption_rate": 0.33225341972642186,
+      "incremental_trips_per_customer": {
+        "difference": 0.7163426925845933,
+        "se": 0.23811965129324927,
+        "ci_low": 0.06523575062816811,
+        "ci_high": 1.3674496345410185,
+        "p_value": 0.002626869899129715,
+        "p_adjusted": 0.02101495919303772
+      },
+      "incremental_trips_cuped": {
+        "difference": 0.7934016664221364,
+        "se": 0.09518382112831265,
+        "ci_low": 0.5331339969459212,
+        "ci_high": 1.0536693358983515,
+        "p_value": 7.719244909822588e-17,
+        "p_adjusted": 6.17539592785807e-16,
+        "theta": 0.8773353660684194,
+        "variance_reduction": 0.8402150779588975
+      },
+      "incremental_net_contribution_per_customer": {
+        "difference": 0.3483197032598895,
+        "se": 1.438627212539164,
+        "ci_low": -3.5854176421644306,
+        "ci_high": 4.2820570486842096,
+        "p_value": 0.8086875678305148,
+        "p_adjusted": 1.0
+      },
+      "incremental_net_contribution_cuped": {
+        "difference": 0.9425404475636512,
+        "se": 0.5911908118789679,
+        "ci_low": -0.673993255323406,
+        "ci_high": 2.5590741504507086,
+        "p_value": 0.11086698848962653,
+        "p_adjusted": 0.8869359079170123,
+        "theta": 0.6264523283062773,
+        "variance_reduction": 0.831127547917514
+      },
+      "incremental_later_margin": {
+        "difference": 2.162547895204007,
+        "se": 2.49959536038871,
+        "ci_low": -4.672267637206029,
+        "ci_high": 8.997363427614044,
+        "p_value": 0.38695142154294004,
+        "p_adjusted": 1.0
+      },
+      "retention_effect": {
+        "difference": 0.01907847372210225,
+        "se": 0.011056979759366847,
+        "ci_low": -0.01115538660523957,
+        "ci_high": 0.04931233404944407,
+        "p_value": 0.08444301977005912,
+        "p_adjusted": 0.675544158160473
+      },
+      "sequential": {
+        "looks": [
+          {
+            "day": 10,
+            "z": 6.182099322721835,
+            "boundary": 4.774544772357521,
+            "crossed": true
+          },
+          {
+            "day": 20,
+            "z": 7.282359142704884,
+            "boundary": 3.376112985612784,
+            "crossed": true
+          },
+          {
+            "day": 30,
+            "z": 8.335467698366411,
+            "boundary": 2.756584709578535,
+            "crossed": true
+          }
+        ],
+        "stopped_at_day": 10
+      }
+    },
+    {
+      "difference": 0.042836573074154116,
+      "se": 0.01122626883185905,
+      "ci_low": 0.012139813991088464,
+      "ci_high": 0.07353333215721977,
+      "p_value": 0.00013577296212326857,
+      "p_adjusted": 0.0010861836969861486,
+      "offer_id": "spend_10",
+      "arm": "Spend & get $10",
+      "n": 2778,
+      "conversion": 0.7944564434845213,
+      "relative_lift": 0.05699233716475102,
+      "enrollment_rate": 0.4089272858171346,
+      "redemption_rate": 0.09467242620590353,
+      "incremental_trips_per_customer": {
+        "difference": 1.0331173506119509,
+        "se": 0.24242582692137227,
+        "ci_low": 0.37023573642865626,
+        "ci_high": 1.6959989647952454,
+        "p_value": 2.02985557484649e-05,
+        "p_adjusted": 0.0001623884459877192
+      },
+      "incremental_trips_cuped": {
+        "difference": 0.9137062699681486,
+        "se": 0.0945049940844258,
+        "ci_low": 0.6552947639721922,
+        "ci_high": 1.172117775964105,
+        "p_value": 4.1099630952401654e-22,
+        "p_adjusted": 3.2879704761921323e-21,
+        "theta": 0.8661200575156144,
+        "variance_reduction": 0.8480321402237023
+      },
+      "incremental_net_contribution_per_customer": {
+        "difference": 3.607243345540674,
+        "se": 1.5198764066834358,
+        "ci_low": -0.5486592602827178,
+        "ci_high": 7.7631459513640655,
+        "p_value": 0.01762614838281868,
+        "p_adjusted": 0.14100918706254945
+      },
+      "incremental_net_contribution_cuped": {
+        "difference": 2.7865893341752255,
+        "se": 0.6011951020423371,
+        "ci_low": 1.1427002125340309,
+        "ci_high": 4.43047845581642,
+        "p_value": 3.5679389717005473e-06,
+        "p_adjusted": 2.8543511773604378e-05,
+        "theta": 0.6425831043423225,
+        "variance_reduction": 0.84353603897799
+      },
+      "incremental_later_margin": {
+        "difference": 6.920849689841624,
+        "se": 2.628271566096322,
+        "ci_low": -0.2658140430248279,
+        "ci_high": 14.107513422708077,
+        "p_value": 0.008457646854848825,
+        "p_adjusted": 0.0676611748387906
+      },
+      "retention_effect": {
+        "difference": 0.03131749460043198,
+        "se": 0.010937240082773232,
+        "ci_low": 0.0014110467072773192,
+        "ci_high": 0.06122394249358665,
+        "p_value": 0.004191451170766112,
+        "p_adjusted": 0.033531609366128895
+      },
+      "sequential": {
+        "looks": [
+          {
+            "day": 10,
+            "z": 7.397204022281242,
+            "boundary": 4.774544772357521,
+            "crossed": true
+          },
+          {
+            "day": 20,
+            "z": 8.524575154742172,
+            "boundary": 3.376112985612784,
+            "crossed": true
+          },
+          {
+            "day": 30,
+            "z": 9.668338470577455,
+            "boundary": 2.756584709578535,
+            "crossed": true
+          }
+        ],
+        "stopped_at_day": 10
+      }
+    },
+    {
+      "difference": 0.1936645068394529,
+      "se": 0.009265601626104255,
+      "ci_low": 0.1683289349645824,
+      "ci_high": 0.21900007871432342,
+      "p_value": 5.194327459564868e-97,
+      "p_adjusted": 4.1554619676518945e-96,
+      "offer_id": "free_trip",
+      "arm": "Fifth trip free",
+      "n": 2778,
+      "conversion": 0.9452843772498201,
+      "relative_lift": 0.25766283524904227,
+      "enrollment_rate": 0.3952483801295896,
+      "redemption_rate": 0.1994240460763139,
+      "incremental_trips_per_customer": {
+        "difference": 1.4053275737940965,
+        "se": 0.24421302798327407,
+        "ci_low": 0.7375590928118786,
+        "ci_high": 2.073096054776314,
+        "p_value": 8.689080383233583e-09,
+        "p_adjusted": 6.951264306586867e-08
+      },
+      "incremental_trips_cuped": {
+        "difference": 1.3765623104980227,
+        "se": 0.09654697913948769,
+        "ci_low": 1.1125672643049378,
+        "ci_high": 1.6405573566911076,
+        "p_value": 4.000155579394119e-46,
+        "p_adjusted": 3.200124463515295e-45,
+        "theta": 0.8501053344307886,
+        "variance_reduction": 0.8437069298065691
+      },
+      "incremental_net_contribution_per_customer": {
+        "difference": 4.713973100631897,
+        "se": 1.541540282232193,
+        "ci_low": 0.4988334697126442,
+        "ci_high": 8.92911273155115,
+        "p_value": 0.002228471113398355,
+        "p_adjusted": 0.01782776890718684
+      },
+      "incremental_net_contribution_cuped": {
+        "difference": 4.060603694935892,
+        "se": 0.6310245119856963,
+        "ci_low": 2.3351499658248738,
+        "ci_high": 5.786057424046911,
+        "p_value": 1.2352363251429337e-10,
+        "p_adjusted": 9.88189060114347e-10,
+        "theta": 0.628242556865862,
+        "variance_reduction": 0.8324352343025927
+      },
+      "incremental_later_margin": {
+        "difference": 8.563308428725158,
+        "se": 2.7066126945956133,
+        "ci_low": 1.1624311593884586,
+        "ci_high": 15.964185698061858,
+        "p_value": 0.001556986277712078,
+        "p_adjusted": 0.012455890221696624
+      },
+      "retention_effect": {
+        "difference": 0.01331893448524124,
+        "se": 0.011111201746235587,
+        "ci_low": -0.017063188750538274,
+        "ci_high": 0.04370105772102076,
+        "p_value": 0.2306468252329723,
+        "p_adjusted": 1.0
+      },
+      "sequential": {
+        "looks": [
+          {
+            "day": 10,
+            "z": 10.09770328128396,
+            "boundary": 4.774544772357521,
+            "crossed": true
+          },
+          {
+            "day": 20,
+            "z": 12.644267155360195,
+            "boundary": 3.376112985612784,
+            "crossed": true
+          },
+          {
+            "day": 30,
+            "z": 14.257953203374843,
+            "boundary": 2.756584709578535,
+            "crossed": true
+          }
+        ],
+        "stopped_at_day": 10
+      }
+    },
+    {
+      "difference": 0.02123830093592516,
+      "se": 0.011421095958494172,
+      "ci_low": -0.009991187360981521,
+      "ci_high": 0.05246778923283184,
+      "p_value": 0.06294671526738187,
+      "p_adjusted": 0.5035737221390549,
+      "offer_id": "offpeak_pass",
+      "arm": "Off-peak pass ($30 cap)",
+      "n": 2778,
+      "conversion": 0.7728581713462923,
+      "relative_lift": 0.028256704980842956,
+      "enrollment_rate": 0.4064074874010079,
+      "redemption_rate": 0.09539236861051116,
+      "incremental_trips_per_customer": {
+        "difference": 0.37437005039596816,
+        "se": 0.2305157946815796,
+        "ci_low": -0.2559451433842336,
+        "ci_high": 1.0046852441761698,
+        "p_value": 0.1043643286703641,
+        "p_adjusted": 0.8349146293629128
+      },
+      "incremental_trips_cuped": {
+        "difference": 0.3789005197574422,
+        "se": 0.09421256263327572,
+        "ci_low": 0.12128862919371114,
+        "ci_high": 0.6365124103211732,
+        "p_value": 5.7764368429895226e-05,
+        "p_adjusted": 0.0004621149474391618,
+        "theta": 0.839042925745023,
+        "variance_reduction": 0.8329616244666433
+      },
+      "incremental_net_contribution_per_customer": {
+        "difference": -6.35230323042909,
+        "se": 1.2314475368712139,
+        "ci_low": -9.7195349375029,
+        "ci_high": -2.9850715233552796,
+        "p_value": 2.490644765944705e-07,
+        "p_adjusted": 1.992515812755764e-06
+      },
+      "incremental_net_contribution_cuped": {
+        "difference": -6.403312656591506,
+        "se": 0.6322212911858958,
+        "ci_low": -8.132038821391923,
+        "ci_high": -4.67458649179109,
+        "p_value": 4.138759035607205e-24,
+        "p_adjusted": 3.311007228485764e-23,
+        "theta": 0.4902398327155787,
+        "variance_reduction": 0.7364236703944838
+      },
+      "incremental_later_margin": {
+        "difference": 2.430161666151591,
+        "se": 2.530659492162139,
+        "ci_low": -4.4895946585604625,
+        "ci_high": 9.349917990863645,
+        "p_value": 0.3369103427568485,
+        "p_adjusted": 1.0
+      },
+      "retention_effect": {
+        "difference": 0.02771778257739388,
+        "se": 0.010973103571558982,
+        "ci_low": -0.002286729320072723,
+        "ci_high": 0.05772229447486048,
+        "p_value": 0.011537777264969507,
+        "p_adjusted": 0.09230221811975606
+      },
+      "sequential": {
+        "looks": [
+          {
+            "day": 10,
+            "z": 3.004589450393856,
+            "boundary": 4.774544772357521,
+            "crossed": false
+          },
+          {
+            "day": 20,
+            "z": 3.4791502580251166,
+            "boundary": 3.376112985612784,
+            "crossed": true
+          },
+          {
+            "day": 30,
+            "z": 4.021762163845601,
+            "boundary": 2.756584709578535,
+            "crossed": true
+          }
+        ],
+        "stopped_at_day": 20
+      }
+    },
+    {
+      "difference": 0.04600346412330225,
+      "se": 0.011197090844995948,
+      "ci_low": 0.015386488416768939,
+      "ci_high": 0.07662043982983556,
+      "p_value": 3.982038888991343e-05,
+      "p_adjusted": 0.00031856311111930745,
+      "offer_id": "loyalty_500",
+      "arm": "500 bonus points",
+      "n": 2777,
+      "conversion": 0.7976233345336694,
+      "relative_lift": 0.06120575830197972,
+      "enrollment_rate": 0.41267554915376303,
+      "redemption_rate": 0.33741447605329494,
+      "incremental_trips_per_customer": {
+        "difference": 0.5565433483362385,
+        "se": 0.2352714185055089,
+        "ci_low": -0.08677547478860903,
+        "ci_high": 1.1998621714610862,
+        "p_value": 0.018003922943304045,
+        "p_adjusted": 0.14403138354643236
+      },
+      "incremental_trips_cuped": {
+        "difference": 0.5698862449590774,
+        "se": 0.09470351919775777,
+        "ci_low": 0.31093189808988303,
+        "ci_high": 0.8288405918282717,
+        "p_value": 1.770410323541728e-09,
+        "p_adjusted": 1.4163282588333823e-08,
+        "theta": 0.8462380365700396,
+        "variance_reduction": 0.8379705739563093
+      },
+      "incremental_net_contribution_per_customer": {
+        "difference": -2.035574657071752,
+        "se": 1.4817286363862379,
+        "ci_low": -6.087167190518648,
+        "ci_high": 2.0160178763751437,
+        "p_value": 0.16950884114296905,
+        "p_adjusted": 1.0
+      },
+      "incremental_net_contribution_cuped": {
+        "difference": -2.0827606438371937,
+        "se": 0.6199746255354696,
+        "ci_low": -3.7779999083439764,
+        "ci_high": -0.3875213793304111,
+        "p_value": 0.0007810376006609882,
+        "p_adjusted": 0.006248300805287906,
+        "theta": 0.6249207912434324,
+        "variance_reduction": 0.8249305040514958
+      },
+      "incremental_later_margin": {
+        "difference": 3.750181702200365,
+        "se": 2.518539476838277,
+        "ci_low": -3.1364340309178163,
+        "ci_high": 10.636797435318545,
+        "p_value": 0.1364793786097603,
+        "p_adjusted": 1.0
+      },
+      "retention_effect": {
+        "difference": 0.02872653154978433,
+        "se": 0.01096404662130227,
+        "ci_low": -0.0012532153055991348,
+        "ci_high": 0.05870627840516779,
+        "p_value": 0.008791261504204853,
+        "p_adjusted": 0.07033009203363882
+      },
+      "sequential": {
+        "looks": [
+          {
+            "day": 10,
+            "z": 5.850786599553272,
+            "boundary": 4.774544772357521,
+            "crossed": true
+          },
+          {
+            "day": 20,
+            "z": 5.748749289730483,
+            "boundary": 3.376112985612784,
+            "crossed": true
+          },
+          {
+            "day": 30,
+            "z": 6.017582554340495,
+            "boundary": 2.756584709578535,
+            "crossed": true
+          }
+        ],
+        "stopped_at_day": 10
+      }
+    },
+    {
+      "difference": 0.06292820305020186,
+      "se": 0.011029168231165306,
+      "ci_low": 0.03277038969748011,
+      "ci_high": 0.0930860164029236,
+      "p_value": 1.1592281046356163e-08,
+      "p_adjusted": 9.273824837084931e-08,
+      "offer_id": "loyalty_1500",
+      "arm": "1,500 bonus points",
+      "n": 2777,
+      "conversion": 0.814548073460569,
+      "relative_lift": 0.08372344256391799,
+      "enrollment_rate": 0.39971191933741446,
+      "redemption_rate": 0.32481094706517827,
+      "incremental_trips_per_customer": {
+        "difference": 0.760720517943728,
+        "se": 0.23902095928628272,
+        "ci_low": 0.10714906754409925,
+        "ci_high": 1.4142919683433566,
+        "p_value": 0.0014593292940819676,
+        "p_adjusted": 0.011674634352655741
+      },
+      "incremental_trips_cuped": {
+        "difference": 0.7977648405646045,
+        "se": 0.09828894434441716,
+        "ci_low": 0.5290066190879337,
+        "ci_high": 1.0665230620412753,
+        "p_value": 4.797152372192223e-16,
+        "p_adjusted": 3.8377218977537785e-15,
+        "theta": 0.8588002017180085,
+        "variance_reduction": 0.8309024282581536
+      },
+      "incremental_net_contribution_per_customer": {
+        "difference": -10.381698985362718,
+        "se": 1.538250421685044,
+        "ci_low": -14.587842924289799,
+        "ci_high": -6.175555046435637,
+        "p_value": 1.4883632159096013e-11,
+        "p_adjusted": 1.190690572727681e-10
+      },
+      "incremental_net_contribution_cuped": {
+        "difference": -10.27040478778438,
+        "se": 0.6639298109638995,
+        "ci_low": -12.085833739332939,
+        "ci_high": -8.45497583623582,
+        "p_value": 5.607499702300865e-54,
+        "p_adjusted": 4.485999761840692e-53,
+        "theta": 0.6506667106869926,
+        "variance_reduction": 0.8137096953797672
+      },
+      "incremental_later_margin": {
+        "difference": 6.585757726955144,
+        "se": 2.5830221509422167,
+        "ci_low": -0.4771774175050405,
+        "ci_high": 13.648692871415328,
+        "p_value": 0.010783646481374849,
+        "p_adjusted": 0.08626917185099879
+      },
+      "retention_effect": {
+        "difference": 0.03880935474027758,
+        "se": 0.010861752618023657,
+        "ci_low": 0.009109317414508676,
+        "ci_high": 0.06850939206604648,
+        "p_value": 0.0003528759564221595,
+        "p_adjusted": 0.002823007651377276
+      },
+      "sequential": {
+        "looks": [
+          {
+            "day": 10,
+            "z": 6.990293892751461,
+            "boundary": 4.774544772357521,
+            "crossed": true
+          },
+          {
+            "day": 20,
+            "z": 7.8030922248330565,
+            "boundary": 3.376112985612784,
+            "crossed": true
+          },
+          {
+            "day": 30,
+            "z": 8.116526694692471,
+            "boundary": 2.756584709578535,
+            "crossed": true
+          }
+        ],
+        "stopped_at_day": 10
+      }
+    }
+  ],
+  "subgroups": [
+    {
+      "dimension": "frequency_group",
+      "group": "Frequent",
+      "offer_id": "offpeak_15",
+      "arm": "Off-peak 15% off",
+      "n_treatment": 681,
+      "n_control": 690,
+      "difference": -1.9690799224975706,
+      "se": 4.00889717354616,
+      "ci_low": -9.826374000372462,
+      "ci_high": 5.888214155377321,
+      "p_value": 0.623300941031243,
+      "p_adjusted": 0.623300941031243,
+      "q_value": 0.7332952247426389,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Frequent",
+      "offer_id": "pct_10",
+      "arm": "10% off every trip",
+      "n_treatment": 675,
+      "n_control": 690,
+      "difference": 3.5261464866285337,
+      "se": 4.544246471213674,
+      "ci_low": -5.380412933823498,
+      "ci_high": 12.432705907080566,
+      "p_value": 0.4377735142470438,
+      "p_adjusted": 0.4377735142470438,
+      "q_value": 0.625390734638634,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Frequent",
+      "offer_id": "weekend_20",
+      "arm": "Weekend 20% off",
+      "n_treatment": 669,
+      "n_control": 690,
+      "difference": 2.173530867453451,
+      "se": 4.3378336678673595,
+      "ci_low": -6.328466892491857,
+      "ci_high": 10.675528627398759,
+      "p_value": 0.6163263124483902,
+      "p_adjusted": 0.6163263124483902,
+      "q_value": 0.7332952247426389,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Frequent",
+      "offer_id": "spend_10",
+      "arm": "Spend & get $10",
+      "n_treatment": 665,
+      "n_control": 690,
+      "difference": 13.684455883414188,
+      "se": 4.591572253096502,
+      "ci_low": 4.685139634931614,
+      "ci_high": 22.68377213189676,
+      "p_value": 0.0028792667683160003,
+      "p_adjusted": 0.0028792667683160003,
+      "q_value": 0.010968635307870477,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Frequent",
+      "offer_id": "free_trip",
+      "arm": "Fifth trip free",
+      "n_treatment": 684,
+      "n_control": 690,
+      "difference": 4.501415203147403,
+      "se": 4.91236617434727,
+      "ci_low": -5.126645577446055,
+      "ci_high": 14.12947598374086,
+      "p_value": 0.35948671762070405,
+      "p_adjusted": 0.35948671762070405,
+      "q_value": 0.5426214605595533,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Frequent",
+      "offer_id": "offpeak_pass",
+      "arm": "Off-peak pass ($30 cap)",
+      "n_treatment": 681,
+      "n_control": 690,
+      "difference": -23.909222850076134,
+      "se": 3.606392335789882,
+      "ci_low": -30.977621942345586,
+      "ci_high": -16.84082375780668,
+      "p_value": 3.3641808451425983e-11,
+      "p_adjusted": 3.3641808451425983e-11,
+      "q_value": 2.6913446761140787e-10,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Frequent",
+      "offer_id": "loyalty_500",
+      "arm": "500 bonus points",
+      "n_treatment": 674,
+      "n_control": 690,
+      "difference": 3.034758853650274,
+      "se": 4.439319760675347,
+      "ci_low": -5.666147993130378,
+      "ci_high": 11.735665700430927,
+      "p_value": 0.49422211260584636,
+      "p_adjusted": 0.49422211260584636,
+      "q_value": 0.6605942781465525,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Frequent",
+      "offer_id": "loyalty_1500",
+      "arm": "1,500 bonus points",
+      "n_treatment": 670,
+      "n_control": 690,
+      "difference": -2.731224127987545,
+      "se": 4.707793410047285,
+      "ci_low": -11.958329658335229,
+      "ci_high": 6.495881402360139,
+      "p_value": 0.5618137860224275,
+      "p_adjusted": 0.5618137860224275,
+      "q_value": 0.6809864072999121,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Occasional",
+      "offer_id": "offpeak_15",
+      "arm": "Off-peak 15% off",
+      "n_treatment": 1067,
+      "n_control": 1060,
+      "difference": 0.35152788057025663,
+      "se": 0.35724083689515446,
+      "ci_low": -0.34865129355119384,
+      "ci_high": 1.051707054691707,
+      "p_value": 0.32511152557867795,
+      "p_adjusted": 0.32511152557867795,
+      "q_value": 0.5099788636528282,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Occasional",
+      "offer_id": "pct_10",
+      "arm": "10% off every trip",
+      "n_treatment": 1080,
+      "n_control": 1060,
+      "difference": 0.2530092271173654,
+      "se": 0.3691817719003875,
+      "ci_low": -0.47057374955607545,
+      "ci_high": 0.9765922037908062,
+      "p_value": 0.4931393220709841,
+      "p_adjusted": 0.4931393220709841,
+      "q_value": 0.6605942781465525,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Occasional",
+      "offer_id": "weekend_20",
+      "arm": "Weekend 20% off",
+      "n_treatment": 1073,
+      "n_control": 1060,
+      "difference": 0.8394721681801398,
+      "se": 0.3609035179187495,
+      "ci_low": 0.13211427116558483,
+      "ci_high": 1.546830065194695,
+      "p_value": 0.02001698602509236,
+      "p_adjusted": 0.02001698602509236,
+      "q_value": 0.05930958822249588,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Occasional",
+      "offer_id": "spend_10",
+      "arm": "Spend & get $10",
+      "n_treatment": 1075,
+      "n_control": 1060,
+      "difference": 1.1303317108842466,
+      "se": 0.36870290152907376,
+      "ci_low": 0.40768730289184396,
+      "ci_high": 1.8529761188766491,
+      "p_value": 0.002171626108970802,
+      "p_adjusted": 0.002171626108970802,
+      "q_value": 0.00914368887987706,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Occasional",
+      "offer_id": "free_trip",
+      "arm": "Fifth trip free",
+      "n_treatment": 1072,
+      "n_control": 1060,
+      "difference": 8.966635981136402,
+      "se": 0.39749634327197686,
+      "ci_low": 8.187557464336958,
+      "ci_high": 9.745714497935847,
+      "p_value": 1.126293212276017e-112,
+      "p_adjusted": 1.126293212276017e-112,
+      "q_value": 2.252586424552034e-111,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Occasional",
+      "offer_id": "offpeak_pass",
+      "arm": "Off-peak pass ($30 cap)",
+      "n_treatment": 1077,
+      "n_control": 1060,
+      "difference": 0.6234692277398706,
+      "se": 0.3689746656367694,
+      "ci_low": -0.09970782811590617,
+      "ci_high": 1.3466462835956472,
+      "p_value": 0.09107875690002287,
+      "p_adjusted": 0.09107875690002287,
+      "q_value": 0.20239723755560637,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Occasional",
+      "offer_id": "loyalty_500",
+      "arm": "500 bonus points",
+      "n_treatment": 1069,
+      "n_control": 1060,
+      "difference": -3.5845814063472967,
+      "se": 0.3870769681142114,
+      "ci_low": -4.34323832309611,
+      "ci_high": -2.8259244895984836,
+      "p_value": 2.0320578856644303e-20,
+      "p_adjusted": 2.0320578856644303e-20,
+      "q_value": 2.0320578856644302e-19,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Occasional",
+      "offer_id": "loyalty_1500",
+      "arm": "1,500 bonus points",
+      "n_treatment": 1074,
+      "n_control": 1060,
+      "difference": -12.44256726182595,
+      "se": 0.40859675981276816,
+      "ci_low": -13.243402195258739,
+      "ci_high": -11.64173232839316,
+      "p_value": 1.1288395324783404e-203,
+      "p_adjusted": 1.1288395324783404e-203,
+      "q_value": 4.515358129913362e-202,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Regular",
+      "offer_id": "offpeak_15",
+      "arm": "Off-peak 15% off",
+      "n_treatment": 1030,
+      "n_control": 1028,
+      "difference": -0.5605232807386251,
+      "se": 0.8222758344577134,
+      "ci_low": -2.1721543016333626,
+      "ci_high": 1.0511077401561126,
+      "p_value": 0.4954457086099143,
+      "p_adjusted": 0.4954457086099143,
+      "q_value": 0.6605942781465525,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Regular",
+      "offer_id": "pct_10",
+      "arm": "10% off every trip",
+      "n_treatment": 1023,
+      "n_control": 1028,
+      "difference": -0.7554608540122665,
+      "se": 0.8165765490074539,
+      "ci_low": -2.3559214806868827,
+      "ci_high": 0.8449997726623497,
+      "p_value": 0.3548846650674742,
+      "p_adjusted": 0.3548846650674742,
+      "q_value": 0.5426214605595533,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Regular",
+      "offer_id": "weekend_20",
+      "arm": "Weekend 20% off",
+      "n_treatment": 1036,
+      "n_control": 1028,
+      "difference": 0.24253609295451284,
+      "se": 0.8237836707847126,
+      "ci_low": -1.3720502328357245,
+      "ci_high": 1.8571224187447501,
+      "p_value": 0.7684391149624249,
+      "p_adjusted": 0.7684391149624249,
+      "q_value": 0.8088832789078156,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Regular",
+      "offer_id": "spend_10",
+      "arm": "Spend & get $10",
+      "n_treatment": 1038,
+      "n_control": 1028,
+      "difference": 1.586469070344016,
+      "se": 0.8189522802917025,
+      "ci_low": -0.018647904084672318,
+      "ci_high": 3.1915860447727047,
+      "p_value": 0.052721689127740765,
+      "p_adjusted": 0.052721689127740765,
+      "q_value": 0.12781015546118973,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Regular",
+      "offer_id": "free_trip",
+      "arm": "Fifth trip free",
+      "n_treatment": 1022,
+      "n_control": 1028,
+      "difference": 1.0148058752636757,
+      "se": 0.7677385725047609,
+      "ci_low": -0.4899340763878486,
+      "ci_high": 2.5195458269152002,
+      "p_value": 0.18623084068737827,
+      "p_adjusted": 0.18623084068737827,
+      "q_value": 0.33860152852250597,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Regular",
+      "offer_id": "offpeak_pass",
+      "arm": "Off-peak pass ($30 cap)",
+      "n_treatment": 1020,
+      "n_control": 1028,
+      "difference": -1.0848106850047756,
+      "se": 0.7856543552232571,
+      "ci_low": -2.6246649255393977,
+      "ci_high": 0.45504355552984643,
+      "p_value": 0.16734862521047666,
+      "p_adjusted": 0.16734862521047666,
+      "q_value": 0.31875928611519366,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Regular",
+      "offer_id": "loyalty_500",
+      "arm": "500 bonus points",
+      "n_treatment": 1034,
+      "n_control": 1028,
+      "difference": -2.5576987878523667,
+      "se": 0.8577991017215978,
+      "ci_low": -4.238954133197509,
+      "ci_high": -0.8764434425072247,
+      "p_value": 0.0028665361017780984,
+      "p_adjusted": 0.0028665361017780984,
+      "q_value": 0.010968635307870477,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "frequency_group",
+      "group": "Regular",
+      "offer_id": "loyalty_1500",
+      "arm": "1,500 bonus points",
+      "n_treatment": 1033,
+      "n_control": 1028,
+      "difference": -11.667780860409927,
+      "se": 0.8555933033181681,
+      "ci_low": -13.34471292032719,
+      "ci_high": -9.990848800492664,
+      "p_value": 2.4107153039043658e-42,
+      "p_adjusted": 2.4107153039043658e-42,
+      "q_value": 3.214287071872488e-41,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "High",
+      "offer_id": "offpeak_15",
+      "arm": "Off-peak 15% off",
+      "n_treatment": 931,
+      "n_control": 925,
+      "difference": -2.556134694439052,
+      "se": 3.1987322367664537,
+      "ci_low": -8.825534674688551,
+      "ci_high": 3.7132652858104462,
+      "p_value": 0.42422739718187197,
+      "p_adjusted": 0.42422739718187197,
+      "q_value": 0.625390734638634,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "High",
+      "offer_id": "pct_10",
+      "arm": "10% off every trip",
+      "n_treatment": 910,
+      "n_control": 925,
+      "difference": 2.138313798873469,
+      "se": 3.6028535142824265,
+      "ci_low": -4.9231493306936525,
+      "ci_high": 9.19977692844059,
+      "p_value": 0.5528428248223806,
+      "p_adjusted": 0.5528428248223806,
+      "q_value": 0.6809864072999121,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "High",
+      "offer_id": "weekend_20",
+      "arm": "Weekend 20% off",
+      "n_treatment": 907,
+      "n_control": 925,
+      "difference": 1.338952051109402,
+      "se": 3.4416672347468182,
+      "ci_low": -5.406591775765921,
+      "ci_high": 8.084495877984725,
+      "p_value": 0.6972453037899378,
+      "p_adjusted": 0.6972453037899378,
+      "q_value": 0.774717004211042,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "High",
+      "offer_id": "spend_10",
+      "arm": "Spend & get $10",
+      "n_treatment": 934,
+      "n_control": 925,
+      "difference": 8.757191116856404,
+      "se": 3.589758775897959,
+      "ci_low": 1.7213932029098133,
+      "ci_high": 15.792989030802996,
+      "p_value": 0.014707890890783344,
+      "p_adjusted": 0.014707890890783344,
+      "q_value": 0.047065250850506696,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "High",
+      "offer_id": "free_trip",
+      "arm": "Fifth trip free",
+      "n_treatment": 928,
+      "n_control": 925,
+      "difference": 2.280099989131884,
+      "se": 3.8451943615487605,
+      "ci_low": -5.256342473060174,
+      "ci_high": 9.816542451323942,
+      "p_value": 0.5531986034308495,
+      "p_adjusted": 0.5531986034308495,
+      "q_value": 0.6809864072999121,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "High",
+      "offer_id": "offpeak_pass",
+      "arm": "Off-peak pass ($30 cap)",
+      "n_treatment": 931,
+      "n_control": 925,
+      "difference": -19.138760759818197,
+      "se": 2.861446800715957,
+      "ci_low": -24.747093432898836,
+      "ci_high": -13.53042808673756,
+      "p_value": 2.2548373382454627e-11,
+      "p_adjusted": 2.2548373382454627e-11,
+      "q_value": 2.0042998562181892e-10,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "High",
+      "offer_id": "loyalty_500",
+      "arm": "500 bonus points",
+      "n_treatment": 929,
+      "n_control": 925,
+      "difference": 1.054350519406725,
+      "se": 3.4954502246174783,
+      "ci_low": -5.796606030595974,
+      "ci_high": 7.9053070694094245,
+      "p_value": 0.7629302385706063,
+      "p_adjusted": 0.7629302385706063,
+      "q_value": 0.8088832789078156,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "High",
+      "offer_id": "loyalty_1500",
+      "arm": "1,500 bonus points",
+      "n_treatment": 938,
+      "n_control": 925,
+      "difference": -7.206892062464036,
+      "se": 3.6716247880626915,
+      "ci_low": -14.40314441181142,
+      "ci_high": -0.01063971311665135,
+      "p_value": 0.049662233818683274,
+      "p_adjusted": 0.049662233818683274,
+      "q_value": 0.12415558454670819,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "Low",
+      "offer_id": "offpeak_15",
+      "arm": "Off-peak 15% off",
+      "n_treatment": 919,
+      "n_control": 932,
+      "difference": 0.4581478826157195,
+      "se": 0.3307655500967668,
+      "ci_low": -0.19014068290052244,
+      "ci_high": 1.1064364481319613,
+      "p_value": 0.16601771479852845,
+      "p_adjusted": 0.16601771479852845,
+      "q_value": 0.31875928611519366,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "Low",
+      "offer_id": "pct_10",
+      "arm": "10% off every trip",
+      "n_treatment": 935,
+      "n_control": 932,
+      "difference": 0.13665945816507286,
+      "se": 0.3290540404047991,
+      "ci_low": -0.508274609995721,
+      "ci_high": 0.7815935263258668,
+      "p_value": 0.677914926812238,
+      "p_adjusted": 0.677914926812238,
+      "q_value": 0.7638478048588597,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "Low",
+      "offer_id": "weekend_20",
+      "arm": "Weekend 20% off",
+      "n_treatment": 916,
+      "n_control": 932,
+      "difference": 0.6289762466806792,
+      "se": 0.33019877274203463,
+      "ci_low": -0.01820145563303477,
+      "ci_high": 1.2761539489943932,
+      "p_value": 0.05680070856876937,
+      "p_adjusted": 0.05680070856876937,
+      "q_value": 0.13364872604416322,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "Low",
+      "offer_id": "spend_10",
+      "arm": "Spend & get $10",
+      "n_treatment": 938,
+      "n_control": 932,
+      "difference": 0.9824637632757858,
+      "se": 0.3416180238873146,
+      "ci_low": 0.31290473998690527,
+      "ci_high": 1.6520227865646664,
+      "p_value": 0.004028605564834803,
+      "p_adjusted": 0.004028605564834803,
+      "q_value": 0.014649474781217465,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "Low",
+      "offer_id": "free_trip",
+      "arm": "Fifth trip free",
+      "n_treatment": 941,
+      "n_control": 932,
+      "difference": 9.022240450808441,
+      "se": 0.385245832891606,
+      "ci_low": 8.267172493146758,
+      "ci_high": 9.777308408470125,
+      "p_value": 2.709089629111505e-121,
+      "p_adjusted": 2.709089629111505e-121,
+      "q_value": 7.224239010964013e-120,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "Low",
+      "offer_id": "offpeak_pass",
+      "arm": "Off-peak pass ($30 cap)",
+      "n_treatment": 908,
+      "n_control": 932,
+      "difference": 0.44315979578552156,
+      "se": 0.34246845120944447,
+      "ci_low": -0.22806603442620232,
+      "ci_high": 1.1143856259972456,
+      "p_value": 0.19565975259835855,
+      "p_adjusted": 0.19565975259835855,
+      "q_value": 0.34027783060584094,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "Low",
+      "offer_id": "loyalty_500",
+      "arm": "500 bonus points",
+      "n_treatment": 917,
+      "n_control": 932,
+      "difference": -3.7444460221000178,
+      "se": 0.36547812227721316,
+      "ci_low": -4.460769978900681,
+      "ci_high": -3.028122065299354,
+      "p_value": 1.2419311113245999e-24,
+      "p_adjusted": 1.2419311113245999e-24,
+      "q_value": 1.4193498415138287e-23,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "Low",
+      "offer_id": "loyalty_1500",
+      "arm": "1,500 bonus points",
+      "n_treatment": 928,
+      "n_control": 932,
+      "difference": -12.715155033253366,
+      "se": 0.37321768787410015,
+      "ci_low": -13.446648259879913,
+      "ci_high": -11.983661806626818,
+      "p_value": 2.123457619892206e-254,
+      "p_adjusted": 2.123457619892206e-254,
+      "q_value": 1.6987660959137648e-252,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "Mid",
+      "offer_id": "offpeak_15",
+      "arm": "Off-peak 15% off",
+      "n_treatment": 928,
+      "n_control": 921,
+      "difference": -0.9310074878885111,
+      "se": 0.7165793708146899,
+      "ci_low": -2.335477246749676,
+      "ci_high": 0.4734622709726535,
+      "p_value": 0.19386210182690422,
+      "p_adjusted": 0.19386210182690422,
+      "q_value": 0.34027783060584094,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "Mid",
+      "offer_id": "pct_10",
+      "arm": "10% off every trip",
+      "n_treatment": 933,
+      "n_control": 921,
+      "difference": -0.7187032750479929,
+      "se": 0.7079557871031654,
+      "ci_low": -2.106271120416903,
+      "ci_high": 0.6688645703209173,
+      "p_value": 0.31001954833091394,
+      "p_adjusted": 0.31001954833091394,
+      "q_value": 0.5061543646219003,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "Mid",
+      "offer_id": "weekend_20",
+      "arm": "Weekend 20% off",
+      "n_treatment": 955,
+      "n_control": 921,
+      "difference": -0.0477288454157474,
+      "se": 0.7111135726521955,
+      "ci_low": -1.4414858367316579,
+      "ci_high": 1.346028145900163,
+      "p_value": 0.9464874008380764,
+      "p_adjusted": 0.9464874008380764,
+      "q_value": 0.9464874008380765,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "Mid",
+      "offer_id": "spend_10",
+      "arm": "Spend & get $10",
+      "n_treatment": 906,
+      "n_control": 921,
+      "difference": 0.5517273521222101,
+      "se": 0.701649060545561,
+      "ci_low": -0.8234795363334533,
+      "ci_high": 1.9269342405778735,
+      "p_value": 0.431674476511965,
+      "p_adjusted": 0.431674476511965,
+      "q_value": 0.625390734638634,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "Mid",
+      "offer_id": "free_trip",
+      "arm": "Fifth trip free",
+      "n_treatment": 909,
+      "n_control": 921,
+      "difference": 2.7063757270117783,
+      "se": 0.6799392370270883,
+      "ci_low": 1.373719310763042,
+      "ci_high": 4.039032143260514,
+      "p_value": 6.882256804289252e-05,
+      "p_adjusted": 6.882256804289252e-05,
+      "q_value": 0.0003058780801906334,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "Mid",
+      "offer_id": "offpeak_pass",
+      "arm": "Off-peak pass ($30 cap)",
+      "n_treatment": 939,
+      "n_control": 921,
+      "difference": -1.0155883989282941,
+      "se": 0.7003870019400542,
+      "ci_low": -2.3883216979707855,
+      "ci_high": 0.3571449001141971,
+      "p_value": 0.14704767140480368,
+      "p_adjusted": 0.14704767140480368,
+      "q_value": 0.31750103356948634,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "Mid",
+      "offer_id": "loyalty_500",
+      "arm": "500 bonus points",
+      "n_treatment": 931,
+      "n_control": 921,
+      "difference": -3.95102035848387,
+      "se": 0.7241105946160153,
+      "ci_low": -5.370251044755143,
+      "ci_high": -2.5317896722125965,
+      "p_value": 4.859477521377761e-08,
+      "p_adjusted": 4.859477521377761e-08,
+      "q_value": 3.2396516809185067e-07,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "value_tercile",
+      "group": "Mid",
+      "offer_id": "loyalty_1500",
+      "arm": "1,500 bonus points",
+      "n_treatment": 911,
+      "n_control": 921,
+      "difference": -12.174849494642721,
+      "se": 0.7518025033364432,
+      "ci_low": -13.648355324669204,
+      "ci_high": -10.701343664616239,
+      "p_value": 5.540244196498442e-59,
+      "p_adjusted": 5.540244196498442e-59,
+      "q_value": 8.864390714397507e-58,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "travel_pattern",
+      "group": "Other travel",
+      "offer_id": "offpeak_15",
+      "arm": "Off-peak 15% off",
+      "n_treatment": 2065,
+      "n_control": 2122,
+      "difference": -0.6197895800236708,
+      "se": 1.6734343484450387,
+      "ci_low": -3.8996606334681982,
+      "ci_high": 2.6600814734208567,
+      "p_value": 0.7111069569017565,
+      "p_adjusted": 0.7111069569017565,
+      "q_value": 0.7792952952348017,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "travel_pattern",
+      "group": "Other travel",
+      "offer_id": "pct_10",
+      "arm": "10% off every trip",
+      "n_treatment": 2061,
+      "n_control": 2122,
+      "difference": -0.6096512670234233,
+      "se": 1.8050058887552838,
+      "ci_low": -4.147397800866491,
+      "ci_high": 2.928095266819644,
+      "p_value": 0.7355471961868683,
+      "p_adjusted": 0.7355471961868683,
+      "q_value": 0.7951861580398575,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "travel_pattern",
+      "group": "Other travel",
+      "offer_id": "weekend_20",
+      "arm": "Weekend 20% off",
+      "n_treatment": 2074,
+      "n_control": 2122,
+      "difference": -1.124631909496891,
+      "se": 1.6899609019845165,
+      "ci_low": -4.4368944126673675,
+      "ci_high": 2.187630593673586,
+      "p_value": 0.5057447692903461,
+      "p_adjusted": 0.5057447692903461,
+      "q_value": 0.663271828577503,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "travel_pattern",
+      "group": "Other travel",
+      "offer_id": "spend_10",
+      "arm": "Spend & get $10",
+      "n_treatment": 2077,
+      "n_control": 2122,
+      "difference": 3.858518477741086,
+      "se": 1.830037233057865,
+      "ci_low": 0.27171141058033754,
+      "ci_high": 7.445325544901834,
+      "p_value": 0.034993194335537325,
+      "p_adjusted": 0.034993194335537325,
+      "q_value": 0.09653294989113745,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "travel_pattern",
+      "group": "Other travel",
+      "offer_id": "free_trip",
+      "arm": "Fifth trip free",
+      "n_treatment": 2071,
+      "n_control": 2122,
+      "difference": 4.363513212048957,
+      "se": 1.9058771057880968,
+      "ci_low": 0.628062725744853,
+      "ci_high": 8.098963698353062,
+      "p_value": 0.022050087141630408,
+      "p_adjusted": 0.022050087141630408,
+      "q_value": 0.06300024897608689,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "travel_pattern",
+      "group": "Other travel",
+      "offer_id": "offpeak_pass",
+      "arm": "Off-peak pass ($30 cap)",
+      "n_treatment": 2058,
+      "n_control": 2122,
+      "difference": -9.043851633581173,
+      "se": 1.450473162110858,
+      "ci_low": -11.886726791860383,
+      "ci_high": -6.200976475301964,
+      "p_value": 4.514768179835103e-10,
+      "p_adjusted": 4.514768179835103e-10,
+      "q_value": 3.283467767152802e-09,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "travel_pattern",
+      "group": "Other travel",
+      "offer_id": "loyalty_500",
+      "arm": "500 bonus points",
+      "n_treatment": 2083,
+      "n_control": 2122,
+      "difference": -2.1863979615296074,
+      "se": 1.7873826246927567,
+      "ci_low": -5.689603532520083,
+      "ci_high": 1.3168076094608678,
+      "p_value": 0.2212390532845535,
+      "p_adjusted": 0.2212390532845535,
+      "q_value": 0.3765771119737081,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "travel_pattern",
+      "group": "Other travel",
+      "offer_id": "loyalty_1500",
+      "arm": "1,500 bonus points",
+      "n_treatment": 2068,
+      "n_control": 2122,
+      "difference": -9.82147775547297,
+      "se": 1.876543743642272,
+      "ci_low": -13.499435908425786,
+      "ci_high": -6.143519602520152,
+      "p_value": 1.660490630508351e-07,
+      "p_adjusted": 1.660490630508351e-07,
+      "q_value": 9.488517888619148e-07,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "travel_pattern",
+      "group": "Peak-led",
+      "offer_id": "offpeak_15",
+      "arm": "Off-peak 15% off",
+      "n_treatment": 713,
+      "n_control": 656,
+      "difference": -0.5916309028854378,
+      "se": 2.185068323223286,
+      "ci_low": -4.874286120162404,
+      "ci_high": 3.6910243143915284,
+      "p_value": 0.7865749914820472,
+      "p_adjusted": 0.7865749914820472,
+      "q_value": 0.8139958256867914,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "travel_pattern",
+      "group": "Peak-led",
+      "offer_id": "pct_10",
+      "arm": "10% off every trip",
+      "n_treatment": 717,
+      "n_control": 656,
+      "difference": 3.299725371591151,
+      "se": 2.4199665315453656,
+      "ci_low": -1.4433218740300777,
+      "ci_high": 8.04277261721238,
+      "p_value": 0.17271183950006241,
+      "p_adjusted": 0.17271183950006241,
+      "q_value": 0.32132435255825564,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "travel_pattern",
+      "group": "Peak-led",
+      "offer_id": "weekend_20",
+      "arm": "Weekend 20% off",
+      "n_treatment": 704,
+      "n_control": 656,
+      "difference": 5.37202283718473,
+      "se": 2.664242833722259,
+      "ci_low": 0.15020283702016624,
+      "ci_high": 10.593842837349293,
+      "p_value": 0.0437642999169612,
+      "p_adjusted": 0.0437642999169612,
+      "q_value": 0.11294012881796439,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "travel_pattern",
+      "group": "Peak-led",
+      "offer_id": "spend_10",
+      "arm": "Spend & get $10",
+      "n_treatment": 701,
+      "n_control": 656,
+      "difference": 3.5070654949788462,
+      "se": 2.5386949642841485,
+      "ci_low": -1.468685202751284,
+      "ci_high": 8.482816192708977,
+      "p_value": 0.16714241618233439,
+      "p_adjusted": 0.16714241618233439,
+      "q_value": 0.31875928611519366,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "travel_pattern",
+      "group": "Peak-led",
+      "offer_id": "free_trip",
+      "arm": "Fifth trip free",
+      "n_treatment": 707,
+      "n_control": 656,
+      "difference": 6.464608709924519,
+      "se": 2.2615078146201633,
+      "ci_low": 2.0321348425131145,
+      "ci_high": 10.897082577335924,
+      "p_value": 0.004255965380859499,
+      "p_adjusted": 0.004255965380859499,
+      "q_value": 0.01480335784646782,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "travel_pattern",
+      "group": "Peak-led",
+      "offer_id": "offpeak_pass",
+      "arm": "Off-peak pass ($30 cap)",
+      "n_treatment": 720,
+      "n_control": 656,
+      "difference": 2.233234402331572,
+      "se": 2.23636016480891,
+      "ci_low": -2.149950977153951,
+      "ci_high": 6.616419781817095,
+      "p_value": 0.3179873859379976,
+      "p_adjusted": 0.3179873859379976,
+      "q_value": 0.5087798175007961,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "travel_pattern",
+      "group": "Peak-led",
+      "offer_id": "loyalty_500",
+      "arm": "500 bonus points",
+      "n_treatment": 694,
+      "n_control": 656,
+      "difference": -1.0298851056640856,
+      "se": 2.44866091012734,
+      "ci_low": -5.829172299864742,
+      "ci_high": 3.7694020885365704,
+      "p_value": 0.6740536580114884,
+      "p_adjusted": 0.6740536580114884,
+      "q_value": 0.7638478048588597,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "travel_pattern",
+      "group": "Peak-led",
+      "offer_id": "loyalty_1500",
+      "arm": "1,500 bonus points",
+      "n_treatment": 709,
+      "n_control": 656,
+      "difference": -11.262088227217898,
+      "se": 2.419967527020593,
+      "ci_low": -16.00513742393472,
+      "ci_high": -6.519039030501076,
+      "p_value": 3.2584457727192763e-06,
+      "p_adjusted": 3.2584457727192763e-06,
+      "q_value": 1.7378377454502806e-05,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "digital_group",
+      "group": "Higher engagement",
+      "offer_id": "offpeak_15",
+      "arm": "Off-peak 15% off",
+      "n_treatment": 1418,
+      "n_control": 1419,
+      "difference": -0.5038247259436375,
+      "se": 1.9260891021607844,
+      "ci_low": -4.278889997193864,
+      "ci_high": 3.271240545306589,
+      "p_value": 0.7936459300446217,
+      "p_adjusted": 0.7936459300446217,
+      "q_value": 0.8139958256867914,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "digital_group",
+      "group": "Higher engagement",
+      "offer_id": "pct_10",
+      "arm": "10% off every trip",
+      "n_treatment": 1357,
+      "n_control": 1419,
+      "difference": -1.4933652327966058,
+      "se": 2.100676812144969,
+      "ci_low": -5.610616127759158,
+      "ci_high": 2.6238856621659465,
+      "p_value": 0.47714795041345415,
+      "p_adjusted": 0.47714795041345415,
+      "q_value": 0.6605942781465525,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "digital_group",
+      "group": "Higher engagement",
+      "offer_id": "weekend_20",
+      "arm": "Weekend 20% off",
+      "n_treatment": 1447,
+      "n_control": 1419,
+      "difference": -0.3714510012589898,
+      "se": 1.9650884825985144,
+      "ci_low": -4.222953653586543,
+      "ci_high": 3.480051651068563,
+      "p_value": 0.8500731626656046,
+      "p_adjusted": 0.8500731626656046,
+      "q_value": 0.8608335824461819,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "digital_group",
+      "group": "Higher engagement",
+      "offer_id": "spend_10",
+      "arm": "Spend & get $10",
+      "n_treatment": 1460,
+      "n_control": 1419,
+      "difference": 3.9576787552419788,
+      "se": 2.149790041667194,
+      "ci_low": -0.2558323007485832,
+      "ci_high": 8.17118981123254,
+      "p_value": 0.0656273333970358,
+      "p_adjusted": 0.0656273333970358,
+      "q_value": 0.150005333478939,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "digital_group",
+      "group": "Higher engagement",
+      "offer_id": "free_trip",
+      "arm": "Fifth trip free",
+      "n_treatment": 1398,
+      "n_control": 1419,
+      "difference": 4.758780689275298,
+      "se": 2.3034353486990007,
+      "ci_low": 0.24413036510879582,
+      "ci_high": 9.273431013441801,
+      "p_value": 0.03883326532527798,
+      "p_adjusted": 0.03883326532527798,
+      "q_value": 0.10355537420074128,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "digital_group",
+      "group": "Higher engagement",
+      "offer_id": "offpeak_pass",
+      "arm": "Off-peak pass ($30 cap)",
+      "n_treatment": 1439,
+      "n_control": 1419,
+      "difference": -7.855115466920363,
+      "se": 1.7044098687708833,
+      "ci_low": -11.195697424605935,
+      "ci_high": -4.514533509234792,
+      "p_value": 4.051925398343736e-06,
+      "p_adjusted": 4.051925398343736e-06,
+      "q_value": 2.025962699171868e-05,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "digital_group",
+      "group": "Higher engagement",
+      "offer_id": "loyalty_500",
+      "arm": "500 bonus points",
+      "n_treatment": 1449,
+      "n_control": 1419,
+      "difference": -1.3024741891246379,
+      "se": 2.0685047060891755,
+      "ci_low": -5.356668914911031,
+      "ci_high": 2.7517205366617556,
+      "p_value": 0.5289108843180359,
+      "p_adjusted": 0.5289108843180359,
+      "q_value": 0.6809864072999121,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "digital_group",
+      "group": "Higher engagement",
+      "offer_id": "loyalty_1500",
+      "arm": "1,500 bonus points",
+      "n_treatment": 1426,
+      "n_control": 1419,
+      "difference": -10.930753847877593,
+      "se": 2.062279570350903,
+      "ci_low": -14.9727475318181,
+      "ci_high": -6.888760163937087,
+      "p_value": 1.1559614204974832e-07,
+      "p_adjusted": 1.1559614204974832e-07,
+      "q_value": 7.113608741522974e-07,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "digital_group",
+      "group": "Lower engagement",
+      "offer_id": "offpeak_15",
+      "arm": "Off-peak 15% off",
+      "n_treatment": 1360,
+      "n_control": 1359,
+      "difference": -1.1404936080557633,
+      "se": 1.9520328552741426,
+      "ci_low": -4.9664077010319705,
+      "ci_high": 2.685420484920444,
+      "p_value": 0.5590457812676225,
+      "p_adjusted": 0.5590457812676225,
+      "q_value": 0.6809864072999121,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "digital_group",
+      "group": "Lower engagement",
+      "offer_id": "pct_10",
+      "arm": "10% off every trip",
+      "n_treatment": 1421,
+      "n_control": 1359,
+      "difference": 2.139132143000893,
+      "se": 2.1015424274043615,
+      "ci_low": -1.9798153266945366,
+      "ci_high": 6.2580796126963225,
+      "p_value": 0.30873179008974605,
+      "p_adjusted": 0.30873179008974605,
+      "q_value": 0.5061543646219003,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "digital_group",
+      "group": "Lower engagement",
+      "offer_id": "weekend_20",
+      "arm": "Weekend 20% off",
+      "n_treatment": 1331,
+      "n_control": 1359,
+      "difference": 0.9557168433774379,
+      "se": 2.098659372537545,
+      "ci_low": -3.1575799426135784,
+      "ci_high": 5.069013629368454,
+      "p_value": 0.6488258257519193,
+      "p_adjusted": 0.6488258257519193,
+      "q_value": 0.752261826958747,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "digital_group",
+      "group": "Lower engagement",
+      "offer_id": "spend_10",
+      "arm": "Spend & get $10",
+      "n_treatment": 1318,
+      "n_control": 1359,
+      "difference": 2.9601219819424927,
+      "se": 2.1277620710865808,
+      "ci_low": -1.2102150450575602,
+      "ci_high": 7.1304590089425455,
+      "p_value": 0.16416772390281553,
+      "p_adjusted": 0.16416772390281553,
+      "q_value": 0.31875928611519366,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "digital_group",
+      "group": "Lower engagement",
+      "offer_id": "free_trip",
+      "arm": "Fifth trip free",
+      "n_treatment": 1380,
+      "n_control": 1359,
+      "difference": 4.795245530366195,
+      "se": 2.0354427851601242,
+      "ci_low": 0.8058509788604526,
+      "ci_high": 8.784640081871938,
+      "p_value": 0.018479213994421945,
+      "p_adjusted": 0.018479213994421945,
+      "q_value": 0.056859119982836756,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "digital_group",
+      "group": "Lower engagement",
+      "offer_id": "offpeak_pass",
+      "arm": "Off-peak pass ($30 cap)",
+      "n_treatment": 1339,
+      "n_control": 1359,
+      "difference": -4.861583655216812,
+      "se": 1.7701029713083827,
+      "ci_low": -8.330921727908578,
+      "ci_high": -1.392245582525045,
+      "p_value": 0.006023531710089992,
+      "p_adjusted": 0.006023531710089992,
+      "q_value": 0.020078439033633308,
+      "significant_fdr10": true
+    },
+    {
+      "dimension": "digital_group",
+      "group": "Lower engagement",
+      "offer_id": "loyalty_500",
+      "arm": "500 bonus points",
+      "n_treatment": 1328,
+      "n_control": 1359,
+      "difference": -3.026707371322388,
+      "se": 2.1067582132477827,
+      "ci_low": -7.155877593421997,
+      "ci_high": 1.1024628507772212,
+      "p_value": 0.15081299094550601,
+      "p_adjusted": 0.15081299094550601,
+      "q_value": 0.31750103356948634,
+      "significant_fdr10": false
+    },
+    {
+      "dimension": "digital_group",
+      "group": "Lower engagement",
+      "offer_id": "loyalty_1500",
+      "arm": "1,500 bonus points",
+      "n_treatment": 1351,
+      "n_control": 1359,
+      "difference": -9.848438541881073,
+      "se": 2.283663029813533,
+      "ci_low": -14.324335833141218,
+      "ci_high": -5.3725412506209285,
+      "p_value": 1.6137356462481882e-05,
+      "p_adjusted": 1.6137356462481882e-05,
+      "q_value": 7.594050099991474e-05,
+      "significant_fdr10": true
+    }
+  ],
+  "subgroup_scope": "Exploratory net-contribution effects by pre-treatment group; Benjamini-Hochberg q-values across all subgroup tests.",
+  "limitations": "Synthetic trial; normal-approximation intervals. Sequential looks use CUPED trips with simulation-calibrated O'Brien-Fleming boundaries. A separate policy experiment evaluates the constrained allocation."
+}

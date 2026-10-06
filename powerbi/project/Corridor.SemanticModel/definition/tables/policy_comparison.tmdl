@@ -1,0 +1,75 @@
+table policy_comparison
+	lineageTag: 4c346229-de78-527a-abb2-b24b797018ca
+
+	column policy
+		dataType: string
+		lineageTag: 6814951d-db5f-58f2-8bb8-38066dc06082
+		summarizeBy: none
+		sourceColumn: policy
+		sortByColumn: policy_order
+
+	column policy_order
+		dataType: int64
+		formatString: #,0
+		lineageTag: 07d7eb5f-b5dc-5a9b-8dd4-70e1590c5c8a
+		summarizeBy: sum
+		sourceColumn: policy_order
+
+	column contacts
+		dataType: int64
+		formatString: #,0
+		lineageTag: 825d71eb-64f8-55e0-8d43-4c549d52fd72
+		summarizeBy: sum
+		sourceColumn: contacts
+
+	column predicted_value
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 7e00a48d-68f5-5f8c-8aa0-4cdabc1dfb2a
+		summarizeBy: sum
+		sourceColumn: predicted_value
+
+	column true_value
+		dataType: double
+		formatString: #,0.00
+		lineageTag: b11f631a-6b4a-584c-bcae-d9a2aa2180d2
+		summarizeBy: sum
+		sourceColumn: true_value
+
+	column true_spend
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 13ea2443-ec7a-5447-a2cc-5f47d3b6439f
+		summarizeBy: sum
+		sourceColumn: true_spend
+
+	column share_of_oracle
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 3264aad4-ab11-5b26-9293-1910ca1b6d98
+		summarizeBy: none
+		sourceColumn: share_of_oracle
+
+	column customers_losing_money
+		dataType: int64
+		formatString: #,0
+		lineageTag: 67a2de8b-b6ca-572f-b3fb-21b4bbd49bf6
+		summarizeBy: sum
+		sourceColumn: customers_losing_money
+
+	partition policy_comparison = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [#"policy" = nullable text, #"policy_order" = nullable text, #"contacts" = nullable text, #"predicted_value" = nullable text, #"true_value" = nullable text, #"true_spend" = nullable text, #"share_of_oracle" = nullable text, #"customers_losing_money" = nullable text], {
+				        {"Random targeting", "1", "1845", "1768.6956", "1079.0437", "9982.0008", "0.0128", "749"},
+				        {"Propensity: 10% off top travellers", "2", "392", "5996.7949", "5623.6515", "9986.2822", "0.0669", "49"},
+				        {"RFM segment playbook", "3", "1766", "-2374.8206", "-4304.4744", "10644.4928", "-0.0512", "1623"},
+				        {"Uplift ranking (greedy)", "4", "5000", "89980.0265", "57367.3784", "5940.2182", "0.6824", "671"},
+				        {"Optimized (MIP)", "5", "5000", "117257.3797", "60381.5078", "9527.8064", "0.7182", "284"},
+				        {"Optimized, risk-averse (MIP on LCB)", "6", "5000", "113791.0124", "58147.9019", "9348.1707", "0.6917", "342"},
+				        {"Oracle optimum (true effects)", "7", "5000", "84816.4791", "84068.5006", "9999.9986", "1.0", "0"}
+				    }),
+				    Typed = Table.TransformColumnTypes(Source, {{"policy", type text}, {"policy_order", Int64.Type}, {"contacts", Int64.Type}, {"predicted_value", type number}, {"true_value", type number}, {"true_spend", type number}, {"share_of_oracle", type number}, {"customers_losing_money", Int64.Type}})
+				in
+				    Typed

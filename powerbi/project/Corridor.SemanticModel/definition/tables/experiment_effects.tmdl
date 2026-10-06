@@ -1,0 +1,82 @@
+table experiment_effects
+	lineageTag: 5bae5e06-0358-5299-a37d-c3c90b0dc7c8
+
+	column offer_id
+		dataType: string
+		lineageTag: 2a654281-8aa0-5b3a-9412-38531f49ff23
+		summarizeBy: none
+		sourceColumn: offer_id
+
+	column n
+		dataType: int64
+		formatString: #,0
+		lineageTag: 1ebbb23d-85f9-53d0-bd8a-5826ad075efb
+		summarizeBy: sum
+		sourceColumn: n
+
+	column trips_effect
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 7b3dc729-6858-59cd-bf2c-0eb5a41ea41b
+		summarizeBy: sum
+		sourceColumn: trips_effect
+
+	column value_effect
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 52b43603-bb06-5d37-ad36-366cd8a30a30
+		summarizeBy: sum
+		sourceColumn: value_effect
+
+	column value_low
+		dataType: double
+		formatString: #,0.00
+		lineageTag: e8bddfb9-4147-5026-8b01-026c5e4d6e53
+		summarizeBy: sum
+		sourceColumn: value_low
+
+	column value_high
+		dataType: double
+		formatString: #,0.00
+		lineageTag: e745d93b-97e6-5f30-b08f-168880891562
+		summarizeBy: sum
+		sourceColumn: value_high
+
+	column p_adjusted
+		dataType: double
+		formatString: 0.0%
+		lineageTag: a69a64b8-e16b-5515-8b1b-fc7c66966c32
+		summarizeBy: none
+		sourceColumn: p_adjusted
+
+	column variance_reduction
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 4a2a537e-f87e-5cac-933a-35b9f08de7fe
+		summarizeBy: none
+		sourceColumn: variance_reduction
+
+	column enrollment_rate
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 79012069-bc61-5014-a556-2e5d4713e9a6
+		summarizeBy: none
+		sourceColumn: enrollment_rate
+
+	partition experiment_effects = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [#"offer_id" = nullable text, #"n" = nullable text, #"trips_effect" = nullable text, #"value_effect" = nullable text, #"value_low" = nullable text, #"value_high" = nullable text, #"p_adjusted" = nullable text, #"variance_reduction" = nullable text, #"enrollment_rate" = nullable text], {
+				        {"offpeak_15", "2778", "0.6986", "0.0194", "-1.6029", "1.6416", "1.0", "0.8261", "0.4082"},
+				        {"pct_10", "2778", "1.07", "0.8092", "-0.8149", "2.4333", "1.0", "0.8264", "0.4035"},
+				        {"weekend_20", "2778", "0.7934", "0.9425", "-0.674", "2.5591", "0.8869", "0.8402", "0.4165"},
+				        {"spend_10", "2778", "0.9137", "2.7866", "1.1427", "4.4305", "0.0", "0.848", "0.4089"},
+				        {"free_trip", "2778", "1.3766", "4.0606", "2.3351", "5.7861", "0.0", "0.8437", "0.3952"},
+				        {"offpeak_pass", "2778", "0.3789", "-6.4033", "-8.132", "-4.6746", "0.0", "0.833", "0.4064"},
+				        {"loyalty_500", "2777", "0.5699", "-2.0828", "-3.778", "-0.3875", "0.0062", "0.838", "0.4127"},
+				        {"loyalty_1500", "2777", "0.7978", "-10.2704", "-12.0858", "-8.455", "0.0", "0.8309", "0.3997"}
+				    }),
+				    Typed = Table.TransformColumnTypes(Source, {{"offer_id", type text}, {"n", Int64.Type}, {"trips_effect", type number}, {"value_effect", type number}, {"value_low", type number}, {"value_high", type number}, {"p_adjusted", type number}, {"variance_reduction", type number}, {"enrollment_rate", type number}})
+				in
+				    Typed

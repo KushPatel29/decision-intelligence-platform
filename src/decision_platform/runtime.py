@@ -36,14 +36,14 @@ def now():
 def artifact_manifest(root):
     folder = Path(root) / "outputs"
     candidates = list(folder.iterdir())
-    for name in ["powerbi", "performance", "adhoc", "models"]:
+    for name in ["powerbi", "performance", "adhoc", "models", "serving"]:
         if (folder / name).exists():
             candidates.extend((folder / name).rglob("*"))
     files = [
         p
         for p in candidates
         if p.is_file()
-        and p.suffix in {".csv", ".json"}
+        and p.suffix in {".csv", ".json", ".parquet"}
         and p.name not in {"artifact_manifest.json", "run_status.json", "repro_reference.json"}
     ]
     hashes = {

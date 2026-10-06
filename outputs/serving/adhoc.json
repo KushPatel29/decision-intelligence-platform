@@ -1,0 +1,47 @@
+{
+  "weekend_decline": {
+    "question": "Why did weekend traffic decline last month?",
+    "sql": "WITH weekend AS (\n  SELECT date_trunc('month', t.timestamp) AS month,\n         count(*) AS trips,\n         count(DISTINCT CAST(t.timestamp AS DATE)) AS weekend_days,\n         avg(c.precipitation_mm) AS mean_rain_mm\n  FROM silver.fact_trip t\n  JOIN silver.external_context c ON c.date = CAST(t.timestamp AS DATE)\n  WHERE t.period = 'Weekend' AND t.timestamp >= '2025-04-01' AND t.timestamp < '2025-10-01'\n  GROUP BY 1\n)\nSELECT strftime(month, '%Y-%m') AS month,\n       trips,\n       weekend_days,\n       round(trips / weekend_days, 1) AS trips_per_weekend_day,\n       round(100 * (trips / weekend_days) / lag(trips / weekend_days) OVER (ORDER BY month) - 100, 1) AS change_pct,\n       round(mean_rain_mm, 2) AS mean_rain_mm\nFROM weekend ORDER BY month",
+    "chart": [
+      "month",
+      "trips_per_weekend_day"
+    ],
+    "conclusion": "Weekend trips per weekend day moved -5.5% from 2025-08 to 2025-09. Average weekend rain went from 0.7 mm to 0.5 mm, and the series also carries the seasonal slide into autumn and customer churn. Normalising by weekend days first matters: raw monthly totals confuse calendar length with demand."
+  },
+  "segment_decline": {
+    "question": "Which customer segment experienced the largest usage decline?",
+    "sql": "SELECT rfm_segment,\n       count(*) AS customers,\n       round(avg(trips_90d), 1) AS trips_last_90d,\n       round(avg(trips_previous90d), 1) AS trips_prior_90d,\n       round(sum(trips_90d) / nullif(sum(trips_previous90d), 0), 3) AS volume_ratio,\n       round(avg(CASE WHEN trips_90d < 0.5 * trips_previous90d THEN 1.0 ELSE 0.0 END), 3) AS share_declining,\n       round(percentile_cont(0.5) WITHIN GROUP (ORDER BY frequency_trend), 3) AS median_trend\nFROM gold.customer_360\nWHERE trips_previous90d >= 3\nGROUP BY 1 ORDER BY share_declining DESC",
+    "chart": [
+      "rfm_segment",
+      "share_declining"
+    ],
+    "conclusion": "Dormant customers decline most: 100% of them halved their trips versus the prior 90 days (volume ratio 0.00). The segment rules themselves use recency, so this is descriptive, not a cause. Target the declining customers whose offers show positive incremental value rather than the whole segment."
+  },
+  "cannibalization": {
+    "question": "Did the July promotion cannibalize full-price trips?",
+    "sql": "WITH control AS (\n  SELECT avg(trip_count) AS base_trips FROM gold.campaign_performance WHERE arm = 'Control'\n)\nSELECT p.arm,\n       count(*) AS customers,\n       round(avg(p.trip_count), 2) AS trips_per_customer,\n       round(avg(p.trip_count) - c.base_trips, 2) AS incremental_trips,\n       round(avg(p.incentive_cost), 2) AS incentive_per_customer,\n       round(1 - (avg(p.trip_count) - c.base_trips) / nullif(avg(p.trip_count), 0), 3) AS subsidy_share,\n       round(avg(p.net_contribution), 2) AS net_contribution_per_customer\nFROM gold.campaign_performance p CROSS JOIN control c\nWHERE p.arm <> 'Control'\nGROUP BY p.arm, c.base_trips ORDER BY subsidy_share DESC",
+    "chart": [
+      "arm",
+      "subsidy_share"
+    ],
+    "conclusion": "Yes. In the Off-peak pass ($30 cap) arm 94% of rewarded trips would have happened anyway, so most of its 8.56 CAD incentive per customer subsidised baseline travel. Discounts paid on every eligible trip are expensive for heavy travellers. That is why the plan prices each offer on incremental trips and includes the cost of baseline trips."
+  },
+  "unused_capacity": {
+    "question": "Which zones have the highest unused off-peak capacity?",
+    "sql": "SELECT z.zone_name,\n       round(c.baseline_forecast) AS forecast_trips,\n       round(c.capacity_trips) AS capacity_trips,\n       round(c.available_trips) AS free_before_campaign,\n       round(c.allocated_trips, 1) AS campaign_trips,\n       round(c.remaining_with_reserve) AS free_after_campaign,\n       rank() OVER (ORDER BY c.remaining_with_reserve DESC) AS headroom_rank,\n       round(100 * c.remaining_with_reserve / sum(c.remaining_with_reserve) OVER (), 1) AS share_of_free_pct\nFROM gold.zone_capacity c JOIN silver.dim_zone z USING (zone_id)\nWHERE c.period = 'Off-peak'\nORDER BY headroom_rank",
+    "chart": [
+      "zone_name",
+      "free_after_campaign"
+    ],
+    "conclusion": "East keeps the most off-peak room: 6,581 trips free after the campaign and the safety reserve (18% of all off-peak headroom). Off-peak offers aimed at this zone add trips where the road has capacity. Validate engineering capacity before raising offer volume further."
+  },
+  "enrollment_vs_value": {
+    "question": "Why did campaign ROI decline despite increased enrollment?",
+    "sql": "WITH control AS (\n  SELECT avg(net_contribution) AS base_value FROM gold.campaign_performance WHERE arm = 'Control'\n)\nSELECT p.arm,\n       round(avg(p.enrolled), 3) AS enrollment_rate,\n       round(avg(p.redeemed), 3) AS redemption_rate,\n       round(avg(p.incentive_cost), 2) AS incentive_per_customer,\n       round(avg(p.net_contribution) - c.base_value, 2) AS net_contribution_per_customer,\n       round((avg(p.net_contribution) - c.base_value) / nullif(avg(p.incentive_cost), 0), 3) AS incremental_roi,\n       row_number() OVER (ORDER BY avg(p.enrolled) DESC) AS enrollment_rank\nFROM gold.campaign_performance p CROSS JOIN control c\nWHERE p.arm <> 'Control'\nGROUP BY p.arm, c.base_value ORDER BY enrollment_rank",
+    "chart": [
+      "arm",
+      "net_contribution_per_customer"
+    ],
+    "conclusion": "Enrollment and value are different things: Weekend 20% off has the highest enrollment (42%) but earns +0.35 CAD per customer, while Fifth trip free earns the most (+4.71 CAD). Enrollment is an intermediate metric. Optimise incremental net value per incentive dollar instead."
+  }
+}

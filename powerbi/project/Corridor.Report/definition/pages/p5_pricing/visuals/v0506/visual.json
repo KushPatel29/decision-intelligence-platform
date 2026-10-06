@@ -1,0 +1,166 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "v0506",
+  "position": {
+    "x": 20,
+    "y": 470,
+    "z": 1416,
+    "height": 234,
+    "width": 1240,
+    "tabOrder": 1416
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_zone"
+                    }
+                  },
+                  "Property": "zone_name"
+                }
+              },
+              "queryRef": "dim_zone.zone_name",
+              "nativeQueryRef": "zone_name",
+              "displayName": "Zone"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_period"
+                    }
+                  },
+                  "Property": "period"
+                }
+              },
+              "queryRef": "dim_period.period",
+              "nativeQueryRef": "period",
+              "displayName": "Period"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "price_plan"
+                    }
+                  },
+                  "Property": "price_change"
+                }
+              },
+              "queryRef": "price_plan.price_change",
+              "nativeQueryRef": "price_change",
+              "displayName": "Price change"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "price_plan"
+                    }
+                  },
+                  "Property": "forecast_trips"
+                }
+              },
+              "queryRef": "price_plan.forecast_trips",
+              "nativeQueryRef": "forecast_trips",
+              "displayName": "Forecast trips"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "price_plan"
+                    }
+                  },
+                  "Property": "campaign_trips"
+                }
+              },
+              "queryRef": "price_plan.campaign_trips",
+              "nativeQueryRef": "campaign_trips",
+              "displayName": "Campaign trips"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Price contribution change"
+                }
+              },
+              "queryRef": "_Measures.Price contribution change",
+              "nativeQueryRef": "Price contribution change"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "Price contribution change"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Jointly optimized price per cell, sharing capacity with the campaign'"
+                }
+              }
+            },
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Table titled Jointly optimized price per cell. Lists zone, period, price change, forecast trips, campaign trips and Price contribution change.'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

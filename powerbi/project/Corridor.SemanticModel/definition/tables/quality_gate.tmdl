@@ -1,0 +1,38 @@
+table quality_gate
+	lineageTag: 1a55784a-871e-5e6c-90b2-ed7b75719b1e
+
+	column check_name
+		dataType: string
+		lineageTag: 0010e427-5360-55f5-94c3-f516dd7d2f06
+		summarizeBy: none
+		sourceColumn: check_name
+
+	column passed
+		dataType: boolean
+		lineageTag: 6ba0b07b-a7e9-51c0-8d98-c373a976e497
+		summarizeBy: none
+		sourceColumn: passed
+
+	column criteria
+		dataType: string
+		lineageTag: de6ad98b-458e-5647-9f0b-11cd699720c1
+		summarizeBy: none
+		sourceColumn: criteria
+
+	partition quality_gate = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [#"check_name" = nullable text, #"passed" = nullable text, #"criteria" = nullable text], {
+				        {"propensity", "True", "AUC >= 0.70, ECE <= 0.10, Brier no worse than constant prevalence"},
+				        {"churn", "True", "AUC >= 0.70, ECE <= 0.10, Brier no worse than constant prevalence"},
+				        {"attrition", "True", "AUC >= 0.70, ECE <= 0.10, Brier no worse than constant prevalence"},
+				        {"contribution", "True", "Held-out MAE no worse than the historical-margin baseline"},
+				        {"demand", "True", "30-day MAE no worse than the same-weekday baseline; 90% interval coverage >= 80%"},
+				        {"uplift", "True", "Mean held-out value Qini of the selected learners above zero (observed outcomes)"},
+				        {"uplift (simulation check)", "False", "Simulation only: selected learners' mean rank correlation with true offer value >= 0.30"},
+				        {"elasticity (simulation check)", "True", "Simulation only: 95% intervals cover the true elasticity in >= 80% of cells"}
+				    }),
+				    Typed = Table.TransformColumnTypes(Source, {{"check_name", type text}, {"passed", type logical}, {"criteria", type text}})
+				in
+				    Typed

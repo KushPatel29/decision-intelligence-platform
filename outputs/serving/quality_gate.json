@@ -1,0 +1,62 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "model": "propensity",
+      "passed": true,
+      "criteria": "AUC >= 0.70, ECE <= 0.10, Brier no worse than constant prevalence",
+      "value": 0.9128103215084272,
+      "reference": 0.7
+    },
+    {
+      "model": "churn",
+      "passed": true,
+      "criteria": "AUC >= 0.70, ECE <= 0.10, Brier no worse than constant prevalence",
+      "value": 0.910322785556224,
+      "reference": 0.7
+    },
+    {
+      "model": "attrition",
+      "passed": true,
+      "criteria": "AUC >= 0.70, ECE <= 0.10, Brier no worse than constant prevalence",
+      "value": 0.7401422189011169,
+      "reference": 0.7
+    },
+    {
+      "model": "contribution",
+      "passed": true,
+      "criteria": "Held-out MAE no worse than the historical-margin baseline",
+      "value": 38.22869393011807,
+      "reference": 38.22869393011807
+    },
+    {
+      "model": "demand",
+      "passed": true,
+      "criteria": "30-day MAE no worse than the same-weekday baseline; 90% interval coverage >= 80%",
+      "value": 43.83086422401848,
+      "reference": 50.16942663817664
+    },
+    {
+      "model": "uplift",
+      "passed": true,
+      "criteria": "Mean held-out value Qini of the selected learners above zero (observed outcomes)",
+      "value": 0.21790737046791953,
+      "reference": 0.0
+    },
+    {
+      "model": "uplift (simulation check)",
+      "passed": false,
+      "criteria": "Simulation only: selected learners' mean rank correlation with true offer value >= 0.30",
+      "value": 0.22910445845639196,
+      "reference": 0.3
+    },
+    {
+      "model": "elasticity (simulation check)",
+      "passed": true,
+      "criteria": "Simulation only: 95% intervals cover the true elasticity in >= 80% of cells",
+      "value": 0.9444444444444444,
+      "reference": 0.8
+    }
+  ],
+  "scope": "Synthetic local quality gate; a production population needs its own validation"
+}

@@ -1,3 +1,10 @@
+"""Batch monitoring: feature/prediction drift, matured performance, feed quality and campaigns.
+
+Every check is a review signal with an owner action, never an automatic retrain.
+The feed-quality monitor is calendar- and weather-aware and is scored against
+the defects planted in the bronze feed.
+"""
+
 import numpy as np
 import pandas as pd
 from scipy.stats import ks_2samp
@@ -185,4 +192,110 @@ def monitor(cfg, snapshots, current, frames=None, trial=None):
             "scope": "Batch checks; live notifications and CloudWatch execution require hosted configuration",
         },
     )
+    return result
+
+
+def data_quality_monitor(cfg, context):
+    """Daily bronze-feed profile with robust anomaly scores, scored against planted defects.
+
+    Volume is compared with the median of the same weekday over the previous four
+    weeks; a regression fitted on pre-June history explains the part of the
+    change due to rain and public holidays. Rate checks (duplicate natural keys,
+    out-of-range values, nulls) use robust z-scores against a trailing window.
+    """
+    feed = pd.read_parquet(
+        cfg.path("data", "bronze", "fact_trip.parquet"),
+        columns=[
+            "customer_id",
+            "timestamp",
+            "entry_zone",
+            "exit_zone",
+            "toll",
+            "distance_km",
+            "final_charge",
+            "ingested_at",
+        ],
+    )
+    feed["day"] = feed.ingested_at.dt.normalize()
+    key = ["customer_id", "timestamp", "entry_zone", "exit_zone", "toll"]
+    feed["duplicate"] = feed.duplicated(key, keep="first")
+    feed["out_of_range"] = (
+        ~feed.distance_km.between(0.5, 120) | ~feed.toll.between(0, 150) | (feed.final_charge < 0)
+    )
+    feed["null_key"] = feed[["customer_id", "timestamp"]].isna().any(axis=1)
+    daily = (
+        feed.groupby("day")
+        .agg(
+            rows=("customer_id", "size"),
+            duplicate_rate=("duplicate", "mean"),
+            out_of_range_rate=("out_of_range", "mean"),
+            null_rate=("null_key", "mean"),
+        )
+        .reindex(
+            pd.date_range(cfg.start, pd.Timestamp(cfg.decision_date) - pd.Timedelta(days=1)), fill_value=0
+        )
+        .rename_axis("day")
+        .reset_index()
+    )
+    daily = daily.merge(
+        context[["date", "precipitation_mm", "holiday"]], left_on="day", right_on="date", how="left"
+    ).drop(columns="date")
+    reference = np.full(len(daily), np.nan)
+    rows = daily.rows.to_numpy(float)
+    for i in range(28, len(daily)):
+        reference[i] = np.median(rows[[i - 7, i - 14, i - 21, i - 28]])
+    daily["expected_rows"] = reference
+    daily["log_ratio"] = np.log((daily.rows + 1) / (daily.expected_rows + 1))
+    train = daily[(daily.day < "2025-06-01") & daily.expected_rows.notna()]
+    design = lambda f: np.column_stack([np.ones(len(f)), f.precipitation_mm, f.holiday])  # noqa: E731
+    coef, *_ = np.linalg.lstsq(design(train), train.log_ratio, rcond=None)
+    daily["explained"] = design(daily) @ coef
+    daily["residual"] = daily.log_ratio - daily.explained
+    scale = 1.4826 * np.median(
+        np.abs(train.log_ratio - design(train) @ coef - np.median(train.log_ratio - design(train) @ coef))
+    )
+    daily["volume_z"] = daily.residual / max(scale, 1e-6)
+    for metric in ["duplicate_rate", "out_of_range_rate", "null_rate"]:
+        history = daily[metric].shift(1).rolling(56, min_periods=28)
+        median = history.median()
+        mad = (daily[metric].shift(1) - median).abs().rolling(56, min_periods=28).median() * 1.4826
+        daily[metric + "_z"] = (daily[metric] - median) / np.maximum(mad, 0.002)
+    window = daily[(daily.day >= "2025-06-01")].copy()
+    window["flag_volume"] = window.volume_z.abs() >= 4
+    window["flag_rates"] = (window[["duplicate_rate_z", "out_of_range_rate_z", "null_rate_z"]] >= 6).any(
+        axis=1
+    )
+    window["flagged"] = window.flag_volume | window.flag_rates
+    window["reason"] = np.select(
+        [window.flag_rates & (window.duplicate_rate_z >= 6), window.flag_rates, window.flag_volume],
+        ["duplicate natural keys", "out-of-range values", "volume vs same weekday"],
+        default="",
+    )
+    planted_path = cfg.path("data", "simulation_audit", "planted_data_defects.parquet")
+    evaluation = {}
+    if planted_path.exists():
+        planted = set(pd.to_datetime(pd.read_parquet(planted_path).ingestion_date))
+        truth = window.day.isin(planted)
+        hits = int((window.flagged & truth).sum())
+        evaluation = {
+            "monitored_days": len(window),
+            "planted_defect_days": int(truth.sum()),
+            "flagged_days": int(window.flagged.sum()),
+            "caught": hits,
+            "precision": hits / max(int(window.flagged.sum()), 1),
+            "recall": hits / max(int(truth.sum()), 1),
+            "false_alarm_days": int((window.flagged & ~truth).sum()),
+        }
+    window.to_csv(cfg.path("outputs", "data_quality_daily.csv"), index=False)
+    result = {
+        "method": "Same-weekday volume ratio with a rain/holiday adjustment fitted before June 2025; robust "
+        "z-scores for duplicate, out-of-range and null rates. Flags: |volume z| >= 4 or rate z >= 6.",
+        "weather_coefficient": float(coef[1]),
+        "holiday_coefficient": float(coef[2]),
+        "evaluation_against_planted": evaluation,
+        "flags": window.loc[window.flagged, ["day", "rows", "expected_rows", "volume_z", "reason"]].to_dict(
+            orient="records"
+        ),
+    }
+    write_json(cfg.path("outputs", "data_quality_monitor.json"), result)
     return result

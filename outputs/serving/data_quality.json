@@ -1,0 +1,48 @@
+{
+  "status": "passed",
+  "checks": {
+    "customer_key_unique": true,
+    "trip_key_unique": true,
+    "event_key_unique": true,
+    "customer_fk": true,
+    "digital_customer_fk": true,
+    "zone_fk": true,
+    "exit_zone_fk": true,
+    "nonnegative_charge": true,
+    "discount_within_toll": true,
+    "charge_reconciles": true,
+    "timestamps_present": true,
+    "distance_in_range": true,
+    "no_trip_before_account": true,
+    "natural_key_unique": true
+  },
+  "rows": {
+    "dim_customer": 25000,
+    "dim_account": 25000,
+    "dim_vehicle": 25000,
+    "dim_zone": 6,
+    "dim_offer": 8,
+    "fact_trip": 3680249,
+    "fact_digital_event": 1412304,
+    "fact_loyalty_points": 3680249,
+    "fact_pricing_scenario": 26316,
+    "external_context": 731,
+    "quarantine_trip": 4147,
+    "dim_transponder": 21513,
+    "customer_preferences": 25000,
+    "customer_status_history": 27000,
+    "dim_entry_point": 6,
+    "dim_exit_point": 6,
+    "dim_time": 731,
+    "dim_rate": 36,
+    "fact_effective_price": 3680249,
+    "dim_reward": 2,
+    "fact_loyalty_tier": 25000
+  },
+  "bronze_rows": 3684396,
+  "quarantined": {
+    "duplicate_natural_key": 2500,
+    "distance_out_of_range": 1528,
+    "charge_out_of_range": 119
+  }
+}

@@ -7,8 +7,8 @@ price-by-promotion interaction. No offer-response/price effect is counted twice.
 
 import numpy as np
 import pandas as pd
-from scipy.optimize import Bounds, LinearConstraint, milp
-from scipy.sparse import csr_matrix
+from scipy.optimize import Bounds, LinearConstraint, linprog, milp
+from scipy.sparse import coo_matrix, csr_matrix, hstack, vstack
 
 from .config import write_json
 from .optimization import constraint_matrix
@@ -44,6 +44,50 @@ def price_options(capacity, scenarios, trips, cutoff, margin=0.72, reserve=0.2):
     return options
 
 
+def _lp_guided(objective, a, lower, upper, bounds, n, keep_rc=2.0, time_limit=90):
+    """LP relaxation, then an exact MIP over every price option and the campaign variables still in play.
+
+    Campaign variables at zero in the LP whose reduced cost exceeds `keep_rc` dollars are dropped; the gap to
+    the LP bound is reported so the reduction's cost is visible.
+    """
+    from .optimization import _quiet
+
+    equality = lower > -np.inf
+    with _quiet():
+        lp = linprog(
+            -objective,
+            A_ub=a[~equality],
+            b_ub=upper[~equality],
+            A_eq=a[equality],
+            b_eq=upper[equality],
+            bounds=np.column_stack([np.zeros(len(bounds)), bounds]),
+            method="highs",
+        )
+    if lp.status != 0:
+        raise RuntimeError(f"Joint pricing LP failed: {lp.message}")
+    reduced = np.asarray(lp.lower.marginals)
+    keep = np.ones(len(objective), dtype=bool)
+    keep[:n] = (lp.x[:n] > 1e-9) | (reduced[:n] <= keep_rc)
+    keep &= bounds > 0
+    keep[n:] = True
+    sub = a[:, keep]
+    with _quiet():
+        result = milp(
+            -objective[keep],
+            integrality=np.ones(int(keep.sum())),
+            bounds=Bounds(np.zeros(int(keep.sum())), bounds[keep]),
+            constraints=LinearConstraint(sub, lower, upper),
+            options={"time_limit": time_limit, "mip_rel_gap": 1e-5},
+        )
+    if result.x is None:
+        raise RuntimeError("No feasible joint pricing plan")
+    selected = np.zeros(len(objective), dtype=bool)
+    selected[np.flatnonzero(keep)[result.x > 0.5]] = True
+    bound = float(-lp.fun)
+    gap = (bound - float(objective[selected].sum())) / max(abs(bound), 1e-9)
+    return selected, gap, bound, int(keep[:n].sum())
+
+
 @bounded_operation
 def optimize_prices(
     options,
@@ -55,7 +99,8 @@ def optimize_prices(
     solver="auto",
     surplus_weight=0.0,
 ):
-    from .optimization import validate_inputs
+    """Choose one effective price per zone/period and the campaign contacts in a single MIP."""
+    from .optimization import GUROBI_LICENCE_LIMIT, _period_usage, _solve_gurobi, validate_inputs
 
     cells = options.drop_duplicates(["zone_id", "period"])[["zone_id", "period", "capacity_trips"]].copy()
     cells["available_trips"] = cells.capacity_trips
@@ -64,58 +109,43 @@ def optimize_prices(
     if not np.isfinite(surplus_weight) or not 0 <= surplus_weight <= 1:
         raise ValueError("Surplus weight must be between zero and one")
     options = options.reset_index(drop=True)
+    candidates = candidates.reset_index(drop=True)
     for _, g in options.groupby(["zone_id", "period"]):
         if not g.eligible.any():
             raise ValueError("No price strategy fits capacity in a zone/period")
-    n = len(candidates)
-    k = len(options)
+    n, k = len(candidates), len(options)
     matrix, upper, names = constraint_matrix(candidates, cells, budget, contacts, roi, points)
-    rows = [np.r_[row, np.zeros(k)] for row in matrix.toarray()]
-    lower = [-np.inf] * len(rows)
-    upper = upper.tolist()
-    for i, name in enumerate(names):
-        if name.startswith("capacity:"):
-            _, zone, period = name.split(":", 2)
-            mask = options.zone_id.eq(int(zone)) & options.period.eq(period)
-            rows[i][n:] = np.where(mask, options.protected_load, 0)
-    for (zone, period), g in options.groupby(["zone_id", "period"]):
-        row = np.zeros(n + k)
-        row[n + g.index.to_numpy()] = 1
-        rows.append(row)
-        lower.append(1.0)
-        upper.append(1.0)
+    row_of = {name: i for i, name in enumerate(names)}
+    price_rows, price_cols, price_vals = [], [], []
+    for j, option in enumerate(options.itertuples()):
+        name = f"capacity:{option.zone_id}:{option.period}"
+        if name not in row_of:
+            raise ValueError("Price option has no capacity row")
+        price_rows.append(row_of[name])
+        price_cols.append(j)
+        price_vals.append(option.protected_load)
+    price_block = coo_matrix((price_vals, (price_rows, price_cols)), shape=(len(upper), k))
+    groups = list(options.groupby(["zone_id", "period"]).indices.values())
+    pick_rows = np.concatenate([np.full(len(g), i) for i, g in enumerate(groups)])
+    pick_cols = np.concatenate(groups)
+    pick = coo_matrix((np.ones(len(pick_cols)), (pick_rows, pick_cols)), shape=(len(groups), k))
+    a = vstack([hstack([matrix, price_block]), hstack([csr_matrix((len(groups), n)), pick])]).tocsr()
+    lower = np.r_[np.full(len(upper), -np.inf), np.ones(len(groups))]
+    upper = np.r_[upper, np.ones(len(groups))]
     objective = np.r_[
-        candidates.objective_value,
-        options.incremental_contribution + surplus_weight * options.consumer_surplus_change,
+        candidates.objective_value.to_numpy(float),
+        (options.incremental_contribution + surplus_weight * options.consumer_surplus_change).to_numpy(float),
     ]
     bounds = np.r_[candidates.eligible.astype(float), options.eligible.astype(float)]
-    a = csr_matrix(np.asarray(rows))
-    actual = "HiGHS (SciPy)"
-    gap = None
-    selected = None
-    if solver in ("auto", "gurobi"):
+    selected, gap, actual = None, None, "HiGHS"
+    small = n + k <= GUROBI_LICENCE_LIMIT and a.shape[0] + len(groups) <= GUROBI_LICENCE_LIMIT
+    if solver == "gurobi" or (solver == "auto" and small):
         try:
-            import gurobipy as gp
-
-            with gp.Env(empty=True) as env:
-                env.setParam("OutputFlag", 0)
-                env.start()
-                with gp.Model("joint_price_campaign", env=env) as model:
-                    x = model.addMVar(n + k, vtype=gp.GRB.BINARY, ub=bounds)
-                    model.setObjective(objective @ x, gp.GRB.MAXIMIZE)
-                    for row, lo, hi in zip(rows, lower, upper):
-                        if lo == hi:
-                            model.addConstr(row @ x == hi)
-                        else:
-                            model.addConstr(row @ x <= hi)
-                    model.Params.TimeLimit = 30
-                    model.Params.MIPGap = 0.001
-                    model.optimize()
-                    if model.SolCount < 1:
-                        raise RuntimeError("No feasible joint pricing plan")
-                    selected = x.X > 0.5
-                    gap = float(model.MIPGap)
-                    actual = "Gurobi"
+            # Equalities as paired inequalities so one solver interface serves both problems.
+            stacked = vstack([a, -a[len(upper) - len(groups) :]]).tocsr()
+            limits = np.r_[upper, -lower[len(upper) - len(groups) :]]
+            selected, gap, _, _ = _solve_gurobi(objective, stacked, limits, bounds, 30)
+            actual = "Gurobi"
         except Exception as exc:
             if (
                 solver == "gurobi"
@@ -124,36 +154,35 @@ def optimize_prices(
             ):
                 raise
     if selected is None:
-        result = milp(
-            -objective,
-            integrality=np.ones(n + k),
-            bounds=Bounds(np.zeros(n + k), bounds),
-            constraints=LinearConstraint(a, lower, upper),
-            options={"time_limit": 30, "mip_rel_gap": 0.001},
-        )
-        if result.x is None:
-            raise RuntimeError("No feasible joint pricing plan")
-        selected = result.x > 0.5
-        gap = float(result.mip_gap)
+        selected, gap, lp_bound, kept = _lp_guided(objective, a, lower, upper, bounds, n)
+        actual = f"HiGHS (LP-guided, {kept:,} campaign variables kept)"
     lhs = a @ selected.astype(float)
-    if np.any(lhs > np.asarray(upper) + 1e-6) or np.any(lhs < np.asarray(lower) - 1e-6):
+    if np.any(lhs > upper + 1e-6) or np.any(lhs < lower - 1e-6):
         raise RuntimeError("Joint pricing constraint violation")
     chosen = options[selected[n:]].copy()
     campaign = candidates[selected[:n]].copy()
-    additions = campaign.groupby(["zone_id", "period"]).incremental_trips.sum()
-    chosen["campaign_trips"] = [additions.get((r.zone_id, r.period), 0.0) for r in chosen.itertuples()]
+    usage = _period_usage(campaign)
+    added = {}
+    for period, values in usage.items():
+        for zone, value in zip(campaign.zone_id, values, strict=True):
+            added[(zone, period)] = added.get((zone, period), 0.0) + value
+    chosen["campaign_trips"] = [added.get((r.zone_id, r.period), 0.0) for r in chosen.itertuples()]
     chosen["remaining_with_reserve"] = chosen.available_trips - chosen.campaign_trips
     summary = {
         "solver": actual,
         "gap": gap,
+        "gap_definition": "Relative distance to the LP bound of the full joint problem",
         "all_constraints_passed": True,
         "price_contribution": float(chosen.incremental_contribution.sum()),
         "campaign_net_contribution": float(campaign.net_contribution.sum()),
+        "campaign_objective": float(campaign.objective_value.sum()),
         "consumer_surplus_change": float(chosen.consumer_surplus_change.sum()),
         "contacts": len(campaign),
         "spend": float(campaign.cost.sum()),
         "surplus_weight": surplus_weight,
-        "assumptions": "Constant elasticity; baseline-price promotion effects held fixed; no estimated price/offer interactions. Surplus is illustrative, not a measured welfare outcome.",
+        "price_changes": int((chosen["price_change"] != 0).sum()) if "price_change" in chosen else 0,
+        "assumptions": "Constant elasticity within the tested range; campaign effects estimated at baseline prices "
+        "(no fitted price-by-offer interaction). Consumer surplus is illustrative, not measured welfare.",
     }
     return chosen, campaign, summary
 
@@ -162,7 +191,7 @@ def build_pricing(cfg, scenarios, capacity, trips, solver):
     options = price_options(capacity, scenarios, trips, cfg.decision_date, cfg.contribution_margin)
     candidates = pd.read_csv(cfg.path("outputs", "joint_candidates.csv"))
     chosen, campaign, summary = optimize_prices(
-        options, candidates, cfg.budget, cfg.campaign_limit, cfg.min_roi, solver=solver
+        options, candidates, cfg.budget, cfg.campaign_limit, cfg.min_roi, cfg.points_budget, solver=solver
     )
     options.to_csv(cfg.path("outputs", "price_options.csv"), index=False)
     chosen.to_csv(cfg.path("outputs", "price_allocation.csv"), index=False)

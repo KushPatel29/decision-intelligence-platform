@@ -1,0 +1,13 @@
+{
+  "cell_ols_test_mae": 5.112223267055387,
+  "boosting_test_mae": 5.27249789180062,
+  "elasticity_rmse_vs_truth": {
+    "ols_elasticity": 0.0427135577614255,
+    "elasticity": 0.051862516601370784,
+    "pooled_elasticity": 0.1805543969909561,
+    "boosting_elasticity": 0.6521681273536423,
+    "ci_coverage": 0.9444444444444444
+  },
+  "selected": "elasticity (empirical Bayes)",
+  "identification": "Independently randomised synthetic price assignments by day, zone, period and segment"
+}

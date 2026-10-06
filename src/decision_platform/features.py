@@ -1,14 +1,19 @@
+"""Point-in-time customer snapshots: end-exclusive features, forward labels, purged folds."""
+
 import duckdb
 import numpy as np
 import pandas as pd
 
 from .config import write_json
 
+# Model allowlist. Outcome (`future_`, `target_`), simulator (`latent_`, `true_`)
+# and identifier columns can never appear here; a test enforces it.
 FEATURES = [
     "tenure_days",
     "business_flag",
     "autopay",
     "transponder_flag",
+    "heavy_vehicle",
     "home_zone",
     "trips_7d",
     "trips_30d",
@@ -21,12 +26,25 @@ FEATURES = [
     "avg_distance_km",
     "peak_share",
     "weekend_share",
+    "night_share_30d",
+    "zones_visited_30d",
+    "active_days_30d",
+    "max_daily_trips_30d",
     "discount_90d",
     "recency_days",
     "digital_events_30d",
     "app_logins_30d",
     "offer_views_30d",
     "email_opens_30d",
+    "sessions_30d",
+    "offer_views_90d",
+    "offer_click_rate_90d",
+    "enroll_rate_90d",
+    "email_click_rate_90d",
+    "pricing_views_90d",
+    "loyalty_views_90d",
+    "app_share_90d",
+    "days_since_last_login",
     "points_earned_to_date",
     "frequency_trend",
     "digital_engagement_score",
@@ -56,7 +74,9 @@ def snapshot(db, cfg, date, labels=True):
     )
     if "customer_status_history" in tables:
         state = db.execute(
-            "SELECT h.customer_id,h.account_status,h.marketing_consent,c.has_my_account,c.past_due FROM silver.customer_status_history h JOIN silver.dim_customer c USING(customer_id) WHERE h.effective_from<= $as_of AND (h.effective_to IS NULL OR h.effective_to > $as_of)",
+            """SELECT h.customer_id, h.account_status, h.marketing_consent, c.has_my_account, c.past_due
+            FROM silver.customer_status_history h JOIN silver.dim_customer c USING (customer_id)
+            WHERE h.effective_from < $as_of AND (h.effective_to IS NULL OR h.effective_to > $as_of)""",
             {"as_of": date},
         ).df()
         if state.customer_id.duplicated().any() or len(state) != len(frame):
@@ -115,7 +135,7 @@ def build(db, cfg):
     write_json(
         cfg.path("outputs", "feature_contract.json"),
         {
-            "version": "1.0",
+            "version": "2.0",
             "features": FEATURES,
             "end_exclusive": True,
             "timezone": "America/Toronto wall-clock",

@@ -1,17 +1,20 @@
-"""Chronological prediction, held-out causal estimates, and reproducible artifacts."""
+"""Customer models, pricing elasticity and demand forecasting.
+
+Every model is chosen on a validation fold and judged once on an untouched test
+fold. Where a simple baseline wins, the baseline serves and the loss is
+recorded rather than tuned away.
+"""
+
+from __future__ import annotations
 
 import time
+import warnings
 
 import joblib
 import numpy as np
 import pandas as pd
 from sklearn.cluster import KMeans
-from sklearn.ensemble import (
-    HistGradientBoostingClassifier,
-    HistGradientBoostingRegressor,
-    IsolationForest,
-    RandomForestRegressor,
-)
+from sklearn.ensemble import HistGradientBoostingClassifier, HistGradientBoostingRegressor, IsolationForest
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.metrics import (
     adjusted_rand_score,
@@ -23,12 +26,33 @@ from sklearn.metrics import (
     root_mean_squared_error,
     silhouette_score,
 )
+from sklearn.mixture import GaussianMixture
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 from .config import frame_hash, write_json
 from .features import FEATURES
-from .quality import HistoricalMargin, SeasonalNaive, select_regression
+from .quality import HistoricalMargin, select_regression
+
+SEGMENT_FEATURES = [
+    "trips_90d",
+    "spend_90d",
+    "avg_distance_km",
+    "peak_share",
+    "weekend_share",
+    "digital_events_30d",
+    "recency_days",
+]
+ANOMALY_FEATURES = [
+    "trips_7d",
+    "trips_30d",
+    "trips_90d",
+    "night_share_30d",
+    "zones_visited_30d",
+    "max_daily_trips_30d",
+    "active_days_30d",
+    "spend_30d",
+]
 
 
 def classifier_metrics(y, score):
@@ -42,7 +66,7 @@ def classifier_metrics(y, score):
         for b in range(10)
         if (bins == b).any()
     )
-    order = np.argsort(-score)
+    order = np.argsort(-score, kind="stable")
 
     def lift(fraction):
         return float(y[order[: max(1, int(len(y) * fraction))]].mean() / y.mean())
@@ -67,10 +91,13 @@ def reg_metrics(y, pred):
     }
 
 
-def log_experiment(cfg, name, model, metrics, params, tracking):
+def log_experiment(cfg, name, model, metrics, params, tracking, artifact=None):
+    """Persist a model locally and, when enabled, as an MLflow run with lineage tags."""
     folder = cfg.path("outputs", "models")
     folder.mkdir(parents=True, exist_ok=True)
-    joblib.dump(model, folder / f"{name}.joblib")
+    if model is not None:
+        artifact = folder / f"{name}.joblib"
+        joblib.dump(model, artifact, compress=3)
     write_json(folder / f"{name}.metrics.json", {"metrics": metrics, "parameters": params})
     if not tracking:
         return
@@ -80,71 +107,97 @@ def log_experiment(cfg, name, model, metrics, params, tracking):
         mlflow.set_tracking_uri("sqlite:///" + str(cfg.path("outputs", "mlflow.db")).replace("\\", "/"))
         mlflow.set_experiment("transportation-decision-intelligence")
         with mlflow.start_run(run_name=name) as run:
-            mlflow.log_params(params)
-            mlflow.log_metrics({k: float(v) for k, v in metrics.items() if isinstance(v, (int, float))})
+            mlflow.log_params({k: str(v)[:250] for k, v in params.items()})
+            mlflow.log_metrics({k: float(v) for k, v in metrics.items() if isinstance(v, int | float)})
             mlflow.set_tags(
-                {"data_kind": "synthetic", "feature_version": "1.0", "artifact_status": "local-candidate"}
+                {"data_kind": "synthetic", "feature_version": "2.0", "artifact_status": "local-candidate"}
             )
-            mlflow.log_artifact(str(folder / f"{name}.joblib"), artifact_path="models")
+            if artifact is not None:
+                mlflow.log_artifact(str(artifact), artifact_path="models")
             mlflow.log_artifact(str(folder / f"{name}.metrics.json"))
             if cfg.path("outputs", "manifest.json").exists():
                 mlflow.log_artifact(str(cfg.path("outputs", "manifest.json")))
             write_json(folder / f"{name}.tracking.json", {"status": "tracked", "run_id": run.info.run_id})
-    except Exception as exc:
-        # Training still has complete local artifacts; tracking failure is reported.
+    except Exception as exc:  # Tracking is optional; local artifacts are complete either way.
         write_json(folder / f"{name}.tracking.json", {"status": "failed", "error": str(exc)})
 
 
+class CalibratedClassifier:
+    """A fitted classifier plus a Platt calibrator fitted on a separate fold."""
+
+    def __init__(self, model, calibrator, features):
+        self.model, self.calibrator, self.features = model, calibrator, features
+
+    def predict_proba(self, frame):
+        raw = np.clip(self.model.predict_proba(frame[self.features])[:, 1], 1e-5, 1 - 1e-5)
+        logit = np.log(raw / (1 - raw)).reshape(-1, 1)
+        return self.calibrator.predict_proba(logit)[:, 1]
+
+
+def _classifier_candidates(seed):
+    candidates = {
+        "logistic": make_pipeline(
+            StandardScaler(), LogisticRegression(max_iter=2000, C=0.5, random_state=seed)
+        ),
+        "hist_gradient_boosting": HistGradientBoostingClassifier(
+            max_iter=120, max_leaf_nodes=15, min_samples_leaf=40, l2_regularization=3, random_state=seed
+        ),
+    }
+    try:
+        from xgboost import XGBClassifier
+
+        candidates["xgboost"] = XGBClassifier(
+            n_estimators=200,
+            max_depth=4,
+            learning_rate=0.06,
+            subsample=0.85,
+            colsample_bytree=0.8,
+            min_child_weight=8,
+            reg_lambda=2.0,
+            n_jobs=1,
+            random_state=seed,
+            eval_metric="logloss",
+        )
+    except ImportError:
+        pass
+    return candidates
+
+
 def fit_customer_models(cfg, snapshots, current, tracking=True):
-    result = {}
-    scored = current.copy()
+    result, scored = {}, current.copy()
     train = snapshots[snapshots.split.eq("train")]
     val = snapshots[snapshots.split.eq("validation")]
     test = snapshots[snapshots.split.eq("test")]
+    cfg.path("outputs", "performance").mkdir(parents=True, exist_ok=True)
     for name in ["propensity", "churn", "attrition"]:
         target = "target_" + name
         tr, va, te = train, val, test
         if name != "propensity":
-            tr = train[train.historically_active]
-            va = val[val.historically_active]
-            te = test[test.historically_active]
-        candidates = {
-            "logistic": make_pipeline(
-                StandardScaler(), LogisticRegression(max_iter=1500, random_state=cfg.seed)
-            ),
-            "hist_gradient_boosting": HistGradientBoostingClassifier(
-                max_iter=75,
-                max_leaf_nodes=12,
-                min_samples_leaf=40,
-                l2_regularization=3,
-                random_state=cfg.seed,
-            ),
-        }
-        leaderboard = {}
-        started = time.perf_counter()
+            tr, va, te = (
+                train[train.historically_active],
+                val[val.historically_active],
+                test[test.historically_active],
+            )
+        leaderboard, started = {}, time.perf_counter()
+        candidates = _classifier_candidates(cfg.seed)
         for algorithm, model in candidates.items():
             model.fit(tr[FEATURES], tr[target])
             leaderboard[algorithm] = classifier_metrics(va[target], model.predict_proba(va[FEATURES])[:, 1])
+        # Brier score rewards calibrated probabilities, which decisions consume directly.
         champion = min(leaderboard, key=lambda k: leaderboard[k]["brier"])
         model = candidates[champion]
-        val_raw = model.predict_proba(va[FEATURES])[:, 1]
-        calibrator = LogisticRegression(C=1, random_state=cfg.seed).fit(
-            np.log(np.clip(val_raw, 1e-5, 1 - 1e-5) / (1 - np.clip(val_raw, 1e-5, 1 - 1e-5))).reshape(-1, 1),
-            va[target],
+        raw = np.clip(model.predict_proba(va[FEATURES])[:, 1], 1e-5, 1 - 1e-5)
+        calibrator = LogisticRegression(C=1.0, random_state=cfg.seed).fit(
+            np.log(raw / (1 - raw)).reshape(-1, 1), va[target]
         )
-
-        def score(frame):
-            raw = np.clip(model.predict_proba(frame[FEATURES])[:, 1], 1e-5, 1 - 1e-5)
-            return calibrator.predict_proba(np.log(raw / (1 - raw)).reshape(-1, 1))[:, 1]
-
-        metrics = classifier_metrics(te[target], score(te))
-        cfg.path("outputs", "performance").mkdir(parents=True, exist_ok=True)
+        calibrated = CalibratedClassifier(model, calibrator, FEATURES)
+        metrics = classifier_metrics(te[target], calibrated.predict_proba(te))
         pd.DataFrame(
             {
                 "customer_id": te.customer_id,
                 "as_of": te.as_of,
                 "target": te[target],
-                "predicted_probability": score(te),
+                "predicted_probability": calibrated.predict_proba(te),
             }
         ).to_csv(cfg.path("outputs", "performance", name + "_predictions.csv"), index=False)
         metrics["training_seconds"] = time.perf_counter() - started
@@ -157,7 +210,7 @@ def fit_customer_models(cfg, snapshots, current, tracking=True):
             if name != "propensity"
             else "all customers",
         }
-        scored[name + "_probability"] = score(current)
+        scored[name + "_probability"] = calibrated.predict_proba(current)
         if name != "propensity":
             scored.loc[scored.trips_90d < 3, name + "_probability"] = np.nan
         log_experiment(
@@ -169,15 +222,22 @@ def fit_customer_models(cfg, snapshots, current, tracking=True):
                 "algorithm": champion,
                 "seed": cfg.seed,
                 "dataset_sha256": frame_hash(snapshots),
-                "feature_version": "1.0",
+                "feature_version": "2.0",
             },
             tracking,
         )
-        print(f"  {name}: test AUC {metrics['roc_auc']:.3f}", flush=True)
+        print(f"  {name}: {champion} test AUC {metrics['roc_auc']:.3f}", flush=True)
+
+    scored, result["clv"] = _contribution(cfg, train, val, test, current, scored, tracking)
+    scored, result["segmentation"] = _segments(cfg, train, current, scored)
+    scored, result["anomaly"] = _anomalies(cfg, train, current, scored)
+    return scored, result
+
+
+def _contribution(cfg, train, val, test, current, scored, tracking):
     forecast = HistGradientBoostingRegressor(
-        loss="poisson", max_iter=90, max_leaf_nodes=12, l2_regularization=3, random_state=cfg.seed
-    )
-    forecast.fit(train[FEATURES], train.future_margin_90d)
+        loss="poisson", max_iter=150, max_leaf_nodes=15, l2_regularization=3, random_state=cfg.seed
+    ).fit(train[FEATURES], train.future_margin_90d)
     baseline = HistoricalMargin(cfg.contribution_margin)
     selection = select_regression(
         val.future_margin_90d,
@@ -186,38 +246,45 @@ def fit_customer_models(cfg, snapshots, current, tracking=True):
             "historical_margin": baseline.predict(val[FEATURES]),
         },
     )
-    selected_name = selection["selected"]
-    forecast = forecast if selected_name == "hist_gradient_boosting" else baseline
-    pred = np.maximum(forecast.predict(test[FEATURES]), 0)
+    selected = forecast if selection["selected"] == "hist_gradient_boosting" else baseline
+    pred = np.maximum(selected.predict(test[FEATURES]), 0)
     metrics = reg_metrics(test.future_margin_90d, pred)
     metrics["baseline_mae"] = float(
-        mean_absolute_error(test.future_margin_90d, test.spend_90d * cfg.contribution_margin)
+        mean_absolute_error(test.future_margin_90d, baseline.predict(test[FEATURES]))
     )
-    first = np.maximum(forecast.predict(current[FEATURES]), 0)
+    first = np.maximum(selected.predict(current[FEATURES]), 0)
     retention = 1 - scored.churn_probability.fillna(0.5).to_numpy()
     scored["expected_margin_90d"] = first
-    scored["clv_12m"] = sum(first * retention ** (q - 1) / (1.10) ** (q / 4) for q in range(1, 5))
-    result["clv"] = {
+    scored["clv_12m"] = sum(first * retention ** (q - 1) / 1.10 ** (q / 4) for q in range(1, 5))
+    log_experiment(
+        cfg, "clv", selected, metrics, {"algorithm": selection["selected"], "seed": cfg.seed}, tracking
+    )
+    return scored, {
         "test": metrics,
         "selection": selection,
-        "champion": selected_name,
-        "method": "Validation-selected 90-day contribution forecast projected four quarters with churn-based survival decay; 10% annual discount. Heuristic projected value; not validated 12-month CLV.",
+        "champion": selection["selected"],
+        "method": "Validation-selected 90-day contribution forecast projected four quarters with churn-based "
+        "survival decay and a 10% annual discount rate. A heuristic projection, not validated 12-month CLV.",
     }
-    log_experiment(cfg, "clv", forecast, metrics, {"algorithm": selected_name, "seed": cfg.seed}, tracking)
-    segment_features = [
-        "trips_90d",
-        "spend_90d",
-        "avg_distance_km",
-        "peak_share",
-        "weekend_share",
-        "digital_events_30d",
-        "recency_days",
-    ]
-    segment_train = train[train.as_of.eq(train.as_of.max())]
-    scaler = StandardScaler().fit(np.log1p(segment_train[segment_features]))
-    scaled = scaler.transform(np.log1p(segment_train[segment_features]))
-    clustering = KMeans(n_clusters=5, n_init=10, random_state=cfg.seed).fit(scaled)
-    scored["cluster"] = clustering.predict(scaler.transform(np.log1p(current[segment_features])))
+
+
+def _segments(cfg, train, current, scored):
+    """Rule-based RFM segments plus K-Means and Gaussian-mixture behavioural clusters."""
+    reference = train[train.as_of.eq(train.as_of.max())]
+    scaler = StandardScaler().fit(np.log1p(reference[SEGMENT_FEATURES]))
+    scaled = scaler.transform(np.log1p(reference[SEGMENT_FEATURES]))
+    current_scaled = scaler.transform(np.log1p(current[SEGMENT_FEATURES]))
+    kmeans = KMeans(n_clusters=5, n_init=10, random_state=cfg.seed).fit(scaled)
+    bics = {}
+    for k in range(3, 9):
+        bics[k] = float(
+            GaussianMixture(k, covariance_type="full", random_state=cfg.seed).fit(scaled).bic(scaled)
+        )
+    best_k = min(bics, key=bics.get)
+    gmm = GaussianMixture(best_k, covariance_type="full", random_state=cfg.seed).fit(scaled)
+    scored["cluster"] = kmeans.predict(current_scaled)
+    scored["gmm_cluster"] = gmm.predict(current_scaled)
+    scored["gmm_confidence"] = gmm.predict_proba(current_scaled).max(axis=1)
     scored["rfm_segment"] = np.select(
         [
             scored.recency_days > 90,
@@ -229,412 +296,384 @@ def fit_customer_models(cfg, snapshots, current, tracking=True):
         ["Dormant", "At risk", "Champions", "Loyal", "New"],
         default="Occasional",
     )
-    result["segmentation"] = {
-        "silhouette": float(
-            silhouette_score(
-                scaled, clustering.labels_, sample_size=min(1000, len(scaled)), random_state=cfg.seed
-            )
-        ),
-        "davies_bouldin": float(davies_bouldin_score(scaled, clustering.labels_)),
-        "clusters": 5,
-        "fit_as_of": str(segment_train.as_of.max()),
-    }
     rng = np.random.default_rng(cfg.seed)
     stability = []
-    for seed in range(3):
-        boot = KMeans(n_clusters=5, n_init=5, random_state=cfg.seed + seed + 1).fit(
-            scaled[rng.integers(len(scaled), size=len(scaled))]
-        )
-        stability.append(float(adjusted_rand_score(clustering.labels_, boot.predict(scaled))))
-    result["segmentation"]["bootstrap_adjusted_rand"] = stability
+    for b in range(5):
+        idx = rng.integers(len(scaled), size=len(scaled))
+        boot = KMeans(n_clusters=5, n_init=5, random_state=cfg.seed + b + 1).fit(scaled[idx])
+        stability.append(float(adjusted_rand_score(kmeans.labels_, boot.predict(scaled))))
+    sample = rng.choice(len(scaled), min(3000, len(scaled)), replace=False)
+    metrics = {
+        "kmeans": {
+            "clusters": 5,
+            "silhouette": float(
+                silhouette_score(scaled[sample], kmeans.labels_[sample], random_state=cfg.seed)
+            ),
+            "davies_bouldin": float(davies_bouldin_score(scaled, kmeans.labels_)),
+            "bootstrap_adjusted_rand": stability,
+        },
+        "gmm": {
+            "clusters": best_k,
+            "bic_by_k": bics,
+            "silhouette": float(
+                silhouette_score(scaled[sample], gmm.predict(scaled)[sample], random_state=cfg.seed)
+            ),
+            "mean_assignment_confidence": float(scored.gmm_confidence.mean()),
+        },
+        "agreement": {
+            "kmeans_vs_gmm_ari": float(adjusted_rand_score(scored.cluster, scored.gmm_cluster)),
+            "kmeans_vs_rfm_ari": float(adjusted_rand_score(scored.cluster, scored.rfm_segment)),
+        },
+        "fit_as_of": str(reference.as_of.max()),
+    }
     joblib.dump(
-        {"scaler": scaler, "model": clustering, "features": segment_features},
+        {"scaler": scaler, "model": kmeans, "gmm": gmm, "features": SEGMENT_FEATURES},
         cfg.path("outputs", "models", "segmentation.joblib"),
+        compress=3,
     )
-    anomaly = IsolationForest(contamination=0.025, n_estimators=120, random_state=cfg.seed).fit(scaled)
-    current_scaled = scaler.transform(np.log1p(current[segment_features]))
-    scored["anomaly_score"] = -anomaly.score_samples(current_scaled)
-    scored["anomaly_flag"] = anomaly.predict(current_scaled) == -1
-    joblib.dump(
-        {"scaler": scaler, "model": anomaly, "features": segment_features},
-        cfg.path("outputs", "models", "anomaly.joblib"),
-    )
-    result["anomaly"] = {
-        "flagged": int(scored.anomaly_flag.sum()),
-        "method": "Isolation Forest, historical January baseline; anomaly is a review signal, not fraud adjudication",
-    }
-    return scored, result
+    return scored, metrics
 
 
-def uplift_curve(y, w, uplift):
-    y = np.asarray(y)
-    w = np.asarray(w)
-    uplift = np.asarray(uplift)
-    order = np.argsort(-uplift)
-    e = float(w.mean())
-    transformed = y * w / e - y * (1 - w) / (1 - e)
-    gain = np.r_[0, np.cumsum(transformed[order])] / len(y)
-    fraction = np.linspace(0, 1, len(gain))
-    random_line = fraction * gain[-1]
-    return {
-        "auuc": float(np.trapezoid(gain, fraction)),
-        "qini": float(np.trapezoid(gain - random_line, fraction)),
-        "fraction": fraction[:: max(1, len(fraction) // 40)].tolist(),
-        "gain": gain[:: max(1, len(gain) // 40)].tolist(),
-    }
+def _robust_z(reference, current):
+    median = np.median(reference, axis=0)
+    mad = np.median(np.abs(reference - median), axis=0) * 1.4826
+    return np.abs(current - median) / np.where(mad > 0, mad, np.std(reference, axis=0) + 1e-9)
 
 
-def fit_uplift(cfg, trial, current, tracking=True):
-    from .experiments import ARMS, OFFER_ARMS
-
-    train = trial[trial.split.eq("train")]
-    test = trial[trial.split.eq("test")]
-    response_models = {}
-    trip_models = {}
-    metrics = {}
-    scores = {}
-    x_models = {}
-    retention_models = {}
-    later_models = {}
-    for arm in ARMS:
-        group = train[train.arm.eq(arm)]
-        response = make_pipeline(
-            StandardScaler(), LogisticRegression(C=0.1, max_iter=1500, random_state=cfg.seed)
-        )
-        response.fit(group[FEATURES], group.response)
-        trips = RandomForestRegressor(
-            n_estimators=120, max_depth=6, min_samples_leaf=35, n_jobs=2, random_state=cfg.seed
-        )
-        trips.fit(group[FEATURES], group.trip_count)
-        response_models[arm] = response
-        trip_models[arm] = trips
-        retention_models[arm] = make_pipeline(
-            StandardScaler(), LogisticRegression(C=0.1, max_iter=1500, random_state=cfg.seed)
-        ).fit(group[FEATURES], group.retained_90d)
-        later_models[arm] = RandomForestRegressor(
-            n_estimators=60, max_depth=5, min_samples_leaf=45, n_jobs=2, random_state=cfg.seed
-        ).fit(group[FEATURES], group.margin_days31_90)
-    # S-learner benchmark shares outcome structure, with explicit arm indicators.
-    s_train = train[FEATURES].copy()
-    for arm in ARMS[1:]:
-        s_train[arm] = (train.arm == arm).astype(int)
-    s_model = HistGradientBoostingClassifier(
-        max_iter=65, max_leaf_nodes=8, min_samples_leaf=35, l2_regularization=4, random_state=cfg.seed
-    ).fit(s_train, train.response)
-    for offer, arm in OFFER_ARMS.items():
-        treated_group = train[train.arm.eq(arm)]
-        control_group = train[train.arm.eq("Control")]
-        # X-learner: impute individual response effects on opposite outcome models.
-        d1 = treated_group.response - response_models["Control"].predict_proba(treated_group[FEATURES])[:, 1]
-        d0 = response_models[arm].predict_proba(control_group[FEATURES])[:, 1] - control_group.response
-        x1 = RandomForestRegressor(
-            n_estimators=100, max_depth=5, min_samples_leaf=40, n_jobs=2, random_state=cfg.seed
-        ).fit(treated_group[FEATURES], d1)
-        x0 = RandomForestRegressor(
-            n_estimators=100, max_depth=5, min_samples_leaf=40, n_jobs=2, random_state=cfg.seed
-        ).fit(control_group[FEATURES], d0)
-        x_models[arm] = (x0, x1)
-        sample = test[test.arm.isin(["Control", arm])]
-        u = (
-            response_models[arm].predict_proba(sample[FEATURES])[:, 1]
-            - response_models["Control"].predict_proba(sample[FEATURES])[:, 1]
-        )
-        curve = uplift_curve(sample.response, (sample.arm == arm).astype(int), u)
-        s0 = sample[FEATURES].copy()
-        s1 = sample[FEATURES].copy()
-        for name in ARMS[1:]:
-            s0[name] = 0
-            s1[name] = int(name == arm)
-        su = s_model.predict_proba(s1)[:, 1] - s_model.predict_proba(s0)[:, 1]
-        xu = 0.5 * x0.predict(sample[FEATURES]) + 0.5 * x1.predict(sample[FEATURES])
-        metrics[offer] = {
-            "t_learner": curve,
-            "s_learner": uplift_curve(sample.response, (sample.arm == arm).astype(int), su),
-            "x_learner": uplift_curve(sample.response, (sample.arm == arm).astype(int), xu),
-            "n_test": len(sample),
-            "algorithm": "Separate regularized logistic outcome models; Random Forest trip outcome models",
-        }
-        scores[offer] = pd.DataFrame(
-            {
-                "customer_id": current.customer_id,
-                "offer_id": offer,
-                "incremental_response": response_models[arm].predict_proba(current[FEATURES])[:, 1]
-                - response_models["Control"].predict_proba(current[FEATURES])[:, 1],
-                "predicted_treated_trips": trip_models[arm].predict(current[FEATURES]),
-                "predicted_baseline_trips": trip_models["Control"].predict(current[FEATURES]),
+def _anomalies(cfg, train, current, scored):
+    """Isolation Forest review flags, scored against the planted anomalies."""
+    reference = train[train.as_of.eq(train.as_of.max())]
+    transform = StandardScaler().fit(np.log1p(reference[ANOMALY_FEATURES]))
+    ref = transform.transform(np.log1p(reference[ANOMALY_FEATURES]))
+    cur = transform.transform(np.log1p(current[ANOMALY_FEATURES]))
+    forest = IsolationForest(n_estimators=300, contamination="auto", random_state=cfg.seed).fit(ref)
+    scored["anomaly_score"] = -forest.score_samples(cur)
+    review_rate = 0.005  # Review capacity: the top 0.5% of accounts each month.
+    threshold = np.quantile(scored.anomaly_score, 1 - review_rate)
+    scored["anomaly_flag"] = scored.anomaly_score >= threshold
+    z = _robust_z(ref, cur).max(axis=1)
+    z_flag = z >= np.quantile(z, 1 - review_rate)
+    planted_path = cfg.path("data", "simulation_audit", "planted_anomalies.parquet")
+    evaluation = {}
+    if planted_path.exists():
+        planted = set(pd.read_parquet(planted_path).customer_id)
+        truth = scored.customer_id.isin(planted).to_numpy()
+        for method, flags, score in [
+            ("isolation_forest", scored.anomaly_flag.to_numpy(), scored.anomaly_score.to_numpy()),
+            ("robust_z_score", z_flag, z),
+        ]:
+            hits = int((flags & truth).sum())
+            evaluation[method] = {
+                "flagged": int(flags.sum()),
+                "planted": int(truth.sum()),
+                "caught": hits,
+                "precision": hits / max(int(flags.sum()), 1),
+                "recall": hits / max(int(truth.sum()), 1),
+                "pr_auc": float(average_precision_score(truth, score)),
             }
-        )
-        scores[offer]["incremental_trips_raw"] = (
-            scores[offer].predicted_treated_trips - scores[offer].predicted_baseline_trips
-        )
-        retention_delta = (
-            retention_models[arm].predict_proba(current[FEATURES])[:, 1]
-            - retention_models["Control"].predict_proba(current[FEATURES])[:, 1]
-        )
-        later_delta = later_models[arm].predict(current[FEATURES]) - later_models["Control"].predict(
-            current[FEATURES]
-        )
-        # Signed, shrunk effects; do not turn negative estimates into positive value.
-        scores[offer]["incremental_retention_90d"] = retention_delta * 0.75
-        scores[offer]["incremental_value_days31_90"] = later_delta * 0.75 / (1.10 ** (0.25))
-        metrics[offer]["retention_90d_test"] = {
-            "treated": classifier_metrics(
-                sample[sample.arm.eq(arm)].retained_90d,
-                retention_models[arm].predict_proba(sample[sample.arm.eq(arm)][FEATURES])[:, 1],
-            ),
-            "control": classifier_metrics(
-                sample[sample.arm.eq("Control")].retained_90d,
-                retention_models["Control"].predict_proba(sample[sample.arm.eq("Control")][FEATURES])[:, 1],
-            ),
-        }
-    # Offer enrollment is a different classification target from travel response.
-    treated = train[train.treated.eq(1)]
-    held = test[test.treated.eq(1)]
-    enroll = make_pipeline(
-        StandardScaler(), LogisticRegression(C=0.2, max_iter=1500, random_state=cfg.seed)
-    ).fit(treated[FEATURES], treated.enrolled)
-    metrics["offer_enrollment"] = classifier_metrics(
-        held.enrolled, enroll.predict_proba(held[FEATURES])[:, 1]
+    joblib.dump(
+        {"scaler": transform, "model": forest, "features": ANOMALY_FEATURES},
+        cfg.path("outputs", "models", "anomaly.joblib"),
+        compress=3,
     )
-    loyalty_train = train[train.arm.eq("500 loyalty points")]
-    loyalty_test = test[test.arm.eq("500 loyalty points")]
-    redemption = make_pipeline(
-        StandardScaler(), LogisticRegression(C=0.2, max_iter=1500, random_state=cfg.seed)
-    ).fit(loyalty_train[FEATURES], loyalty_train.redeemed)
-    metrics["loyalty_redemption"] = classifier_metrics(
-        loyalty_test.redeemed, redemption.predict_proba(loyalty_test[FEATURES])[:, 1]
-    )
-    for offer in scores:
-        scores[offer]["enrollment_probability"] = enroll.predict_proba(current[FEATURES])[:, 1]
-        scores[offer]["redemption_probability"] = (
-            redemption.predict_proba(current[FEATURES])[:, 1] if offer == "loyalty_500" else np.nan
-        )
-    # Held-out predictions support exploratory off-policy evaluation, without simulator truth.
-    evaluation = test[["customer_id", "arm", "net_contribution", "trip_count"]].copy()
-    for offer, arm in OFFER_ARMS.items():
-        baseline = trip_models["Control"].predict(test[FEATURES])
-        treated_prediction = trip_models[arm].predict(test[FEATURES])
-        delta = np.maximum(treated_prediction - baseline, 0) * 0.75
-        cost = (
-            np.full(len(test), 5.35)
-            if offer == "loyalty_500"
-            else treated_prediction * test.avg_toll.clip(lower=8) * (0.2 if offer == "weekend_20" else 0.15)
-            + 0.35
-        )
-        evaluation[offer + "_value"] = delta * test.avg_toll.clip(lower=8) * cfg.contribution_margin - cost
-    evaluation.to_csv(cfg.path("outputs", "heldout_policy_scores.csv"), index=False)
-    log_experiment(
-        cfg,
-        "uplift",
-        {
-            "response": response_models,
-            "trips": trip_models,
-            "retention": retention_models,
-            "later_margin": later_models,
-            "s_learner": s_model,
-            "x_learner": x_models,
-            "enrollment": enroll,
-            "redemption": redemption,
-            "features": FEATURES,
-        },
-        {
-            "offpeak_qini": metrics["offpeak_15"]["t_learner"]["qini"],
-            "weekend_qini": metrics["weekend_20"]["t_learner"]["qini"],
-        },
-        {
-            "seed": cfg.seed,
-            "assignment": "customer-randomized",
-            "fit_as_of": "2025-07-01",
-            "outcome_available_by": "2025-09-30",
-        },
-        tracking,
-    )
-    return pd.concat(scores.values(), ignore_index=True), metrics
+    return scored, {
+        "flagged": int(scored.anomaly_flag.sum()),
+        "review_rate": review_rate,
+        "evaluation_against_planted": evaluation,
+        "method": "Isolation Forest on log-scaled velocity, night-travel and zone-spread features with a "
+        "fixed review capacity; a robust z-score detector is the baseline. Review signal, not fraud adjudication.",
+    }
 
 
 def fit_elasticity(cfg, pricing, tracking=True):
-    rows = []
-    models = {}
-    inputs = [
-        "log_price",
-        "temperature_c",
-        "precipitation_mm",
-        "weekend",
-        "holiday",
-        "month_sin",
-        "month_cos",
-    ]
-    pricing = pricing.copy()
-    pricing["log_price"] = np.log(pricing.effective_price)
-    for (zone, period), group in pricing.groupby(["zone_id", "period"]):
-        tr = group[group.date < "2025-07-01"]
-        te = group[(group.date >= "2025-07-01") & (group.date < "2025-10-01")]
-        model = LinearRegression().fit(tr[inputs], np.log(np.maximum(tr.demand, 1)))
-        pred = np.exp(model.predict(te[inputs]))
-        beta = float(model.coef_[0])
-        metrics = reg_metrics(te.demand, pred)
-        rows.append({"zone_id": int(zone), "period": period, "elasticity": beta, **metrics})
-        models[f"{zone}:{period}"] = model
-    result = pd.DataFrame(rows)
+    """Cell-level log-log elasticities with empirical-Bayes shrinkage, checked against the truth."""
+    controls = ["temperature_c", "precipitation_mm", "weekend", "holiday", "month_sin", "month_cos"]
+    frame = pricing.copy()
+    frame["log_price"] = np.log(frame.effective_price)
+    frame["log_demand"] = np.log(np.maximum(frame.demand, 1))
+    train = frame[frame.date < "2025-07-01"]
+    test = frame[(frame.date >= "2025-07-01") & (frame.date < "2025-10-01")]
+    rows, models = [], {}
+    for (zone, period, segment), group in train.groupby(["zone_id", "period", "segment"]):
+        x = group[["log_price", *controls]].to_numpy(float)
+        y = group.log_demand.to_numpy()
+        model = LinearRegression().fit(x, y)
+        residual = y - model.predict(x)
+        design = np.column_stack([np.ones(len(x)), x])
+        sigma2 = residual @ residual / max(len(y) - design.shape[1], 1)
+        cov = sigma2 * np.linalg.pinv(design.T @ design)
+        held = test[(test.zone_id == zone) & (test.period == period) & (test.segment == segment)]
+        pred = np.exp(model.predict(held[["log_price", *controls]].to_numpy(float)))
+        rows.append(
+            {
+                "zone_id": int(zone),
+                "period": period,
+                "segment": segment,
+                "ols_elasticity": float(model.coef_[0]),
+                "ols_se": float(np.sqrt(cov[1, 1])),
+                **reg_metrics(held.demand, pred),
+            }
+        )
+        models[f"{zone}:{period}:{segment}"] = model
+    cells = pd.DataFrame(rows)
+    # Empirical Bayes: shrink each cell toward its period x segment mean by its noise.
+    parts = []
+    for _, group in cells.groupby(["period", "segment"]):
+        prior = float(np.average(group.ols_elasticity, weights=1 / group.ols_se**2))
+        tau2 = max(float(group.ols_elasticity.var(ddof=1) - (group.ols_se**2).mean()), 1e-4)
+        weight = tau2 / (tau2 + group.ols_se**2)
+        parts.append(
+            group.assign(
+                prior_mean=prior,
+                shrinkage_weight=weight,
+                elasticity=weight * group.ols_elasticity + (1 - weight) * prior,
+                elasticity_se=np.sqrt(weight) * group.ols_se,
+            )
+        )
+    cells = pd.concat(parts).sort_values(["zone_id", "period", "segment"]).reset_index(drop=True)
+    cells["ci_low"] = cells.elasticity - 1.96 * cells.elasticity_se
+    cells["ci_high"] = cells.elasticity + 1.96 * cells.elasticity_se
+    pooled = (
+        train.groupby(["period", "segment"])
+        .apply(
+            lambda g: LinearRegression().fit(g[["log_price", *controls]], g.log_demand).coef_[0],
+            include_groups=False,
+        )
+        .rename("pooled_elasticity")
+        .reset_index()
+    )
+    cells = cells.merge(pooled, on=["period", "segment"], validate="many_to_one")
+    boosted = HistGradientBoostingRegressor(
+        max_iter=200,
+        max_leaf_nodes=20,
+        monotonic_cst=[-1] + [0] * (len(controls) + 3),
+        random_state=cfg.seed,
+    )
+    code = {"Peak": 0, "Off-peak": 1, "Weekend": 2}
+    gb_x = lambda f: np.column_stack(  # noqa: E731
+        [f.log_price, f[controls], f.zone_id, f.period.map(code), f.segment.eq("Business")]
+    )
+    boosted.fit(gb_x(train), train.log_demand)
+    gb = []
+    for _, row in cells.iterrows():
+        group = test[
+            (test.zone_id == row.zone_id) & (test.period == row.period) & (test.segment == row.segment)
+        ]
+        up, down = group.copy(), group.copy()
+        up["log_price"] += 0.05
+        down["log_price"] -= 0.05
+        gb.append(float(np.mean(boosted.predict(gb_x(up)) - boosted.predict(gb_x(down))) / 0.10))
+    cells["boosting_elasticity"] = gb
+    truth_path = cfg.path("data", "simulation_audit", "true_elasticity.parquet")
+    recovery = {}
+    if truth_path.exists():
+        truth = pd.read_parquet(truth_path)
+        merged = cells.merge(truth, on=["zone_id", "period", "segment"], validate="one_to_one")
+        for method in ["ols_elasticity", "elasticity", "pooled_elasticity", "boosting_elasticity"]:
+            recovery[method] = float(np.sqrt(((merged[method] - merged.true_elasticity) ** 2).mean()))
+        recovery["ci_coverage"] = float(
+            ((merged.true_elasticity >= merged.ci_low) & (merged.true_elasticity <= merged.ci_high)).mean()
+        )
+    gb_pred = np.exp(boosted.predict(gb_x(test)))
+    metrics = {
+        "cell_ols_test_mae": float(cells.mae.mean()),
+        "boosting_test_mae": float(mean_absolute_error(test.demand, gb_pred)),
+        "elasticity_rmse_vs_truth": recovery,
+        "selected": "elasticity (empirical Bayes)",
+        "identification": "Independently randomised synthetic price assignments by day, zone, period and segment",
+    }
     log_experiment(
         cfg,
         "elasticity",
-        {"models": models, "features": inputs},
-        {"mean_test_mae": float(result.mae.mean())},
-        {"identification": "independently randomized synthetic price assignments", "seed": cfg.seed},
+        {"models": models, "features": ["log_price", *controls], "cells": cells},
+        {"mean_test_mae": metrics["cell_ols_test_mae"]},
+        {"identification": "randomised synthetic price tests", "seed": cfg.seed},
         tracking,
     )
-    result.to_csv(cfg.path("outputs", "elasticity.csv"), index=False)
+    cells.to_csv(cfg.path("outputs", "elasticity.csv"), index=False)
+    write_json(cfg.path("outputs", "elasticity_metrics.json"), metrics)
+
+    # Decision cells are zone x period: weight segments by their historical traffic share.
+    weights = pricing.groupby(["zone_id", "period", "segment"]).demand.sum().rename("weight").reset_index()
+    blended = cells.merge(weights, on=["zone_id", "period", "segment"])
+    zone_period = (
+        blended.groupby(["zone_id", "period"])
+        .apply(
+            lambda g: pd.Series(
+                {
+                    "elasticity": np.average(g.elasticity, weights=g.weight),
+                    "elasticity_se": np.sqrt(np.average(g.elasticity_se**2, weights=g.weight)),
+                }
+            ),
+            include_groups=False,
+        )
+        .reset_index()
+    )
     scenarios = []
-    for _, row in result.iterrows():
+    for _, row in zone_period.iterrows():
         for change in [-0.30, -0.20, -0.10, 0, 0.05, 0.10]:
-            demand_ratio = (1 + change) ** row.elasticity
+            ratio = (1 + change) ** row.elasticity
+            low = (1 + change) ** (row.elasticity - 1.96 * row.elasticity_se)
+            high = (1 + change) ** (row.elasticity + 1.96 * row.elasticity_se)
             scenarios.append(
                 {
                     "zone_id": int(row.zone_id),
                     "period": row.period,
                     "price_change": change,
-                    "demand_index": 100 * demand_ratio,
-                    "revenue_index": 100 * demand_ratio * (1 + change),
+                    "demand_index": 100 * ratio,
+                    "demand_index_low": 100 * min(low, high),
+                    "demand_index_high": 100 * max(low, high),
+                    "revenue_index": 100 * ratio * (1 + change),
                     "elasticity": row.elasticity,
+                    "elasticity_se": row.elasticity_se,
                 }
             )
-    pd.DataFrame(scenarios).to_csv(cfg.path("outputs", "pricing_scenarios.csv"), index=False)
-    return result, pd.DataFrame(scenarios)
+    scenarios = pd.DataFrame(scenarios)
+    scenarios.to_csv(cfg.path("outputs", "pricing_scenarios.csv"), index=False)
+    return cells, scenarios, metrics
+
+
+# Planning capacity as a multiple of each cell's pre-decision 95th-percentile day.
+# The central peak cells are deliberately tight: that is where the network has
+# no room, and where a promotion that adds peak trips should be refused.
+CAPACITY_FACTORS = {
+    "Peak": {0: 1.0, 1: 0.85, 2: 0.85, 3: 0.85, 4: 1.0, 5: 1.0},
+    "Off-peak": 1.3,
+    "Weekend": 1.3,
+}
+
+
+def _capacity_factor(zone, period):
+    factor = CAPACITY_FACTORS[period]
+    return factor[zone] if isinstance(factor, dict) else factor
 
 
 def fit_demand(cfg, trips, context, tracking=True):
-    from .data import PERIODS, ZONES
+    from .forecasting import bounds, daily_cells, horizon_dataset, hourly_forecast, interval_radius
 
-    daily = (
-        trips.assign(date=trips.timestamp.dt.normalize())
-        .groupby(["date", "zone_id", "period"])
-        .size()
-        .rename("trips")
-        .reset_index()
-    )
-    grid = pd.MultiIndex.from_product(
-        [pd.date_range(cfg.start, cfg.end), range(len(ZONES)), PERIODS], names=["date", "zone_id", "period"]
-    ).to_frame(index=False)
-    frame = (
-        grid.merge(daily, on=["date", "zone_id", "period"], how="left")
-        .fillna({"trips": 0})
-        .merge(context, on="date")
-    )
-    frame = frame.sort_values(["zone_id", "period", "date"])
-    group = frame.groupby(["zone_id", "period"])
-    frame["lag7"] = group.trips.shift(7)
-    frame["rolling28"] = group.trips.transform(lambda v: v.shift(1).rolling(28, min_periods=28).mean())
-    frame["weather_lag1"] = group.precipitation_mm.shift(1)
-    frame["temperature_lag1"] = group.temperature_c.shift(1)
-    frame["economic_lag1"] = group.cad_usd.shift(1)
-    frame["dow"] = frame.date.dt.dayofweek
-    frame["period_code"] = frame.period.map({p: i for i, p in enumerate(PERIODS)})
+    frame = daily_cells(cfg, trips, context)
+    data = horizon_dataset(frame, context)
     inputs = [
         "zone_id",
         "period_code",
         "dow",
-        "weekend",
+        "horizon",
         "holiday",
         "month_sin",
         "month_cos",
-        "lag7",
-        "rolling28",
-        "weather_lag1",
-        "temperature_lag1",
-        "economic_lag1",
+        "log_sdw4",
+        "log_rolling28",
+        "trend",
     ]
-    valid = frame[frame.rolling28.notna()]
-    tr = valid[valid.date < "2025-04-01"]
-    va = valid[(valid.date >= "2025-04-01") & (valid.date < "2025-07-01")]
-    te = valid[(valid.date >= "2025-07-01") & (valid.date < cfg.decision_date)]
+    tr = data[data.origin < pd.Timestamp("2025-03-02")]
+    va = data[(data.origin >= pd.Timestamp("2025-04-01")) & (data.origin < pd.Timestamp("2025-06-02"))]
+    te = data[(data.origin >= pd.Timestamp("2025-07-01")) & (data.origin < pd.Timestamp("2025-09-02"))]
     model = HistGradientBoostingRegressor(
-        max_iter=100, max_leaf_nodes=18, l2_regularization=4, random_state=cfg.seed
-    ).fit(tr[inputs], tr.trips)
-    selection = select_regression(
-        va.trips, {"hist_gradient_boosting": model.predict(va[inputs]), "seasonal_naive": va.lag7}
-    )
-    use_model = selection["selected"] == "hist_gradient_boosting"
-    pred = np.maximum(model.predict(te[inputs]) if use_model else te.lag7.to_numpy(), 0)
-    candidate_test = reg_metrics(te.trips, pred)
-    # Predeclared acceptance gate; reject without tuning/refitting on test.
-    if use_model and candidate_test["mae"] > mean_absolute_error(te.trips, te.lag7):
-        use_model = False
-        pred = np.maximum(te.lag7.to_numpy(), 0)
-        selection["promotion_gate"] = (
-            "Rejected candidate: held-out error exceeds predeclared baseline. Seasonal baseline remains the serving champion."
-        )
-        selection["candidate_test"] = candidate_test
-    serving_name = "hist_gradient_boosting" if use_model else "seasonal_naive"
-    metrics = reg_metrics(te.trips, pred)
+        max_iter=250, learning_rate=0.05, max_leaf_nodes=20, l2_regularization=2, random_state=cfg.seed
+    ).fit(tr[inputs], tr.log_ratio)
+
+    def predict(rows):
+        return np.maximum(np.expm1(np.log1p(rows.sdw4) + model.predict(rows[inputs])), 0)
+
+    candidates = {
+        "ratio_boosting": predict(va),
+        "same_weekday_mean": va.sdw4.to_numpy(),
+        "seasonal_naive": va.lag7.to_numpy(),
+    }
+    selection = select_regression(va.trips, candidates)
+    baseline_test = reg_metrics(te.trips, te.sdw4)
+    candidate_test = reg_metrics(te.trips, predict(te))
+    serving = selection["selected"]
+    # Predeclared acceptance gate: the learned model must also beat the strongest naive baseline on test.
+    if serving == "ratio_boosting" and candidate_test["mae"] > baseline_test["mae"]:
+        serving = "same_weekday_mean"
+        selection["promotion_gate"] = "Rejected: held-out error exceeds the same-weekday baseline."
+    elif serving == "ratio_boosting":
+        selection["promotion_gate"] = "Accepted: beats the same-weekday baseline on validation and test."
+    forecaster = {
+        "ratio_boosting": predict,
+        "same_weekday_mean": lambda rows: rows.sdw4.to_numpy(),
+        "seasonal_naive": lambda rows: rows.lag7.to_numpy(),
+    }[serving]
+    radius = interval_radius(va, forecaster(va))
+    test_pred = forecaster(te)
+    metrics = reg_metrics(te.trips, test_pred)
+    metrics["same_weekday_mean_mae"] = baseline_test["mae"]
     metrics["seasonal_naive_mae"] = float(mean_absolute_error(te.trips, te.lag7))
-    # Next-day test allows yesterday's observations, never same-day realized weather.
+    metrics["candidate_test"] = candidate_test
+    lower, upper = bounds(test_pred, te.period, radius)
+    metrics["interval_coverage_90"] = float(((te.trips >= lower) & (te.trips <= upper)).mean())
+    metrics["horizon_days"] = 30
+    metrics["test_origins"] = int(te.origin.nunique())
     log_experiment(
         cfg,
         "demand",
-        {
-            "model": model if use_model else SeasonalNaive(),
-            "candidate_model": model,
-            "features": inputs,
-            "selected": serving_name,
-        },
-        metrics,
-        {"horizon": "next-day rolling evaluation", "seed": cfg.seed, "serving_algorithm": serving_name},
+        {"model": model, "features": inputs, "selected": serving, "interval_radius": radius},
+        {k: v for k, v in metrics.items() if not isinstance(v, dict)},
+        {"horizon": "30-day fixed origin", "seed": cfg.seed, "serving_algorithm": serving},
         tracking,
     )
-    history = frame[frame.date < pd.Timestamp(cfg.decision_date)]
-    future_rows = []
-    for (zone, period), g in history.groupby(["zone_id", "period"]):
-        recent = g.tail(28)
-        for date in pd.date_range(cfg.decision_date, periods=30):
-            same_dow = recent[recent.dow.eq(date.dayofweek)]
-            base = float(same_dow.trips.mean())
-            future_rows.append(
-                {
-                    "date": date,
-                    "zone_id": zone,
-                    "period": period,
-                    "period_code": PERIODS.index(period),
-                    "dow": date.dayofweek,
-                    "weekend": int(date.dayofweek >= 5),
-                    "holiday": int(context.set_index("date").loc[date, "holiday"]),
-                    "month_sin": np.sin(2 * np.pi * date.dayofyear / 365.25),
-                    "month_cos": np.cos(2 * np.pi * date.dayofyear / 365.25),
-                    "lag7": base,
-                    "rolling28": float(recent.trips.mean()),
-                    "weather_lag1": float(recent.precipitation_mm.mean()),
-                    "temperature_lag1": float(recent.temperature_c.mean()),
-                    "economic_lag1": float(recent.cad_usd.iloc[-1]),
-                }
-            )
-    future = pd.DataFrame(future_rows)
-    future["baseline_forecast"] = np.maximum(
-        model.predict(future[inputs]) if use_model else future.lag7.to_numpy(), 0
-    )
-    # Finite illustrative engineering capacities, based only on pre-decision history.
-    caps = history.groupby(["zone_id", "period"]).trips.quantile(0.95).rename("daily_capacity").reset_index()
-    caps["daily_capacity"] = np.maximum(np.ceil(caps.daily_capacity * 1.30), 3)
+    pd.DataFrame(
+        {
+            "origin": te.origin,
+            "date": te.date,
+            "zone_id": te.zone_id,
+            "period": te.period,
+            "trips": te.trips,
+            "prediction": test_pred,
+            "lower_90": lower,
+            "upper_90": upper,
+        }
+    ).to_csv(cfg.path("outputs", "demand_horizon_backtest.csv"), index=False)
+
+    decision = pd.Timestamp(cfg.decision_date)
+    future = horizon_dataset(frame, context, origins=[decision])
+    if serving == "ratio_boosting":
+        # Selection and acceptance are done; refit on every origin whose targets end before the decision date.
+        history = data[data.date < decision]
+        final = HistGradientBoostingRegressor(
+            max_iter=250, learning_rate=0.05, max_leaf_nodes=20, l2_regularization=2, random_state=cfg.seed
+        ).fit(history[inputs], history.log_ratio)
+        future["baseline_forecast"] = np.maximum(
+            np.expm1(np.log1p(future.sdw4) + final.predict(future[inputs])), 0
+        )
+        metrics["refit_rows"] = int(len(history))
+    else:
+        future["baseline_forecast"] = forecaster(future)
+    future["forecast_low"], future["forecast_high"] = bounds(future.baseline_forecast, future.period, radius)
+    future.to_csv(cfg.path("outputs", "decision_forecast.csv"), index=False)
+    history = frame[(frame.date < decision) & (frame.date >= decision - pd.Timedelta(days=180))]
+    # A period only runs on its own days (peak/off-peak on weekdays, weekend on weekends): ignore structural zeros.
+    weekend_day = history.date.dt.dayofweek >= 5
+    operating = history[history.period.eq("Weekend") == weekend_day]
+    caps = operating.groupby(["zone_id", "period"]).trips.quantile(0.95).rename("p95_daily").reset_index()
+    caps["daily_capacity"] = [
+        np.ceil(row.p95_daily * _capacity_factor(int(row.zone_id), row.period)) for row in caps.itertuples()
+    ]
     cell = (
         future.groupby(["zone_id", "period"])
-        .baseline_forecast.sum()
+        .agg(baseline_forecast=("baseline_forecast", "sum"), forecast_high=("forecast_high", "sum"))
         .reset_index()
-        .merge(caps, on=["zone_id", "period"])
+        .merge(caps, on=["zone_id", "period"], validate="one_to_one")
     )
-    cell["capacity_trips"] = cell.daily_capacity * 30
+    days = future.groupby(["zone_id", "period"]).date.nunique().rename("operating_days").reset_index()
+    cell = cell.merge(days, on=["zone_id", "period"], validate="one_to_one")
+    cell["capacity_trips"] = cell.daily_capacity * cell.operating_days
     cell["reserve_trips"] = 0.2 * cell.baseline_forecast
     cell["available_trips"] = np.maximum(cell.capacity_trips - cell.baseline_forecast - cell.reserve_trips, 0)
     cell["baseline_over_capacity"] = (cell.baseline_forecast + cell.reserve_trips) > cell.capacity_trips
     cell.to_csv(cfg.path("outputs", "capacity.csv"), index=False)
     frame.to_parquet(cfg.path("data", "gold", "zone_day.parquet"), index=False)
-    from .forecasting import horizon_validation, hourly_forecast
-
-    horizon = horizon_validation(cfg, frame)
     hourly_forecast(cfg, trips, future)
     return cell, {
         "test": metrics,
         "selection": selection,
-        "champion": serving_name,
-        "horizon_validation": horizon,
-        "decision_forecast": "30-day seasonal planning forecast; independent rolling-origin monthly backtests and validation-derived intervals provided. Weather forecast uncertainty remains outside scope.",
+        "champion": serving,
+        "interval_radius": radius,
+        "decision_forecast": "30-day fixed-origin forecast from the validation-selected champion, with split-conformal "
+        "90% intervals from validation residuals. Weather enters as monthly climatology, not a weather forecast.",
         "reserve_fraction": 0.20,
     }
+
+
+warnings.filterwarnings("ignore", message=".*does not have valid feature names.*")

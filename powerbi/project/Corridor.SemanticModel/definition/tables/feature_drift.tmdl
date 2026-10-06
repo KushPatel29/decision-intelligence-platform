@@ -1,0 +1,70 @@
+table feature_drift
+	lineageTag: 00edc2f0-7116-5eeb-b43c-708fb828f593
+
+	column feature
+		dataType: string
+		lineageTag: 57fea1d5-6c1b-5779-bb2e-36191e1b6334
+		summarizeBy: none
+		sourceColumn: feature
+
+	column psi
+		dataType: double
+		formatString: 0.0%
+		lineageTag: a7b7b332-7c52-5393-a591-3735b700e636
+		summarizeBy: none
+		sourceColumn: psi
+
+	column status
+		dataType: string
+		lineageTag: 6b84b884-a0f0-518f-8fb3-3b0c0a5a38f0
+		summarizeBy: none
+		sourceColumn: status
+
+	partition feature_drift = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [#"feature" = nullable text, #"psi" = nullable text, #"status" = nullable text], {
+				        {"tenure_days", "1.2596", "Review"},
+				        {"business_flag", "0.0", "Stable"},
+				        {"autopay", "0.0", "Stable"},
+				        {"transponder_flag", "0.0", "Stable"},
+				        {"heavy_vehicle", "0.0", "Stable"},
+				        {"home_zone", "0.0", "Stable"},
+				        {"trips_7d", "0.0668", "Stable"},
+				        {"trips_30d", "0.2311", "Review"},
+				        {"trips_90d", "0.2194", "Review"},
+				        {"trips_previous90d", "0.0352", "Stable"},
+				        {"spend_30d", "0.155", "Stable"},
+				        {"spend_90d", "0.1621", "Stable"},
+				        {"spend_365d", "0.0009", "Stable"},
+				        {"avg_toll", "0.1497", "Stable"},
+				        {"avg_distance_km", "0.1496", "Stable"},
+				        {"peak_share", "0.1021", "Stable"},
+				        {"weekend_share", "0.0911", "Stable"},
+				        {"night_share_30d", "0.0039", "Stable"},
+				        {"zones_visited_30d", "0.2262", "Review"},
+				        {"active_days_30d", "0.2314", "Review"},
+				        {"max_daily_trips_30d", "0.2256", "Review"},
+				        {"discount_90d", "0.063", "Stable"},
+				        {"recency_days", "0.2917", "Review"},
+				        {"digital_events_30d", "0.0332", "Stable"},
+				        {"app_logins_30d", "0.0206", "Stable"},
+				        {"offer_views_30d", "0.0102", "Stable"},
+				        {"email_opens_30d", "0.003", "Stable"},
+				        {"sessions_30d", "0.035", "Stable"},
+				        {"offer_views_90d", "0.0225", "Stable"},
+				        {"offer_click_rate_90d", "0.0198", "Stable"},
+				        {"enroll_rate_90d", "0.0029", "Stable"},
+				        {"email_click_rate_90d", "0.0062", "Stable"},
+				        {"pricing_views_90d", "0.0073", "Stable"},
+				        {"loyalty_views_90d", "0.0063", "Stable"},
+				        {"app_share_90d", "0.0294", "Stable"},
+				        {"days_since_last_login", "0.0487", "Stable"},
+				        {"points_earned_to_date", "0.276", "Review"},
+				        {"frequency_trend", "0.4397", "Review"},
+				        {"digital_engagement_score", "0.0332", "Stable"}
+				    }),
+				    Typed = Table.TransformColumnTypes(Source, {{"feature", type text}, {"psi", type number}, {"status", type text}})
+				in
+				    Typed

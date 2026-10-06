@@ -1,49 +1,88 @@
-name: release acceptance
-on: [push, pull_request]
+name: ci
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  source-security:
-    runs-on: ubuntu-latest
+  lint:
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: '3.12'
+          python-version: "3.12"
+      - run: pip install "ruff>=0.15"
+      - run: ruff check src views tests app.py scripts aws databricks
+      - run: ruff format --check src views tests app.py
+
+  unit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e '.[dev,api,app,ml]'
+      - name: Hermetic tests (no pipeline run needed)
+        run: pytest -q tests/test_contracts.py tests/test_hardening.py tests/test_planning.py tests/test_methods.py tests/test_api.py -k "not local_model_gate and not production_refuses"
+
+  powerbi:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install pandas
+      - name: Committed Power BI project matches its spec and data
+        run: PYTHONPATH=src python -m decision_platform.bi.build_pbip --check
+
+  security:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
       - run: pip install pip-audit cfn-lint
       - run: pip-audit -r requirements-runtime.txt
       - run: cfn-lint aws/infrastructure.json
-  contracts:
-    runs-on: ubuntu-latest
+
+  integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    needs: [unit]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: '3.12'
-      - run: pip install -e '.[dev]'
-      - run: pytest -q tests/test_contracts.py tests/test_planning.py tests/test_hardening.py -k 'not local_model_gate and not production_refuses'
-  generated-integration:
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: pip install -e '.[dev,app,advanced]' mlflow
-      - run: python -m decision_platform.cli demo --customers 8000 --solver highs
-      - run: pytest -q
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e '.[dev,api,app,ml,advanced]'
+      - name: Full pipeline, 25,000 customers, open-source solvers
+        run: python -m decision_platform.cli demo --solver highs --no-tracking
+      - name: Every test, including app smoke tests against the new snapshot
+        run: pytest -q
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: synthetic-acceptance-evidence
+          name: decision-evidence
           path: |
-            outputs/quality_gate.json
-            outputs/run_status.json
             outputs/summary.json
+            outputs/quality_gate.json
+            outputs/optimization_results.json
+            outputs/policy_value.json
+            outputs/executive_brief.md
+
   container:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - run: mkdir -p outputs
-      - run: docker build -t corridor-app:${{ github.sha }} .
-      - run: docker build -f aws/Dockerfile -t corridor-model:${{ github.sha }} .
+      - uses: actions/checkout@v5
+      - name: Build the serving image against the committed snapshot
+        run: docker build -t corridor:${{ github.sha }} .

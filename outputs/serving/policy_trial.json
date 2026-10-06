@@ -1,0 +1,29 @@
+{
+  "unit": "customer",
+  "assignment": "New October 2025 balanced randomisation, independent seed; intention to treat including customers the policy chose not to contact",
+  "n_policy": 12500,
+  "n_control": 12500,
+  "policy_contacts": 2500,
+  "planning_constraints_passed": true,
+  "planned_spend": 4999.996241773403,
+  "expected_spend": 4794.099281513136,
+  "predicted_effect_per_customer": 2.51967800852377,
+  "true_effect_per_customer": 1.4802211432897538,
+  "incremental_net_contribution_per_customer": {
+    "difference": 1.4186106485168182,
+    "se": 0.5970881625528207,
+    "ci_low": 0.2483393543180923,
+    "ci_high": 2.588881942715544,
+    "p_value": 0.017507089798261228,
+    "p_adjusted": 0.017507089798261228
+  },
+  "incremental_trips_per_customer": {
+    "difference": 0.29008000000000056,
+    "se": 0.09434496423329702,
+    "ci_low": 0.10516726798001885,
+    "ci_high": 0.47499273201998227,
+    "p_value": 0.0021073282156036477,
+    "p_adjusted": 0.0021073282156036477
+  },
+  "limitations": "Guardrails are scaled to the policy half. Only a minority of the policy half is contacted, so the per-customer effect is diluted and its interval is wide by design. Estimated-cost constraints do not guarantee realised spend; operational caps still apply."
+}

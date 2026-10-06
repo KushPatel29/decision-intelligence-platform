@@ -136,8 +136,11 @@ def reward_ledger(cfg):
     earned = pd.read_parquet(cfg.path("data", "silver", "fact_loyalty_points.parquet"))
     redemption = pd.read_parquet(cfg.path("data", "silver", "fact_loyalty_redemption.parquet"))
     trial = pd.read_parquet(cfg.path("data", "silver", "fact_campaign_result.parquet"))
-    awards = trial.loc[trial.arm.eq("500 loyalty points"), ["customer_id"]].assign(
-        points_awarded=500, awarded_at=pd.Timestamp("2025-07-01"), award_id="trial_july"
+    loyalty = trial[trial.offer_id.isin(["loyalty_500", "loyalty_1500"])]
+    awards = loyalty[["customer_id", "offer_id"]].assign(
+        points_awarded=np.where(loyalty.offer_id.eq("loyalty_1500"), 1500, 500),
+        awarded_at=pd.Timestamp("2025-07-01"),
+        award_id="trial_july",
     )
     awards.to_parquet(cfg.path("data", "silver", "fact_loyalty_award.parquet"), index=False)
     ledger = (
@@ -152,7 +155,8 @@ def reward_ledger(cfg):
         .fillna(0)
     )
     ledger["points_balance"] = ledger.points_earned + ledger.points_awarded - ledger.points_redeemed
-    assert (ledger.points_balance >= 0).all()
+    if (ledger.points_balance < 0).any():
+        raise ValueError("Loyalty ledger has a negative balance")
     ledger.reset_index().to_csv(cfg.path("outputs", "loyalty_ledger.csv"), index=False)
     write_json(
         cfg.path("outputs", "loyalty_accounting.json"),

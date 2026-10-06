@@ -5,7 +5,7 @@ import pandas as pd
 from .config import write_json
 
 
-def build_marts(cfg, frames, customers, uplift, trial, elasticity):
+def build_marts(cfg, frames, customers, uplift, trial, elasticity, decisions):
     cutoff = pd.Timestamp(cfg.decision_date)
     ledger = pd.read_csv(cfg.path("outputs", "loyalty_ledger.csv"))
     result = customers.merge(ledger, on="customer_id", how="left", validate="one_to_one")
@@ -24,6 +24,8 @@ def build_marts(cfg, frames, customers, uplift, trial, elasticity):
         campaign_redemptions=("redeemed", "sum"),
     )
     result = result.merge(campaign, on="customer_id", how="left", validate="one_to_one")
+    campaign_cols = ["campaign_exposures", "campaign_enrollments", "campaign_redemptions"]
+    result[campaign_cols] = result[campaign_cols].fillna(0).astype(int)
     events = frames["fact_digital_event"]
     recent = events[(events.timestamp < cutoff) & (events.timestamp >= cutoff - pd.Timedelta(days=30))].copy()
     recent["session_day"] = recent.timestamp.dt.normalize()
@@ -50,6 +52,22 @@ def build_marts(cfg, frames, customers, uplift, trial, elasticity):
         columns={"redemption_probability": "loyalty_500_redemption_probability"}
     )
     result = result.merge(loyalty, on="customer_id", validate="one_to_one")
+    # Next-best offer by model value, and the offer the optimized plan actually assigns.
+    value = uplift.assign(total_value=uplift.value_uplift + uplift.later_value_uplift)
+    best = value.loc[value.groupby("customer_id").total_value.idxmax()]
+    best = best[["customer_id", "offer_id", "total_value", "value_uplift_sd"]].rename(
+        columns={
+            "offer_id": "best_offer_id",
+            "total_value": "best_offer_value",
+            "value_uplift_sd": "best_offer_sd",
+        }
+    )
+    result = result.merge(best, on="customer_id", validate="one_to_one")
+    plan = decisions[["customer_id", "offer_id", "objective_value", "cost"]].rename(
+        columns={"offer_id": "plan_offer_id", "objective_value": "plan_value", "cost": "plan_cost"}
+    )
+    result = result.merge(plan, on="customer_id", how="left", validate="one_to_one")
+    result["in_plan"] = result.plan_offer_id.notna()
     offer = uplift.merge(
         result[["customer_id", "rfm_segment", "home_zone", "eligible", "tier", "points_balance"]],
         on="customer_id",
@@ -91,7 +109,7 @@ def build_marts(cfg, frames, customers, uplift, trial, elasticity):
         "customer_offer": ["customer_id", "offer_id"],
         "customer_activity_month": ["customer_id", "month"],
         "campaign_performance": ["arm"],
-        "pricing_elasticity": ["zone_id", "period"],
+        "pricing_elasticity": ["zone_id", "period", "segment"],
         "loyalty_performance": ["customer_id"],
     }
     for name, frame in marts.items():

@@ -1,0 +1,76 @@
+table learner_comparison
+	lineageTag: 3e8027e9-a004-5598-bffa-cf9219b5e5cf
+
+	column offer_id
+		dataType: string
+		lineageTag: c81b3eb6-eeac-5d6e-9958-9c01d5ad9a37
+		summarizeBy: none
+		sourceColumn: offer_id
+
+	column learner
+		dataType: string
+		lineageTag: ce4b5916-f226-502c-adbc-63fe265d147c
+		summarizeBy: none
+		sourceColumn: learner
+
+	column value_spearman
+		dataType: double
+		formatString: 0.0%
+		lineageTag: e61caaec-ecaa-5a36-9e6f-a013dc83f761
+		summarizeBy: none
+		sourceColumn: value_spearman
+
+	column qini
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 584c36d1-8774-564e-a0ab-6e06cb1117ea
+		summarizeBy: sum
+		sourceColumn: qini
+
+	column selected
+		dataType: boolean
+		lineageTag: 140abbe5-d23c-5638-8af2-7ea2cc36301b
+		summarizeBy: none
+		sourceColumn: selected
+
+	partition learner_comparison = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [#"offer_id" = nullable text, #"learner" = nullable text, #"value_spearman" = nullable text, #"qini" = nullable text, #"selected" = nullable text], {
+				        {"offpeak_15", "S-learner", "0.1494", "-0.7999", "True"},
+				        {"offpeak_15", "T-learner", "0.1361", "-1.9195", "False"},
+				        {"offpeak_15", "X-learner", "0.2217", "-0.7952", "False"},
+				        {"offpeak_15", "DR-learner", "0.1315", "-0.6025", "False"},
+				        {"pct_10", "S-learner", "-0.5262", "-1.9458", "False"},
+				        {"pct_10", "T-learner", "0.0854", "-2.428", "False"},
+				        {"pct_10", "X-learner", "0.1343", "-0.2503", "False"},
+				        {"pct_10", "DR-learner", "0.0831", "-0.9147", "True"},
+				        {"weekend_20", "S-learner", "0.0165", "1.8427", "False"},
+				        {"weekend_20", "T-learner", "0.0132", "1.4336", "False"},
+				        {"weekend_20", "X-learner", "0.0805", "-1.6437", "True"},
+				        {"weekend_20", "DR-learner", "0.0753", "-0.441", "False"},
+				        {"spend_10", "S-learner", "-0.1654", "0.4398", "False"},
+				        {"spend_10", "T-learner", "0.1593", "-0.5327", "False"},
+				        {"spend_10", "X-learner", "0.3625", "0.4048", "False"},
+				        {"spend_10", "DR-learner", "0.2196", "0.0638", "True"},
+				        {"free_trip", "S-learner", "0.8331", "1.0777", "False"},
+				        {"free_trip", "T-learner", "0.4532", "-0.8666", "False"},
+				        {"free_trip", "X-learner", "0.7247", "0.0107", "False"},
+				        {"free_trip", "DR-learner", "0.4759", "-0.6186", "True"},
+				        {"offpeak_pass", "S-learner", "0.3641", "4.2514", "False"},
+				        {"offpeak_pass", "T-learner", "0.2535", "4.7921", "False"},
+				        {"offpeak_pass", "X-learner", "0.396", "4.5215", "True"},
+				        {"offpeak_pass", "DR-learner", "0.3282", "3.8922", "False"},
+				        {"loyalty_500", "S-learner", "0.1293", "-0.2739", "False"},
+				        {"loyalty_500", "T-learner", "0.1675", "-0.2681", "False"},
+				        {"loyalty_500", "X-learner", "0.2778", "-2.1104", "False"},
+				        {"loyalty_500", "DR-learner", "0.1831", "-0.35", "True"},
+				        {"loyalty_1500", "S-learner", "0.4906", "0.3983", "False"},
+				        {"loyalty_1500", "T-learner", "0.1716", "-0.6839", "False"},
+				        {"loyalty_1500", "X-learner", "0.3582", "-0.1387", "False"},
+				        {"loyalty_1500", "DR-learner", "0.2453", "1.4849", "True"}
+				    }),
+				    Typed = Table.TransformColumnTypes(Source, {{"offer_id", type text}, {"learner", type text}, {"value_spearman", type number}, {"qini", type number}, {"selected", type logical}})
+				in
+				    Typed

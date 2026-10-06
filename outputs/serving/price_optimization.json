@@ -1,0 +1,15 @@
+{
+  "solver": "HiGHS (LP-guided, 8,283 campaign variables kept)",
+  "gap": 0.015561504410249751,
+  "gap_definition": "Relative distance to the LP bound of the full joint problem",
+  "all_constraints_passed": true,
+  "price_contribution": 22895.30717138732,
+  "campaign_net_contribution": 63795.338037561916,
+  "campaign_objective": 117413.09330431596,
+  "consumer_surplus_change": 70638.38494013797,
+  "contacts": 5000,
+  "spend": 9999.999596921274,
+  "surplus_weight": 0.0,
+  "price_changes": 18,
+  "assumptions": "Constant elasticity within the tested range; campaign effects estimated at baseline prices (no fitted price-by-offer interaction). Consumer surplus is illustrative, not measured welfare."
+}

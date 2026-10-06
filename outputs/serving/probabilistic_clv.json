@@ -1,0 +1,12 @@
+{
+  "method": "BG/NBD customer-day frequency plus Gamma-Gamma mean contribution, 12 months, 10% annual discount",
+  "validation_90d_customer_days": {
+    "mae": 3.748064526283483,
+    "rmse": 6.4039368260783505,
+    "n": 24983,
+    "baseline_mae": 5.079348538897911
+  },
+  "customers_with_history": 24984,
+  "frequency_monetary_correlation": 0.512536074079004,
+  "limitations": "Left-truncated history begins January 2024. Stationarity and frequency/value independence are assumptions, not established business facts. Held-out 90-day purchase-day evaluation does not validate 12-month CLV. Customers without a prior purchase have no estimate."
+}

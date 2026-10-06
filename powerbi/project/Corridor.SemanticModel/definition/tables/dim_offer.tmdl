@@ -1,0 +1,59 @@
+table dim_offer
+	lineageTag: 1cfe09a6-8681-5f82-ae8f-69be7f7e163a
+
+	column offer_id
+		dataType: string
+		lineageTag: ef9171f2-fba2-55bc-8e8d-ffb3d6a1d628
+		summarizeBy: none
+		sourceColumn: offer_id
+
+	column offer_name
+		dataType: string
+		lineageTag: 53e96c3a-e69c-5e24-b71f-11bd296c0598
+		summarizeBy: none
+		sourceColumn: offer_name
+		sortByColumn: offer_order
+
+	column offer_type
+		dataType: string
+		lineageTag: 21c7fab0-57a9-522d-9dba-75977306a742
+		summarizeBy: none
+		sourceColumn: offer_type
+
+	column period
+		dataType: string
+		lineageTag: 2af19cca-9323-5cfb-a69f-c9da50e32730
+		summarizeBy: none
+		sourceColumn: period
+
+	column inventory
+		dataType: int64
+		formatString: #,0
+		lineageTag: 356496b0-37fe-5bbc-a1ec-3ed7e135ad6a
+		summarizeBy: sum
+		sourceColumn: inventory
+
+	column offer_order
+		dataType: int64
+		formatString: #,0
+		lineageTag: 4f234544-16ed-5802-b9b4-80af14ef9e4a
+		summarizeBy: sum
+		sourceColumn: offer_order
+
+	partition dim_offer = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [#"offer_id" = nullable text, #"offer_name" = nullable text, #"offer_type" = nullable text, #"period" = nullable text, #"inventory" = nullable text, #"offer_order" = nullable text], {
+				        {"offpeak_15", "Off-peak 15% off", "Off-peak discount", "Off-peak", "9000", "1"},
+				        {"pct_10", "10% off every trip", "Percentage discount", "Mixed", "9000", "2"},
+				        {"weekend_20", "Weekend 20% off", "Weekend incentive", "Weekend", "9000", "3"},
+				        {"spend_10", "Spend & get $10", "Spend threshold reward", "Mixed", "9000", "4"},
+				        {"free_trip", "Fifth trip free", "Free-trip reward", "Mixed", "3000", "5"},
+				        {"offpeak_pass", "Off-peak pass ($30 cap)", "Driving pass", "Off-peak", "9000", "6"},
+				        {"loyalty_500", "500 bonus points", "Loyalty reward", "Mixed", "9000", "7"},
+				        {"loyalty_1500", "1,500 bonus points", "Loyalty reward", "Mixed", "1200", "8"}
+				    }),
+				    Typed = Table.TransformColumnTypes(Source, {{"offer_id", type text}, {"offer_name", type text}, {"offer_type", type text}, {"period", type text}, {"inventory", Int64.Type}, {"offer_order", Int64.Type}})
+				in
+				    Typed

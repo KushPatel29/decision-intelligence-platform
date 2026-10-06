@@ -1,0 +1,77 @@
+table zone_capacity
+	lineageTag: 35ebcb3e-10f3-54df-8730-460113309bc4
+
+	column zone_id
+		dataType: string
+		lineageTag: e507adb6-ddea-5e2e-832e-12ceca1c8fc8
+		summarizeBy: none
+		sourceColumn: zone_id
+
+	column period
+		dataType: string
+		lineageTag: 4c79415f-8aa8-55a0-a9ee-0f31e733376d
+		summarizeBy: none
+		sourceColumn: period
+
+	column baseline_forecast
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 309ab207-91a6-5b2c-bc11-760a8f5f7155
+		summarizeBy: sum
+		sourceColumn: baseline_forecast
+
+	column campaign_trips
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 1e48192e-34e6-5396-8c9c-6653a80542eb
+		summarizeBy: sum
+		sourceColumn: campaign_trips
+
+	column reserve_trips
+		dataType: double
+		formatString: #,0.00
+		lineageTag: dbc01916-ff96-5cea-b656-0397756766a9
+		summarizeBy: sum
+		sourceColumn: reserve_trips
+
+	column capacity_trips
+		dataType: double
+		formatString: #,0.00
+		lineageTag: b795f561-d8d3-541a-9b6d-30ca51ddaca6
+		summarizeBy: sum
+		sourceColumn: capacity_trips
+
+	column free_after_campaign
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 55826d58-e91f-5586-a598-0040245d5eff
+		summarizeBy: sum
+		sourceColumn: free_after_campaign
+
+	partition zone_capacity = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [#"zone_id" = nullable text, #"period" = nullable text, #"baseline_forecast" = nullable text, #"campaign_trips" = nullable text, #"reserve_trips" = nullable text, #"capacity_trips" = nullable text, #"free_after_campaign" = nullable text], {
+				        {"0", "Off-peak", "8167.3515", "909.7785", "1633.4703", "17160.0", "6449.3997"},
+				        {"0", "Peak", "8908.5054", "663.5992", "1781.7011", "14608.0", "3254.1943"},
+				        {"0", "Weekend", "4772.9708", "425.5598", "954.5942", "9104.0", "2950.8752"},
+				        {"1", "Off-peak", "7799.8798", "602.5139", "1559.976", "16478.0", "6515.6303"},
+				        {"1", "Peak", "6921.5277", "450.165", "1384.3055", "8756.0", "0.0018"},
+				        {"1", "Weekend", "4597.4138", "325.7284", "919.4828", "8960.0", "3117.375"},
+				        {"2", "Off-peak", "7991.4291", "762.297", "1598.2858", "16456.0", "6103.9881"},
+				        {"2", "Peak", "7244.0571", "656.3795", "1448.8114", "9372.0", "22.752"},
+				        {"2", "Weekend", "4604.6574", "444.7734", "920.9315", "8944.0", "2973.6378"},
+				        {"3", "Off-peak", "8033.84", "843.1737", "1606.768", "16478.0", "5994.2182"},
+				        {"3", "Peak", "7248.488", "733.1933", "1449.6976", "9438.0", "6.6211"},
+				        {"3", "Weekend", "4739.3919", "449.6826", "947.8784", "9288.0", "3151.0472"},
+				        {"4", "Off-peak", "7693.343", "774.7082", "1538.6686", "16588.0", "6581.2802"},
+				        {"4", "Peak", "6841.153", "689.2314", "1368.2306", "9900.0", "1001.385"},
+				        {"4", "Weekend", "4554.4659", "397.9655", "910.8932", "9096.0", "3232.6755"},
+				        {"5", "Off-peak", "7781.1511", "818.1267", "1556.2302", "16214.0", "6058.492"},
+				        {"5", "Peak", "8397.3697", "666.582", "1679.4739", "13728.0", "2984.5743"},
+				        {"5", "Weekend", "4449.826", "379.8104", "889.9652", "8872.0", "3152.3984"}
+				    }),
+				    Typed = Table.TransformColumnTypes(Source, {{"zone_id", type text}, {"period", type text}, {"baseline_forecast", type number}, {"campaign_trips", type number}, {"reserve_trips", type number}, {"capacity_trips", type number}, {"free_after_campaign", type number}})
+				in
+				    Typed

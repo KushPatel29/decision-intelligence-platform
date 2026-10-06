@@ -31,7 +31,7 @@ def fetch(cfg, refresh=False):
             request = Request(url, headers={"User-Agent": "DecisionSciencePortfolio/0.1 (educational)"})
             with urlopen(request, timeout=45) as response:
                 payload = response.read()
-            parsed = json.loads(payload)  # Validate before saving.
+            json.loads(payload)  # Validate before saving.
             target.write_bytes(payload)
             write_json(
                 metadata,

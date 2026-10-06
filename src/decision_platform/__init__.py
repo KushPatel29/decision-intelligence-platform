@@ -1,3 +1,3 @@
-"""Reproducible, synthetic decision-science platform. No real customer data."""
+"""Customer, pricing and transportation decision intelligence on a synthetic population. No real customer data."""
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"

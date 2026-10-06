@@ -13,13 +13,16 @@ ROOT = Path(os.environ.get("CORRIDOR_ROOT", Path(__file__).resolve().parents[2])
 
 @dataclass(frozen=True)
 class Config:
+    """Run configuration. Campaign limits are the October planning guardrails."""
+
     seed: int = 407
-    customers: int = 8000
+    customers: int = 25000
     start: str = "2024-01-01"
     end: str = "2025-12-31"
     decision_date: str = "2025-10-01"
-    budget: float = 1600.0
-    campaign_limit: int = 180
+    budget: float = 10000.0
+    campaign_limit: int = 5000
+    points_budget: int = 2_500_000
     min_roi: float = 0.15  # Net incremental contribution / incentive cost.
     contribution_margin: float = 0.72
     root: Path = ROOT

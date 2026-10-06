@@ -1,5 +1,5 @@
 services:
-  corridor:
+  app:
     build: .
     ports:
       - "127.0.0.1:8501:8501"
@@ -13,6 +13,28 @@ services:
     read_only: true
     tmpfs:
       - /tmp:size=128M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 2g
+    cpus: 2
+    restart: unless-stopped
+  api:
+    build: .
+    command: ["uvicorn", "decision_platform.api:app", "--host", "0.0.0.0", "--port", "8600", "--workers", "2"]
+    ports:
+      - "127.0.0.1:8600:8600"
+    environment:
+      CORRIDOR_ENV: production
+      CORRIDOR_API_KEYS: ${CORRIDOR_API_KEYS:?Set at least one API key}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8600/ready', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+    read_only: true
+    tmpfs:
+      - /tmp:size=64M
     security_opt:
       - no-new-privileges:true
     cap_drop:

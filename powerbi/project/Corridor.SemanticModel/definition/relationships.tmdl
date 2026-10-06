@@ -1,0 +1,63 @@
+relationship c154bdd3-58b8-507c-a56a-b517617016cb
+	fromColumn: plan_contacts.offer_id
+	toColumn: dim_offer.offer_id
+
+relationship 81a52f02-1fb1-52f7-a9d6-d78317182f2a
+	fromColumn: plan_contacts.zone_id
+	toColumn: dim_zone.zone_id
+
+relationship 1489e26f-e319-5097-8c69-cd655e8a332e
+	fromColumn: customer_segments.zone_id
+	toColumn: dim_zone.zone_id
+
+relationship 88b89085-0026-5ba5-8482-45633e5d02cf
+	fromColumn: zone_capacity.zone_id
+	toColumn: dim_zone.zone_id
+
+relationship a0917f48-280d-50c4-b94d-62d5038b982f
+	fromColumn: zone_capacity.period
+	toColumn: dim_period.period
+
+relationship 23cdb24c-a22b-5445-92b3-490a2fed2076
+	fromColumn: elasticity.zone_id
+	toColumn: dim_zone.zone_id
+
+relationship 6ff709f4-2b89-5907-ad8c-ca52e817c20a
+	fromColumn: elasticity.period
+	toColumn: dim_period.period
+
+relationship e1d4a052-44f4-5921-ad0f-70254123cb8e
+	fromColumn: price_scenarios.zone_id
+	toColumn: dim_zone.zone_id
+
+relationship 6a50b435-3b5e-51a5-bd7b-d5b6c272fde6
+	fromColumn: price_scenarios.period
+	toColumn: dim_period.period
+
+relationship fbedeb58-182a-576a-b11f-a56b0fc64afe
+	fromColumn: price_plan.zone_id
+	toColumn: dim_zone.zone_id
+
+relationship 43d0c602-b1ac-5a23-ac68-b8869f842173
+	fromColumn: price_plan.period
+	toColumn: dim_period.period
+
+relationship f5f732eb-d30b-558d-89ff-d74c4d9d5fa6
+	fromColumn: hourly_forecast.zone_id
+	toColumn: dim_zone.zone_id
+
+relationship b054a699-0898-570e-b66f-368d8da4b504
+	fromColumn: hourly_forecast.period
+	toColumn: dim_period.period
+
+relationship 0c3fba4e-87fe-5584-bf57-4f5ca7f54c97
+	fromColumn: demand_backtest.period
+	toColumn: dim_period.period
+
+relationship 03c80013-e6a2-54d7-a574-f26e7cdeb983
+	fromColumn: experiment_effects.offer_id
+	toColumn: dim_offer.offer_id
+
+relationship 9cc9cd9d-a6dd-56f9-9e55-25ad5e8d3208
+	fromColumn: learner_comparison.offer_id
+	toColumn: dim_offer.offer_id

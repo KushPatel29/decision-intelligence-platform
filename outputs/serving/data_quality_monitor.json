@@ -1,0 +1,44 @@
+{
+  "method": "Same-weekday volume ratio with a rain/holiday adjustment fitted before June 2025; robust z-scores for duplicate, out-of-range and null rates. Flags: |volume z| >= 4 or rate z >= 6.",
+  "weather_coefficient": -0.01888253392880253,
+  "holiday_coefficient": -0.49936883051445535,
+  "evaluation_against_planted": {
+    "monitored_days": 122,
+    "planted_defect_days": 4,
+    "flagged_days": 4,
+    "caught": 4,
+    "precision": 1.0,
+    "recall": 1.0,
+    "false_alarm_days": 0
+  },
+  "flags": [
+    {
+      "day": "2025-07-23 00:00:00",
+      "rows": 1985,
+      "expected_rows": 5138.0,
+      "volume_z": -23.099105362563826,
+      "reason": "volume vs same weekday"
+    },
+    {
+      "day": "2025-07-24 00:00:00",
+      "rows": 7575,
+      "expected_rows": 5068.0,
+      "volume_z": 9.840148395287274,
+      "reason": "volume vs same weekday"
+    },
+    {
+      "day": "2025-08-21 00:00:00",
+      "rows": 4548,
+      "expected_rows": 4662.5,
+      "volume_z": -1.4576397184986039,
+      "reason": "out-of-range values"
+    },
+    {
+      "day": "2025-09-10 00:00:00",
+      "rows": 6761,
+      "expected_rows": 4309.5,
+      "volume_z": 9.64790646124453,
+      "reason": "duplicate natural keys"
+    }
+  ]
+}

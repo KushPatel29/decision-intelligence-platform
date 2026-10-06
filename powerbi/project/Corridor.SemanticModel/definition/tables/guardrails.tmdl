@@ -1,0 +1,36 @@
+table guardrails
+	lineageTag: 49c4d065-4cdb-5b8e-8dd5-f54f4c1b8202
+
+	column constraint_label
+		dataType: string
+		lineageTag: c5b024cd-c8f3-5750-8117-7d4446af5c2a
+		summarizeBy: none
+		sourceColumn: constraint_label
+
+	column shadow_price
+		dataType: double
+		formatString: 0.0%
+		lineageTag: d0f1031b-27c8-50e6-9ac6-44bd49485ee0
+		summarizeBy: none
+		sourceColumn: shadow_price
+
+	column limit
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 9a6aac7d-e525-5b50-a058-d43557403f04
+		summarizeBy: sum
+		sourceColumn: limit
+
+	partition guardrails = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [#"constraint_label" = nullable text, #"shadow_price" = nullable text, #"limit" = nullable text], {
+				        {"Incentive budget ($)", "2.4439", "10000.0"},
+				        {"Contact limit", "7.2294", "5000.0"},
+				        {"Inventory free_trip", "5.4117", "3000.0"},
+				        {"Capacity Northwest Peak", "2.3918", "450.1668"}
+				    }),
+				    Typed = Table.TransformColumnTypes(Source, {{"constraint_label", type text}, {"shadow_price", type number}, {"limit", type number}})
+				in
+				    Typed

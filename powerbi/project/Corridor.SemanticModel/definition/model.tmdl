@@ -1,0 +1,38 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation PBI_QueryOrder = ["dim_zone", "dim_offer", "dim_period", "plan_summary", "plan_contacts", "customer_segments", "zone_capacity", "monthly_trips", "policy_comparison", "budget_frontier", "guardrails", "experiment_effects", "sequential_looks", "learner_comparison", "elasticity", "price_scenarios", "price_plan", "hourly_forecast", "demand_backtest", "feed_quality", "feature_drift", "model_quality", "quality_gate", "_Measures"]
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table dim_zone
+ref table dim_offer
+ref table dim_period
+ref table plan_summary
+ref table plan_contacts
+ref table customer_segments
+ref table zone_capacity
+ref table monthly_trips
+ref table policy_comparison
+ref table budget_frontier
+ref table guardrails
+ref table experiment_effects
+ref table sequential_looks
+ref table learner_comparison
+ref table elasticity
+ref table price_scenarios
+ref table price_plan
+ref table hourly_forecast
+ref table demand_backtest
+ref table feed_quality
+ref table feature_drift
+ref table model_quality
+ref table quality_gate
+ref table _Measures

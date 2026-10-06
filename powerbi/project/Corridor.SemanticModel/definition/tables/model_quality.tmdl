@@ -1,0 +1,55 @@
+table model_quality
+	lineageTag: b680ed37-0a14-5efa-98b4-8870169f92d5
+
+	column model
+		dataType: string
+		lineageTag: 91e1f83a-cd81-57ef-b6f2-d2a3291e4e43
+		summarizeBy: none
+		sourceColumn: model
+
+	column champion
+		dataType: string
+		lineageTag: b58c6144-8c25-5222-b172-5367edc7fe5d
+		summarizeBy: none
+		sourceColumn: champion
+
+	column auc
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 233d4122-3823-59c0-9fb9-6222c93ac58d
+		summarizeBy: none
+		sourceColumn: auc
+
+	column pr_auc
+		dataType: double
+		formatString: 0.0%
+		lineageTag: ffb466ab-e4ce-5782-a2fb-4d4723886363
+		summarizeBy: none
+		sourceColumn: pr_auc
+
+	column brier
+		dataType: double
+		formatString: 0.0%
+		lineageTag: b6b98474-2260-5bc4-94c2-590e9d6deb7c
+		summarizeBy: none
+		sourceColumn: brier
+
+	column ece
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 44d4b06c-ff0b-565d-92b9-ba74acef5164
+		summarizeBy: none
+		sourceColumn: ece
+
+	partition model_quality = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [#"model" = nullable text, #"champion" = nullable text, #"auc" = nullable text, #"pr_auc" = nullable text, #"brier" = nullable text, #"ece" = nullable text], {
+				        {"propensity", "xgboost", "0.9128", "0.9711", "0.1078", "0.0571"},
+				        {"churn", "xgboost", "0.9103", "0.5219", "0.038", "0.0052"},
+				        {"attrition", "hist gradient boosting", "0.7401", "0.5005", "0.1481", "0.0796"}
+				    }),
+				    Typed = Table.TransformColumnTypes(Source, {{"model", type text}, {"champion", type text}, {"auc", type number}, {"pr_auc", type number}, {"brier", type number}, {"ece", type number}})
+				in
+				    Typed
