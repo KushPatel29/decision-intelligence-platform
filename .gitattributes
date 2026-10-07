@@ -4,3 +4,6 @@
 *.jpg binary
 *.zip binary
 *.pbix binary
+
+# Serving files are byte-hashed; Git must preserve the bytes produced by the pipeline.
+outputs/serving/** -text

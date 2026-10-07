@@ -2,6 +2,8 @@
 
 ## 2026-10-07 release review
 
+- Preserve exact serving artifact bytes through Git checkout; prevent Windows line-ending conversion
+  from breaking snapshot checksums on Linux hosting. CI now verifies the shipped snapshot.
 - Verified serving reads now enforce manifest membership, safe paths and byte hashes at read time;
   required API artifacts and the release ID are checked before serving.
 - Scenario solves retain capacity-relieving options in off-peak and weekend periods even when their

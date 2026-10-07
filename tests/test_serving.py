@@ -67,3 +67,13 @@ def test_streamlit_loader_rechecks_after_cached_verification(tmp_path, monkeypat
     finally:
         webapp.verify_snapshot.clear()
         webapp._doc.clear()
+
+
+def test_shipped_snapshot_matches_its_manifest():
+    from decision_platform.config import ROOT
+
+    folder = ROOT / "outputs" / "serving"
+    verify_manifest(
+        folder,
+        ["summary.json", "customers.parquet", "candidates.parquet", "decisions.parquet", "capacity.parquet"],
+    )
