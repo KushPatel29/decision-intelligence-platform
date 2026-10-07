@@ -324,6 +324,11 @@ def main():
             "should run as a policy test like October's before any full rollout."
         ),
         rich(
+            "**The numbers move with the computing environment.** On identical data, the same pipeline on "
+            "Databricks (whose platform fixes older numpy and pandas) fits slightly different models and its plan "
+            "reaches 65% of the ceiling instead of 75%. Both clear the release gate; read the share as a range."
+        ),
+        rich(
             "**Congestion relief is a policy choice.** It is valued at "
             f"{money(Config().relief_value, 2)} per "
             "net rush-hour trip moved onto the highway; the business should set that number."
@@ -365,7 +370,10 @@ def main():
                 ],
                 ["Decision app and API", "Twelve-page app; decision API with keys and health checks"],
                 ["Power BI", "Nine-page report; every measure executed against the Power BI engine"],
-                ["Databricks", "Four-task job built and run locally end to end; hosted run pending sign-in"],
+                [
+                    "Databricks",
+                    "Four-task job ran on serverless: Delta, PySpark parity, Unity Catalog, every check passed",
+                ],
                 ["AWS SageMaker", "Pipeline defined and its stages run locally; not run in AWS"],
             ],
             [160, 335],

@@ -1,0 +1,21 @@
+# The same gates CI runs, before each commit: `pip install pre-commit && pre-commit install`.
+# Local hooks, so they use the project's own ruff and need no downloads.
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-lint
+        name: ruff lint
+        entry: ruff check
+        language: system
+        types: [python]
+      - id: ruff-format
+        name: ruff format
+        entry: ruff format --check
+        language: system
+        types: [python]
+      - id: powerbi-drift
+        name: Power BI project matches its spec
+        entry: python -m decision_platform.bi.build_pbip --check
+        language: system
+        pass_filenames: false
+        files: ^(src/decision_platform/bi/|powerbi/)

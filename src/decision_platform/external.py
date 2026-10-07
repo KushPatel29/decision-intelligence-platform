@@ -9,7 +9,7 @@ from urllib.request import Request, urlopen
 import numpy as np
 import pandas as pd
 
-from .config import write_json
+from .config import PARQUET, write_json
 
 SOURCES = {
     "weather": "https://archive-api.open-meteo.com/v1/archive?latitude=43.65&longitude=-79.38&start_date=2024-01-01&end_date=2025-12-31&daily=temperature_2m_mean,precipitation_sum,sunrise,sunset&timezone=America%2FToronto",
@@ -88,5 +88,5 @@ def fetch(cfg, refresh=False):
     result["month_cos"] = np.cos(2 * np.pi * result.date.dt.dayofyear / 365.25)
     if result[["temperature_c", "precipitation_mm", "daylight_hours"]].isna().any().any():
         raise ValueError("Weather feed has gaps. Inspect source; synthetic replacement is prohibited.")
-    result.to_parquet(folder / "daily_context.parquet", index=False)
+    result.to_parquet(folder / "daily_context.parquet", index=False, **PARQUET)
     return result

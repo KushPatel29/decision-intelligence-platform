@@ -5,7 +5,7 @@ import json
 import time
 from pathlib import Path
 
-from .config import Config, manifest, write_json
+from .config import PARQUET, Config, manifest, write_json
 
 STEPS = 10
 
@@ -74,7 +74,7 @@ def _run(cfg, solver="auto", tracking=True):
             "fact_loyalty_award",
         ]:
             pd.read_parquet(cfg.path("data", "silver", name + ".parquet")).to_parquet(
-                cfg.path("data", "bronze", name + ".parquet"), index=False
+                cfg.path("data", "bronze", name + ".parquet"), index=False, **PARQUET
             )
         experiment = analyze(cfg, trial)
         mark("experiment")
@@ -112,7 +112,7 @@ def _run(cfg, solver="auto", tracking=True):
         scored = build_marts(cfg, frames, scored, uplift, trial, elasticity, decisions)
         monitoring = monitor(cfg, snapshots, scored, frames, trial)
         monitoring["data_quality"] = data_quality_monitor(cfg, context)
-        scored.to_parquet(cfg.path("data", "gold", "customer_360.parquet"), index=False)
+        scored.to_parquet(cfg.path("data", "gold", "customer_360.parquet"), index=False, **PARQUET)
         for name, table in {
             "customer_360": scored,
             "decision_table": decisions,

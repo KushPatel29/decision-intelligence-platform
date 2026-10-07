@@ -11,7 +11,7 @@
 
 # COMMAND ----------
 
-# MAGIC %pip install --quiet "numpy>=2.0" "pandas>=2.2" "scipy>=1.14" "scikit-learn>=1.5" "joblib>=1.4" "xgboost>=2.0" "mlflow>=3"
+# MAGIC %pip install --quiet "scipy==1.18.1" "scikit-learn==1.9.0" "joblib==1.6.0" "xgboost==2.0.3" "mlflow==3.14.0"
 
 # COMMAND ----------
 

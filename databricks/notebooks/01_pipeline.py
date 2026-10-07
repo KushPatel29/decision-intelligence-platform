@@ -9,10 +9,13 @@
 # MAGIC
 # MAGIC The pipeline needs a POSIX file system for DuckDB, so it runs on the task's local disk and then copies
 # MAGIC its layers and outputs to a Unity Catalog volume, which is how the later tasks receive them.
+# MAGIC
+# MAGIC Packages are pinned to `databricks/requirements-job.txt`, the versions the local run was tested with,
+# MAGIC except numpy, pandas and pyarrow, which serverless fixes; the run's manifest records the versions used.
 
 # COMMAND ----------
 
-# MAGIC %pip install --quiet "numpy>=2.0" "pandas>=2.2" "scipy>=1.14" "scikit-learn>=1.5" "duckdb>=1.1" "pyarrow>=17" "joblib>=1.4" "threadpoolctl>=3.5" "xgboost>=2.0" "lifetimes>=0.11" "shap>=0.48" "gurobipy>=12" "mlflow>=3"
+# MAGIC %pip install --quiet "scipy==1.18.1" "scikit-learn==1.9.0" "duckdb==1.5.4" "joblib==1.6.0" "threadpoolctl==3.6.0" "xgboost==2.0.3" "lifetimes==0.11.3" "shap==0.52.0" "gurobipy==13.0.3" "mlflow==3.14.0"
 
 # COMMAND ----------
 

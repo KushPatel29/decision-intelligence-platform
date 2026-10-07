@@ -1,0 +1,13 @@
+# Versions the Databricks job installs, matched to the local reference run.
+# numpy, pandas and pyarrow are not listed: serverless compute fixes them (its Spark client depends on them)
+# and refuses other versions. Each run records the versions it actually used in outputs/manifest.json.
+scipy==1.18.1
+scikit-learn==1.9.0
+duckdb==1.5.4
+joblib==1.6.0
+threadpoolctl==3.6.0
+xgboost==2.0.3
+lifetimes==0.11.3
+shap==0.52.0
+gurobipy==13.0.3
+mlflow==3.14.0

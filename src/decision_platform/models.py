@@ -31,7 +31,7 @@ from sklearn.mixture import GaussianMixture
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from .config import frame_hash, write_json
+from .config import PARQUET, frame_hash, write_json
 from .features import FEATURES
 from .quality import HistoricalMargin, select_regression
 
@@ -685,7 +685,7 @@ def fit_demand(cfg, trips, context, tracking=True):
     cell["available_trips"] = np.maximum(cell.capacity_trips - cell.baseline_forecast - cell.reserve_trips, 0)
     cell["baseline_over_capacity"] = (cell.baseline_forecast + cell.reserve_trips) > cell.capacity_trips
     cell.to_csv(cfg.path("outputs", "capacity.csv"), index=False)
-    frame.to_parquet(cfg.path("data", "gold", "zone_day.parquet"), index=False)
+    frame.to_parquet(cfg.path("data", "gold", "zone_day.parquet"), index=False, **PARQUET)
     hourly_forecast(cfg, trips, future)
     return cell, {
         "test": metrics,

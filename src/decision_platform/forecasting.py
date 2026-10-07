@@ -13,6 +13,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from .config import PARQUET
 from .simulation import PERIODS, ZONES
 
 HORIZON = 30
@@ -121,5 +122,5 @@ def hourly_forecast(cfg, trips, daily_forecast):
     future["forecast_trips"] = future.baseline_forecast * future.share
     future["method"] = "Daily champion disaggregated with pre-cutoff hour/direction shares"
     future.to_csv(cfg.path("outputs", "zone_hour_forecast.csv"), index=False)
-    future.to_parquet(cfg.path("data", "gold", "zone_hour.parquet"), index=False)
+    future.to_parquet(cfg.path("data", "gold", "zone_hour.parquet"), index=False, **PARQUET)
     return future

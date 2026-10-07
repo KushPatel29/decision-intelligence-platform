@@ -189,3 +189,14 @@ def test_drift_distinguishes_stationarity_from_shift():
 
 def test_feature_allowlist_excludes_outcomes_and_simulator_oracle():
     assert not any(c.startswith(("future_", "target_", "latent_", "true_")) for c in FEATURES)
+
+
+def test_parquet_layers_store_microsecond_timestamps(tmp_path):
+    """Spark rejects nanosecond Parquet timestamps, which pandas 2 writes by default."""
+    import pyarrow.parquet as pq
+
+    from decision_platform.config import PARQUET
+
+    frame = pd.DataFrame({"at": pd.to_datetime(["2025-10-01 08:30:00"]).astype("datetime64[ns]")})
+    frame.to_parquet(tmp_path / "t.parquet", index=False, **PARQUET)
+    assert str(pq.read_schema(tmp_path / "t.parquet").field("at").type) == "timestamp[us]"

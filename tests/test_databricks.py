@@ -64,3 +64,28 @@ def test_uploads_cover_what_the_notebooks_import():
     for path in NOTEBOOKS.glob("*.py"):
         for module in re.findall(r"from decision_platform\.(\w+) import", path.read_text(encoding="utf-8")):
             assert (ROOT / "src" / "decision_platform" / f"{module}.py").exists(), module
+
+
+def test_only_the_latest_attempt_of_each_task_counts():
+    from types import SimpleNamespace as Task
+
+    tasks = [
+        Task(task_key="publish", attempt_number=0, state="failed"),
+        Task(task_key="pipeline", attempt_number=0, state="ok"),
+        Task(task_key="publish", attempt_number=2, state="ok"),
+        Task(task_key="publish", attempt_number=1, state="failed"),
+    ]
+    latest = {t.task_key: t for t in _run_job().latest_attempts(tasks)}
+    assert latest["publish"].attempt_number == 2 and len(latest) == 2
+
+
+def test_job_notebooks_pin_the_tested_versions():
+    """Serverless otherwise installs its own versions, and the hosted models then fit differently."""
+    text = (ROOT / "databricks" / "requirements-job.txt").read_text()
+    pins = {line.strip() for line in text.splitlines() if line.strip() and not line.startswith("#")}
+    for name in ("01_pipeline.py", "03_registry.py"):
+        line = next(
+            ln for ln in (NOTEBOOKS / name).read_text(encoding="utf-8").splitlines() if "%pip install" in ln
+        )
+        requested = set(re.findall(r'"([^"]+)"', line))
+        assert requested <= pins and all("==" in r for r in requested), (name, requested - pins)

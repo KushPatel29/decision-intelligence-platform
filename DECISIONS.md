@@ -162,3 +162,11 @@ first. Running one implementation and gating on parity keeps a single source of 
 Delta, MLflow and Unity Catalog work the platform exists for. `databricks/local_run.py` runs all four notebooks
 locally before any hosted run is spent; it found two real bugs (a fixed-size resent batch larger than a small
 population's day, and a NaN rank correlation from a learner that cannot split) before either reached a cluster.
+
+**Hosted.** The job then ran on Databricks serverless and passed every check, all four tasks first time. The
+first hosted attempts found what no local stand-in could: pandas 2 on serverless writes nanosecond Parquet
+timestamps that Spark refuses (every layer is now written in microseconds); Delta rejects spaces and brackets in
+column names (publish snake-cases them, and the harness now applies the same rule); and serverless fixes numpy,
+pandas and pyarrow (everything else is pinned to the tested versions). On identical data the hosted plan reaches
+65% of the ceiling against 75% locally, because small numeric differences change the model fits. That spread is
+reported as the result, not tuned away.

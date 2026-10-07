@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 
-from .config import write_json
+from .config import PARQUET, write_json
 
 # Model allowlist. Outcome (`future_`, `target_`), simulator (`latent_`, `true_`)
 # and identifier columns can never appear here; a test enforces it.
@@ -131,8 +131,8 @@ def build(db, cfg):
     current = snapshot(db, cfg, cfg.decision_date, labels=False)
     out = cfg.path("data", "gold")
     out.mkdir(parents=True, exist_ok=True)
-    snapshots.to_parquet(out / "customer_month.parquet", index=False)
-    current.to_parquet(out / "customer_360_features.parquet", index=False)
+    snapshots.to_parquet(out / "customer_month.parquet", index=False, **PARQUET)
+    current.to_parquet(out / "customer_360_features.parquet", index=False, **PARQUET)
     db.register("incoming", snapshots)
     db.execute("CREATE OR REPLACE TABLE gold.customer_month AS SELECT * FROM incoming")
     write_json(

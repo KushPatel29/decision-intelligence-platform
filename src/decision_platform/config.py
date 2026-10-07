@@ -33,6 +33,11 @@ class Config:
         return self.root.joinpath(*parts)
 
 
+# Parquet written for other engines: pandas 2 stores timestamps as nanoseconds by default and Spark refuses
+# to read those, so every layer is written with microseconds, the precision of every timestamp in the data.
+PARQUET = {"coerce_timestamps": "us", "allow_truncated_timestamps": True}
+
+
 def write_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)

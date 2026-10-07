@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from .config import write_json
+from .config import PARQUET, write_json
 
 
 def build_marts(cfg, frames, customers, uplift, trial, elasticity, decisions):
@@ -115,7 +115,7 @@ def build_marts(cfg, frames, customers, uplift, trial, elasticity, decisions):
     for name, frame in marts.items():
         if frame.duplicated(grains[name]).any():
             raise ValueError(f"Duplicate mart grain: {name}")
-        frame.to_parquet(cfg.path("data", "gold", name + ".parquet"), index=False)
+        frame.to_parquet(cfg.path("data", "gold", name + ".parquet"), index=False, **PARQUET)
         frame.to_csv(cfg.path("outputs", name + ".csv"), index=False)
         catalog.append({"table": name, "grain": grains[name], "rows": len(frame), "as_of": cfg.decision_date})
     write_json(cfg.path("outputs", "mart_catalog.json"), catalog)

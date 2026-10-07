@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr
 
-from .config import write_json
+from .config import PARQUET, write_json
 from .optimization import candidates, solve
 from .policy import baseline_plans, summarise
 from .simulation import OFFERS, Population, expected_tolls, expected_window_trips, offer_truth
@@ -78,7 +78,7 @@ def oracle_plan(cfg, everything, truth, capacity):
 
 def evaluate_policies(cfg, current, uplift, offers, capacity, production, robust, hidden, context, customers):
     truth = decision_truth(cfg, current, hidden, context, customers)
-    truth.to_parquet(cfg.path("data", "simulation_audit", "decision_truth.parquet"), index=False)
+    truth.to_parquet(cfg.path("data", "simulation_audit", "decision_truth.parquet"), index=False, **PARQUET)
     everything = candidates(cfg, current, uplift, offers, keep_all=True)
     useful = candidates(cfg, current, uplift, offers)
     plans = baseline_plans(cfg, everything, useful, capacity, cfg.seed + 5)

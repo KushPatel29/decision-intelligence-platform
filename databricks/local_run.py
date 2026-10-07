@@ -164,6 +164,9 @@ def patch_writes(local):
 
     def save_as_table(writer, name, format=None, mode=None, partitionBy=None, **options):  # noqa: A002, N803
         frame, view = writer._df, local.view(name)
+        # Delta refuses these characters in column names unless column mapping is on; a temp view would not.
+        bad = [c for c in frame.columns if re.search(r"[ ,;{}()\n\t=]", c)]
+        assert not bad, f"{name}: Delta rejects the column names {bad}"
         exists = view in local.views
         if (mode or getattr(writer, "_mode", None)) == "append" and exists:
             frame = local._spark.table(view).unionByName(frame)

@@ -32,6 +32,17 @@ learner rule and crashed on a mixed-type column; offer charts indexed an eight-c
 feature catalog covered 24 of 39 features and overwrote the model cards. Importing the feature list no longer loads
 DuckDB, so a registered model's serving environment does not need it.
 
+**Hosted Databricks run.** The job ran on Databricks serverless and passed every check (receipt in
+`databricks/receipts/`). It found three issues the local stand-in could not: nanosecond Parquet timestamps from
+pandas 2 (all layers now written in microseconds), Delta's column-name rule (publish snake-cases names; the
+harness enforces the rule), and platform-fixed numpy, pandas and pyarrow (the rest pinned in
+`databricks/requirements-job.txt`). On identical data its plan reaches 65% of the ceiling against 75% locally.
+`run_job.py` can re-attach to a run (`--attach`) and re-run only failed tasks (`--repair`).
+
+**Production hardening.** Decision API: bounded solve time and concurrency, 503 before startup, request IDs and
+JSON access logs. App: shared solver slots. Dependabot, pre-commit hooks, a smaller Docker context. HTML/CSS
+KPI strips on every Power BI page.
+
 **Documentation.** Role coverage, an A/B testing playbook, a data platform plan for IT, a project plan with RACI,
 rewritten README and limitations, four new decision records.
 

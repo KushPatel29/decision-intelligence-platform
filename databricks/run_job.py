@@ -121,6 +121,16 @@ def deploy(w, job: dict, root: str) -> int:
     return w.jobs.create(**settings).job_id
 
 
+def latest_attempts(tasks) -> list:
+    """A run lists every attempt of a retried or repaired task; only each task's latest attempt counts."""
+    latest = {}
+    for task in tasks or []:
+        current = latest.get(task.task_key)
+        if current is None or (task.attempt_number or 0) >= (current.attempt_number or 0):
+            latest[task.task_key] = task
+    return list(latest.values())
+
+
 def follow(w, run_id: int) -> dict:
     """Print each task's state when it changes; return the finished run."""
     seen: dict[str, str] = {}
@@ -149,6 +159,15 @@ def main() -> int:
     ap.add_argument("--solver", choices=["auto", "gurobi", "highs"])
     ap.add_argument("--no-run", action="store_true", help="deploy only")
     ap.add_argument("--no-wait", action="store_true", help="start the run and return")
+    ap.add_argument(
+        "--attach", type=int, metavar="RUN_ID", help="follow a run already started and write its receipt"
+    )
+    ap.add_argument(
+        "--repair",
+        type=int,
+        metavar="RUN_ID",
+        help="upload the current code and re-run only the failed tasks of a finished run",
+    )
     args = ap.parse_args()
     if not args.host:
         ap.error("--host (or DATABRICKS_HOST) is required")
@@ -157,24 +176,49 @@ def main() -> int:
 
     w = WorkspaceClient(host=args.host, auth_type="external-browser")
     user = w.current_user.me().user_name
-    root = f"/Users/{user}/corridor"
-    job = job_definition(
-        {"catalog": args.catalog, "schema": args.schema, "customers": args.customers, "solver": args.solver},
-        f"/Workspace{root}",
-    )
-    print(f"uploaded {upload(w, root)} files to /Workspace{root}")
-    job_id = deploy(w, job, root)
-    print(f"job {job['name']} ({job_id}) deployed")
-    if args.no_run:
-        return 0
-    run_id = w.jobs.run_now(job_id=job_id).run_id
-    print(f"run {run_id} started: {args.host.rstrip('/')}/jobs/{job_id}/runs/{run_id}")
-    if args.no_wait:
-        return 0
+    if args.repair:
+        # Re-runs the failed tasks against the outputs the successful ones left in the volume, with the
+        # notebooks as they are now: a 17-minute pipeline task is not repeated to fix a publish step.
+        root = f"/Users/{user}/corridor"
+        print(f"uploaded {upload(w, root)} files to /Workspace{root}")
+        failed = sorted(
+            task.task_key
+            for task in latest_attempts(w.jobs.get_run(args.repair).tasks)
+            if not (task.state.result_state and task.state.result_state.value == "SUCCESS")
+        )
+        w.jobs.repair_run(run_id=args.repair, rerun_tasks=failed)
+        run_id, job_id = args.repair, w.jobs.get_run(args.repair).job_id
+        print(f"repairing run {run_id}: {', '.join(failed)}")
+    elif args.attach:
+        # The run lives in the workspace, not in this process: a poller that dies can re-attach.
+        run_id = args.attach
+        job_id = w.jobs.get_run(run_id).job_id
+        print(f"attached to run {run_id} of job {job_id}")
+    else:
+        root = f"/Users/{user}/corridor"
+        job = job_definition(
+            {
+                "catalog": args.catalog,
+                "schema": args.schema,
+                "customers": args.customers,
+                "solver": args.solver,
+            },
+            f"/Workspace{root}",
+        )
+        print(f"uploaded {upload(w, root)} files to /Workspace{root}")
+        job_id = deploy(w, job, root)
+        print(f"job {job['name']} ({job_id}) deployed")
+        if args.no_run:
+            return 0
+        run_id = w.jobs.run_now(job_id=job_id).run_id
+        print(f"run {run_id} started: {args.host.rstrip('/')}/jobs/{job_id}/runs/{run_id}")
+        if args.no_wait:
+            return 0
     run = follow(w, run_id)
     result = run.state.result_state.value if run.state.result_state else run.state.life_cycle_state.value
     print(f"run {run_id} finished: {result}")
-    for task in run.tasks or []:
+    tasks = latest_attempts(run.tasks)
+    for task in tasks:
         output = w.jobs.get_run_output(task.run_id)
         if output.error:
             print(f"\n{task.task_key} failed: {output.error}\n{(output.error_trace or '')[-3000:]}")
@@ -183,9 +227,9 @@ def main() -> int:
             receipt["databricks_job_id"], receipt["databricks_run_id"] = job_id, run_id
             receipt["run_seconds"] = round(((run.end_time or 0) - (run.start_time or 0)) / 1000, 1)
             receipt["task_seconds"] = {
-                t.task_key: round(((t.end_time or 0) - (t.start_time or 0)) / 1000, 1)
-                for t in run.tasks or []
+                t.task_key: round(((t.end_time or 0) - (t.start_time or 0)) / 1000, 1) for t in tasks
             }
+            receipt["task_attempts"] = {t.task_key: (t.attempt_number or 0) + 1 for t in tasks}
             folder = ROOT / "databricks" / "receipts"
             folder.mkdir(exist_ok=True)
             path = folder / f"{datetime.now(UTC):%Y-%m-%d}-run-{run_id}.json"

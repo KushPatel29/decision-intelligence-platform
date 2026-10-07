@@ -1,0 +1,79 @@
+{
+  "recorded_at_utc": "2026-10-07T05:27:02+00:00",
+  "databricks_job_run_id": "649786944044225",
+  "pipeline": {
+    "run_id": "a6bbb370eaee474f8c6d463e3664cbbb",
+    "runtime_seconds": 1234.6,
+    "files_copied": 186,
+    "mlflow_experiment": "/Users/<user>/corridor-decision-platform",
+    "solver": "HiGHS LP + HiGHS core",
+    "proven_optimal": true,
+    "gurobi_check": {
+      "free_variables": 180,
+      "free_constraints": 208,
+      "status": "optimal",
+      "gurobi_objective": 41291.880551730996,
+      "confirmed": true
+    },
+    "gate_passed": true,
+    "contacts": 4237,
+    "spend": 10000.0,
+    "expected_value": 41291.87,
+    "true_value": 55888.23,
+    "share_of_oracle": 0.6509
+  },
+  "lakehouse": {
+    "tables": 63,
+    "silver_trips": 3680249,
+    "bronze_trips": 3684396,
+    "quarantined": {
+      "charge_out_of_range": 119,
+      "distance_out_of_range": 1528,
+      "duplicate_natural_key": 2500
+    },
+    "check_constraints": [
+      "charge_within_toll",
+      "distance_positive",
+      "known_period",
+      "toll_non_negative"
+    ],
+    "features_checked": 39,
+    "customers": 25000,
+    "max_feature_error": 0.0,
+    "worst_feature": "tenure_days",
+    "delta_history_versions": 18
+  },
+  "registry": {
+    "workspace.corridor.corridor_propensity": "3",
+    "workspace.corridor.corridor_churn": "3",
+    "workspace.corridor.corridor_attrition": "3",
+    "workspace.corridor.corridor_uplift": "3"
+  },
+  "published_tables": 36,
+  "plan_checks": {
+    "one_offer_per_customer": true,
+    "contacts_match_certificate": true,
+    "spend_matches_certificate": true,
+    "value_matches_certificate": true,
+    "within_budget": true,
+    "within_contact_limit": true,
+    "within_points_cap": true,
+    "proven_optimal": true
+  },
+  "status": "passed",
+  "databricks_job_id": 418493797427341,
+  "databricks_run_id": 649786944044225,
+  "run_seconds": 1781.7,
+  "task_seconds": {
+    "pipeline": 1346.6,
+    "publish": 118.1,
+    "registry": 129.0,
+    "lakehouse": 315.7
+  },
+  "task_attempts": {
+    "pipeline": 1,
+    "publish": 1,
+    "registry": 1,
+    "lakehouse": 1
+  }
+}

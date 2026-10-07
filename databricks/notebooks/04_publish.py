@@ -11,6 +11,7 @@
 
 import json
 import os
+import re
 from datetime import UTC, datetime
 
 dbutils.widgets.text("catalog", "workspace")
@@ -38,11 +39,28 @@ def task_value(task, key):
 # COMMAND ----------
 
 serving = f"{run_path}/outputs/serving"
+
+
+def delta_safe(frame):
+    """Snake-case column names: Delta rejects spaces and ,;{}()= in names, and SQL users prefer them anyway.
+
+    One serving table is a pivot whose columns are policy names such as "Optimized (MIP)".
+    """
+    names, seen = [], set()
+    for column in frame.columns:
+        name = re.sub(r"[^0-9A-Za-z_]+", "_", column).strip("_").lower() or "column"
+        while name in seen:
+            name += "_"
+        seen.add(name)
+        names.append(name)
+    return frame.toDF(*names)
+
+
 published = {}
 for entry in sorted(os.listdir(serving)):
     if entry.endswith(".parquet"):
         table = f"{prefix}.serving_{entry.removesuffix('.parquet')}"
-        spark.read.parquet(f"{serving}/{entry}").write.mode("overwrite").option(
+        delta_safe(spark.read.parquet(f"{serving}/{entry}")).write.mode("overwrite").option(
             "overwriteSchema", "true"
         ).saveAsTable(table)
         published[table] = spark.table(table).count()

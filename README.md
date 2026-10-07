@@ -1,5 +1,7 @@
 # Corridor: customer, pricing and transportation decision intelligence
 
+[![ci](https://github.com/KushPatel29/decision-intelligence-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/KushPatel29/decision-intelligence-platform/actions/workflows/ci.yml)
+
 Corridor decides which toll-road customers should get which promotion or loyalty reward, at what price,
 without filling the highway at rush hour, and proves how much value the decision creates. It covers the
 full loop a pricing and loyalty data science team owns: data contracts, customer models, a randomised offer
@@ -21,7 +23,7 @@ its choices, which no real dataset allows.
 | Plan | 5,000 contacts and $10,000 of incentives, chosen among nine offers by one mixed-integer program over **112,563** customer-offer decisions |
 | Certificate | Proven optimal (gap 1.5e-7 to the LP bound); **Gurobi** independently re-solved the residual and confirmed it |
 | Expected value | $42,649: 30-day net contribution after incentives, plus discounted margin on days 31-90, plus congestion relief |
-| **True value (simulation)** | **$64,774, 75% of what a perfectly informed planner reaches** |
+| **True value (simulation)** | **$64,774, 75% of what a perfectly informed planner reaches** (65% on Databricks, where the platform's numpy and pandas fit slightly different models; see below) |
 | Propensity targeting, same budget | $6,278, 7% of the ceiling |
 | Policy test | The targeting policy itself randomised against business as usual: **+$1.40 per customer** (95% CI $0.23 to $2.57) |
 | Rush hour | A net 86 extra trips per workday moved onto the 407 at peak, only where free-flow capacity allows |
@@ -68,7 +70,7 @@ Every method choice, including the ones that were tried and rejected, is in [`DE
 | **Streamlit app** | Twelve pages: decision centre with live re-solves, next best offer per customer, pricing, segments, offers and loyalty, transportation, policy value, experiments, model operations, operations centre, analyst workbench | `tests/test_app.py` renders every page |
 | **FastAPI** | Decision service with API keys, health and readiness probes and a bounded scenario solver | `tests/test_api.py` |
 | **Power BI** | Generated PBIP: 9 pages, 97 visuals, 101 documented measures, an HTML/CSS KPI strip on every page and nine HTML/CSS panels (HTML Content visual) | All 135 measures executed against Power BI's engine (`scripts/validate_powerbi_model.ps1`); byte-for-byte drift gate in CI |
-| **Databricks** | Four-task serverless job: pipeline with Gurobi and workspace MLflow → Delta medallion with CHECK constraints and a PySpark feature-parity gate → Unity Catalog model registry → reconciled publish and a run receipt | All four notebooks run locally by `databricks/local_run.py`; see [`databricks/README.md`](databricks/README.md) for the hosted run |
+| **Databricks** | Four-task serverless job: pipeline with Gurobi and workspace MLflow → Delta medallion with CHECK constraints and a PySpark feature-parity gate → Unity Catalog model registry → reconciled publish and a run receipt | **Ran on Databricks serverless**: all four tasks first time, PySpark features equal DuckDB's exactly, 8 of 8 plan checks ([receipt](databricks/receipts/2026-10-07-run-649786944044225.json)) |
 | **AWS SageMaker** | Pipeline definition: Processing, Training, held-out Evaluation, quality gate, Model Registry (pending approval), Batch Transform | Stages run locally (`scripts/verify_cloud_stages.py`); not executed in AWS |
 
 ## Run it
@@ -123,6 +125,9 @@ Scientist posting to the code and evidence here. Supporting documents written as
   sits below true value. Ranking is what the plan depends on. A BLP recalibration is computed as a diagnostic
   and not applied: when first tested it raised bias on 7 of 8 offers, and in this run it would only move the
   mean bias to −$3.86.
+- Results depend on the numeric environment. On identical data, the hosted Databricks run (numpy 2.3,
+  pandas 2.3, fixed by the platform) reaches 65% of the ceiling against 75% locally; both pass the release
+  gate. [`databricks/README.md`](databricks/README.md) has the comparison.
 - Gurobi runs under its size-limited licence: it solves or verifies cores up to 2,000 variables and
   constraints, HiGHS solves the larger ones, and the certificate says which did what.
 - SageMaker is defined and locally exercised, not run in AWS.

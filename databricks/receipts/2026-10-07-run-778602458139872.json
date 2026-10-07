@@ -1,0 +1,73 @@
+{
+  "recorded_at_utc": "2026-10-07T04:52:58+00:00",
+  "databricks_job_run_id": "778602458139872",
+  "pipeline": {
+    "run_id": "cbd21bc00e7642e9a00ea9481697d60c",
+    "runtime_seconds": 935.8,
+    "files_copied": 186,
+    "mlflow_experiment": "/Users/<user>/corridor-decision-platform",
+    "solver": "HiGHS LP + Gurobi core",
+    "proven_optimal": true,
+    "gurobi_check": {},
+    "gate_passed": true,
+    "contacts": 4304,
+    "spend": 9999.95,
+    "expected_value": 41144.1,
+    "true_value": 56588.39,
+    "share_of_oracle": 0.6584
+  },
+  "lakehouse": {
+    "tables": 63,
+    "silver_trips": 3680249,
+    "bronze_trips": 3684396,
+    "quarantined": {
+      "charge_out_of_range": 119,
+      "distance_out_of_range": 1528,
+      "duplicate_natural_key": 2500
+    },
+    "check_constraints": [
+      "charge_within_toll",
+      "distance_positive",
+      "known_period",
+      "toll_non_negative"
+    ],
+    "features_checked": 39,
+    "customers": 25000,
+    "max_feature_error": 0.0,
+    "worst_feature": "tenure_days",
+    "delta_history_versions": 7
+  },
+  "registry": {
+    "workspace.corridor.corridor_propensity": "2",
+    "workspace.corridor.corridor_churn": "2",
+    "workspace.corridor.corridor_attrition": "2",
+    "workspace.corridor.corridor_uplift": "2"
+  },
+  "published_tables": 36,
+  "plan_checks": {
+    "one_offer_per_customer": true,
+    "contacts_match_certificate": true,
+    "spend_matches_certificate": true,
+    "value_matches_certificate": true,
+    "within_budget": true,
+    "within_contact_limit": true,
+    "within_points_cap": true,
+    "proven_optimal": true
+  },
+  "status": "passed",
+  "databricks_job_id": 418493797427341,
+  "databricks_run_id": 778602458139872,
+  "run_seconds": 2023.0,
+  "task_seconds": {
+    "pipeline": 1042.5,
+    "publish": 141.1,
+    "registry": 120.4,
+    "lakehouse": 390.0
+  },
+  "task_attempts": {
+    "pipeline": 1,
+    "publish": 3,
+    "registry": 1,
+    "lakehouse": 1
+  }
+}

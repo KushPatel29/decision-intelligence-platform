@@ -12,7 +12,7 @@ import json
 
 import pandas as pd
 
-from .config import write_json
+from .config import PARQUET, write_json
 from .palette import OFFER_COLORS, offer_fill
 from .simulation import OFFER_CATALOG
 
@@ -111,7 +111,7 @@ def _parquet(frame, path):
     for column in frame.columns:
         if frame[column].dtype == object:
             frame[column] = frame[column].astype("string")
-    frame.to_parquet(path, index=False)
+    frame.to_parquet(path, index=False, **PARQUET)
 
 
 def report(

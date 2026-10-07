@@ -58,7 +58,39 @@ round trip really run.
 |---|---|
 | PySpark feature parity, 3,680,249 trips, 25,000 customers, 39 features | max difference 2.2e-11 (`scripts/benchmark_spark.py`) |
 | Local run of all four notebooks, 25,000 customers | Passed ([`receipts/2026-10-07-local-run.json`](receipts/2026-10-07-local-run.json)): 63 Delta tables, 4 CHECK constraints held on every row, primary key unique, feature parity 2.2e-11, 4 models registered and scored identically after load-back, 8 of 8 plan reconciliation checks, Gurobi confirmed the optimum |
-| Hosted run on Databricks | Not yet run: it needs the workspace owner's browser sign-in |
+| **Hosted run on Databricks serverless, 25,000 customers** | **Passed** ([`receipts/2026-10-07-run-649786944044225.json`](receipts/2026-10-07-run-649786944044225.json)): all four tasks on their first attempt (pipeline 22 min, lakehouse 5, registry 2, publish 2); 63 Delta tables with the CHECK constraints and primary key; PySpark features equal DuckDB's exactly (max difference 0.0); four models in Unity Catalog with alias `candidate`, each loaded back and scored identically; 8 of 8 plan reconciliation checks; release gate passed |
+
+## What the hosted runs found
+
+The local harness cannot see three things a real workspace enforces, and the first hosted runs found all three:
+
+1. **Nanosecond timestamps.** Serverless runs pandas 2, which writes Parquet timestamps in nanoseconds; Spark
+   refuses to read them. Every Parquet write in the pipeline now stores microseconds (`config.PARQUET`), and a
+   test pins it.
+2. **Delta column names.** One serving table is a pivot whose columns are policy names such as
+   "Optimized (MIP)"; Delta rejects spaces and brackets. The publish task snake-cases column names, and the
+   local harness now applies Delta's rule so it would have failed the same way.
+3. **The platform's own packages.** Serverless fixes numpy, pandas and pyarrow and refuses other versions.
+   The job pins everything else to the locally tested versions (`requirements-job.txt`); the manifest of
+   each run records what it used.
+
+## Hosted against local results
+
+The simulated data is identical on both (same 3,680,249 trips, same revenue to the cent, same quarantine).
+The plan is not:
+
+| | Local (numpy 2.5, pandas 3.0) | Databricks (numpy 2.3, pandas 2.3) |
+|---|---|---|
+| Contacts | 5,000 | 4,237 |
+| Expected value | $42,649 | $41,292 |
+| True value | $64,774 | $55,888 |
+| Share of the ceiling | 75% | 65% |
+| Release gate | passed | passed |
+
+Small numeric differences change the model fits (the propensity champion flips between XGBoost and gradient
+boosting), and the plan follows the fits. A first hosted run without the scikit-learn and scipy pins reached
+66%. The plan's quality is therefore a range across environments, not one number; every run still clears
+the 60% gate, and the policy, not the run, is what a real operator would test (see the policy trial).
 
 Gurobi on Databricks uses the same size-limited licence `pip install gurobipy` provides everywhere: it
 solves or checks cores up to 2,000 variables and constraints, and the certificate records which solver did

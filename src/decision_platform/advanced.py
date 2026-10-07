@@ -4,7 +4,7 @@ import joblib
 import numpy as np
 import pandas as pd
 
-from .config import write_json
+from .config import PARQUET, write_json
 from .features import FEATURES
 from .models import reg_metrics
 
@@ -142,7 +142,7 @@ def reward_ledger(cfg):
         awarded_at=pd.Timestamp("2025-07-01"),
         award_id="trial_july",
     )
-    awards.to_parquet(cfg.path("data", "silver", "fact_loyalty_award.parquet"), index=False)
+    awards.to_parquet(cfg.path("data", "silver", "fact_loyalty_award.parquet"), index=False, **PARQUET)
     ledger = (
         earned[earned.timestamp < pd.Timestamp(cfg.decision_date)]
         .groupby("customer_id")

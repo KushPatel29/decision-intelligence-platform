@@ -18,7 +18,7 @@ import hashlib
 import numpy as np
 import pandas as pd
 
-from .config import write_json
+from .config import PARQUET, write_json
 from .simulation import (
     OFFER_CATALOG,
     PERIODS,
@@ -438,22 +438,22 @@ def generate(cfg, context):
     for folder in (bronze, silver):
         folder.mkdir(parents=True, exist_ok=True)
     for name, frame in frames.items():
-        frame.to_parquet(silver / f"{name}.parquet", index=False)
+        frame.to_parquet(silver / f"{name}.parquet", index=False, **PARQUET)
         if name not in {"fact_trip", "quarantine_trip"}:
-            frame.to_parquet(bronze / f"{name}.parquet", index=False)
-    feed.to_parquet(bronze / "fact_trip.parquet", index=False)
+            frame.to_parquet(bronze / f"{name}.parquet", index=False, **PARQUET)
+    feed.to_parquet(bronze / "fact_trip.parquet", index=False, **PARQUET)
 
     audit = cfg.path("data", "simulation_audit")
     audit.mkdir(parents=True, exist_ok=True)
     hidden = population.frame.copy()
     hidden.insert(0, "customer_id", customer_ids)
     hidden["created_day"] = created_day
-    hidden.to_parquet(audit / "hidden_parameters.parquet", index=False)
-    anomaly_labels.to_parquet(audit / "planted_anomalies.parquet", index=False)
+    hidden.to_parquet(audit / "hidden_parameters.parquet", index=False, **PARQUET)
+    anomaly_labels.to_parquet(audit / "planted_anomalies.parquet", index=False, **PARQUET)
     pd.DataFrame(DATA_DEFECTS, columns=["ingestion_date", "defect"]).to_parquet(
-        audit / "planted_data_defects.parquet", index=False
+        audit / "planted_data_defects.parquet", index=False, **PARQUET
     )
-    elasticity_truth.to_parquet(audit / "true_elasticity.parquet", index=False)
+    elasticity_truth.to_parquet(audit / "true_elasticity.parquet", index=False, **PARQUET)
     quality = validate(frames)
     quality["bronze_rows"] = len(feed)
     quality["quarantined"] = quarantine.reason.value_counts().to_dict()

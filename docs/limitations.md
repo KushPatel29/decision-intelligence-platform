@@ -53,9 +53,9 @@ What the evidence in this repository does and does not establish. Figures are fr
 
 ## Platform
 
-- The Databricks job's four notebooks have been executed locally with real PySpark and a stand-in for the
-  Databricks runtime (`databricks/local_run.py`); Delta and Unity Catalog statements were checked against the
-  data rather than executed. The hosted run's status is recorded in `databricks/README.md`.
+- The Databricks job has run on Databricks serverless and passed every check. On identical data its plan
+  reaches 65% of the ceiling against 75% locally: serverless fixes numpy 2.3 and pandas 2.3, and small numeric
+  differences change the model fits. Plan quality is a range across environments, not one number.
 - SageMaker: the pipeline is defined and its entry points run locally; it has not run in AWS.
 - Power BI: every measure executes against Power BI's engine and the HTML panels render from its output. The
   HTML Content visual is an AppSource custom visual; an organisation that blocks AppSource visuals would see

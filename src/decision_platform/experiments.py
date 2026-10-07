@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import chi2, norm
 
-from .config import write_json
+from .config import PARQUET, write_json
 from .simulation import (
     ARMS,
     LOYALTY_OFFERS,
@@ -283,10 +283,10 @@ def simulate(cfg, features, hidden, context, customers):
     oracle = pd.concat(oracle, ignore_index=True)
     audit = cfg.path("data", "simulation_audit")
     audit.mkdir(parents=True, exist_ok=True)
-    oracle.to_parquet(audit / "trial_oracle.parquet", index=False)
+    oracle.to_parquet(audit / "trial_oracle.parquet", index=False, **PARQUET)
     pd.DataFrame(
         {"customer_id": trial.customer_id, "true_baseline_trips": mu, "true_later_trips": later}
-    ).to_parquet(audit / "trial_baseline.parquet", index=False)
+    ).to_parquet(audit / "trial_baseline.parquet", index=False, **PARQUET)
 
     perm = rng.permutation(n)
     split = np.empty(n, dtype=object)
@@ -295,7 +295,7 @@ def simulate(cfg, features, hidden, context, customers):
     split[perm[int(0.8 * n) :]] = "test"
     trial["split"] = split
     trial["spend_threshold"] = np.where(offer == "spend_10", spend_threshold, np.nan)
-    trial.to_parquet(cfg.path("data", "silver", "fact_campaign_result.parquet"), index=False)
+    trial.to_parquet(cfg.path("data", "silver", "fact_campaign_result.parquet"), index=False, **PARQUET)
 
     start = pd.Timestamp(TRIAL_START)
     treated = trial[trial.treated.eq(1)]
@@ -320,7 +320,7 @@ def simulate(cfg, features, hidden, context, customers):
         .rename(columns={"offer_id": "reward_id"}),
     }
     for name, frame in facts.items():
-        frame.to_parquet(cfg.path("data", "silver", name + ".parquet"), index=False)
+        frame.to_parquet(cfg.path("data", "silver", name + ".parquet"), index=False, **PARQUET)
     return trial
 
 

@@ -12,13 +12,12 @@ Assessed 6 October 2026, against the committed 25,000-customer run.
 | Tests | 200+ passing, including every app page, the API, the Power BI model's references, and the registry scorer reproducing the plan's effects |
 | Spark | PySpark features equal DuckDB's on all 39 features (max difference 2.2e-11) over the full silver layer |
 | Power BI | All 135 measures executed against Power BI's engine; the HTML panels rendered from its output with no overflow; byte-for-byte drift gate |
-| Databricks | All four job notebooks executed locally in task order (`databricks/local_run.py`) |
+| Databricks | Hosted run on serverless passed, all four tasks first time: 63 Delta tables, PySpark features equal DuckDB's exactly, four models in Unity Catalog, 8 of 8 plan checks (`databricks/receipts/`). Plan quality there is 65% of the ceiling against 75% locally, on identical data, because the platform fixes older numpy and pandas |
 
 ## Open
 
 | Item | What it needs |
 |---|---|
-| Hosted Databricks run | The workspace owner's browser sign-in; then `python databricks/run_job.py --host …` records a receipt in `databricks/receipts/` |
 | Hosted SageMaker run | An AWS account role, a bucket and a spending limit (see `aws/README.md`) |
 | Opening the report in Desktop with the HTML Content visual loaded | A Desktop session that can reach AppSource; the measures themselves are verified |
 | Tableau | Not built; the posting accepts Tableau or Power BI |

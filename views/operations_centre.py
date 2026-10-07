@@ -167,8 +167,8 @@ with tab_release:
         (
             "Databricks job",
             "Four tasks (pipeline with Gurobi, Delta with CHECK constraints and a PySpark parity gate, Unity Catalog "
-            "registry, reconciled publish) run locally end to end; the hosted run needs the workspace owner's sign-in",
-            "Pending sign-in",
+            "registry, reconciled publish) ran on Databricks serverless and passed every check",
+            "Ready",
         ),
     ]
     st.dataframe(
