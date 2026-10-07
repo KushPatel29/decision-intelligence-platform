@@ -70,7 +70,7 @@ jobs:
         # The byte-for-byte Power BI check runs in its own job against the committed data; a Linux
         # pipeline run may format floats differently and is not what that check is about.
         run: pytest -q --deselect tests/test_powerbi.py::test_committed_project_matches_the_spec
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: decision-evidence
