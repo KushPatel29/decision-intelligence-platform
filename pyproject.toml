@@ -13,7 +13,7 @@ dependencies = ["numpy>=2.0", "pandas>=2.2", "scipy>=1.14", "scikit-learn>=1.5",
 dev = ["pytest>=8", "ruff>=0.15", "httpx>=0.27", "pyyaml>=6"]
 tracking = ["mlflow>=3"]
 gurobi = ["gurobipy>=12"]
-spark = ["pyspark==4.0.1", "delta-spark==4.0.0", "deltalake>=1.6"]
+spark = ["pyspark==4.0.4", "delta-spark==4.0.0", "deltalake>=1.6"]
 aws = ["boto3>=1.35", "sagemaker>=2.230,<3"]
 app = ["streamlit>=1.50", "plotly>=6", "Authlib>=1.3.2,<2"]
 api = ["fastapi>=0.110", "uvicorn>=0.30"]
