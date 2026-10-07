@@ -1,0 +1,28 @@
+arm,day,z,boundary
+Rush-hour 25% off,10,4.1749,4.8408
+Rush-hour 25% off,20,5.77,3.423
+Rush-hour 25% off,30,6.0648,2.7948
+Off-peak 15% off,10,4.1906,4.8408
+Off-peak 15% off,20,5.4459,3.423
+Off-peak 15% off,30,5.5891,2.7948
+10% off every trip,10,4.8738,4.8408
+10% off every trip,20,5.9033,3.423
+10% off every trip,30,6.9233,2.7948
+Weekend 20% off,10,3.0269,4.8408
+Weekend 20% off,20,4.5041,3.423
+Weekend 20% off,30,4.9176,2.7948
+Spend & get $10,10,4.7752,4.8408
+Spend & get $10,20,5.896,3.423
+Spend & get $10,30,6.5907,2.7948
+Fifth trip free,10,7.1079,4.8408
+Fifth trip free,20,9.0406,3.423
+Fifth trip free,30,10.0532,2.7948
+Off-peak pass ($30 cap),10,1.6033,4.8408
+Off-peak pass ($30 cap),20,2.167,3.423
+Off-peak pass ($30 cap),30,2.8116,2.7948
+500 bonus points,10,1.2656,4.8408
+500 bonus points,20,2.3603,3.423
+500 bonus points,30,2.7408,2.7948
+"1,500 bonus points",10,2.8062,4.8408
+"1,500 bonus points",20,4.5677,3.423
+"1,500 bonus points",30,5.3212,2.7948

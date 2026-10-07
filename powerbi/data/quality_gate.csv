@@ -1,0 +1,9 @@
+check_name,passed,criteria
+propensity,True,"AUC >= 0.70, ECE <= 0.10, Brier no worse than constant prevalence"
+churn,True,"AUC >= 0.70, ECE <= 0.10, Brier no worse than constant prevalence"
+attrition,True,"AUC >= 0.70, ECE <= 0.10, Brier no worse than constant prevalence"
+contribution,True,Held-out MAE no worse than the historical-margin baseline
+demand,True,30-day MAE no worse than the same-weekday baseline; 90% interval coverage >= 80%
+uplift,True,Mean held-out value Qini of the selected learners above zero (observed outcomes)
+targeting policy (simulation check),True,Simulation only: the optimized plan captures >= 60% of the perfect-knowledge ceiling and beats every approach that uses no causal model
+elasticity (simulation check),True,Simulation only: 95% intervals cover the true elasticity in >= 80% of cells

@@ -1,0 +1,8 @@
+policy,policy_order,contacts,predicted_value,true_value,true_spend,share_of_oracle,customers_losing_money
+Random targeting,1,1943,-6841.3754,1106.7269,10832.5317,0.0129,789
+Propensity: 10% off top travellers,2,431,-2038.1231,6277.7471,10814.983,0.0731,50
+RFM segment playbook,3,1763,-9331.9912,-4226.0294,10599.7508,-0.0492,1617
+Uplift ranking (greedy),4,5000,38914.2587,64158.3829,9229.7825,0.7472,85
+Optimized (MIP),5,5000,42648.7522,64773.8093,12904.7417,0.7543,94
+"Optimized, risk-averse (MIP on LCB)",6,4239,40336.3685,57727.196,10230.8813,0.6723,60
+Oracle optimum (true effects),7,5000,29062.0542,85868.0939,9999.9975,1.0,0

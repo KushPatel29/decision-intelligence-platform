@@ -1,0 +1,2 @@
+budget,contact_limit,points_limit,eligible_customers,proven_optimal,decision_variables,free_variables,relief_value_per_trip,min_roi,required_per_arm
+10000.0,5000,2500000,17059,True,112563,4402,0.5,0.15,1794

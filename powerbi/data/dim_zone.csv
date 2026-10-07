@@ -1,0 +1,7 @@
+zone_id,zone_name,zone_order
+0,West,0
+1,Northwest,1
+2,Central,2
+3,Northeast,3
+4,East,4
+5,Outer east,5

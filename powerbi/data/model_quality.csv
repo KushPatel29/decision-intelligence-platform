@@ -1,0 +1,4 @@
+model,champion,auc,pr_auc,brier,ece
+propensity,xgboost,0.9128,0.9711,0.1078,0.0571
+churn,xgboost,0.9103,0.5219,0.038,0.0052
+attrition,hist gradient boosting,0.7401,0.5005,0.1481,0.0796
