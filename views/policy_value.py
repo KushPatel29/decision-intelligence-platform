@@ -183,17 +183,19 @@ st.dataframe(
     hide_index=True,
     width="stretch",
     column_config={
-        "predicted_value": st.column_config.NumberColumn("Predicted value", format="$%.0f"),
-        "planned_spend": st.column_config.NumberColumn("Planned spend", format="$%.0f"),
-        "true_value": st.column_config.NumberColumn("True value", format="$%.0f"),
-        "true_net_contribution_30d": st.column_config.NumberColumn("True 30-day net", format="$%.0f"),
-        "true_spend": st.column_config.NumberColumn("True spend", format="$%.0f"),
-        "true_incremental_trips": st.column_config.NumberColumn("True extra trips", format="%.0f"),
+        "policy": st.column_config.TextColumn("Policy"),
+        "contacts": st.column_config.NumberColumn("Contacts", format="%,d"),
+        "predicted_value": st.column_config.NumberColumn("Predicted value", format="$%,.0f"),
+        "planned_spend": st.column_config.NumberColumn("Planned spend", format="$%,.0f"),
+        "true_value": st.column_config.NumberColumn("True value", format="$%,.0f"),
+        "true_net_contribution_30d": st.column_config.NumberColumn("True 30-day net", format="$%,.0f"),
+        "true_spend": st.column_config.NumberColumn("True spend", format="$%,.0f"),
+        "true_incremental_trips": st.column_config.NumberColumn("True extra trips", format="%,.0f"),
         "true_peak_trips": st.column_config.NumberColumn("True peak trips", format="%+.0f"),
         "share_of_oracle": st.column_config.ProgressColumn(
             "Share of ceiling", min_value=0, max_value=1, format="percent"
         ),
-        "winners_curse": st.column_config.NumberColumn("Predicted − true", format="$%.0f"),
+        "winners_curse": st.column_config.NumberColumn("Predicted − true", format="$%,.0f"),
     },
 )
 download(display, "policy_comparison.csv")

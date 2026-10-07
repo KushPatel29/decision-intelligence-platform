@@ -101,15 +101,15 @@ with tab_capacity:
         hide_index=True,
         width="stretch",
         column_config={
-            "baseline_forecast": st.column_config.NumberColumn("Forecast", format="%.0f"),
-            "forecast_high": st.column_config.NumberColumn("Forecast, 90% high", format="%.0f"),
+            "baseline_forecast": st.column_config.NumberColumn("Forecast", format="%,.0f"),
+            "forecast_high": st.column_config.NumberColumn("Forecast, 90% high", format="%,.0f"),
             "allocated_trips": st.column_config.NumberColumn("Campaign", format="%+.0f"),
-            "reserve_trips": st.column_config.NumberColumn("Reserve", format="%.0f"),
-            "capacity_trips": st.column_config.NumberColumn("Capacity", format="%.0f"),
+            "reserve_trips": st.column_config.NumberColumn("Reserve", format="%,.0f"),
+            "capacity_trips": st.column_config.NumberColumn("Capacity", format="%,.0f"),
             "final_utilization": st.column_config.ProgressColumn(
                 "Load", min_value=0, max_value=1, format="percent"
             ),
-            "remaining_with_reserve": st.column_config.NumberColumn("Free after reserve", format="%.0f"),
+            "remaining_with_reserve": st.column_config.NumberColumn("Free after reserve", format="%,.0f"),
         },
     )
     download(view, "capacity.csv")

@@ -15,7 +15,11 @@
   setup-python and upload-artifact v7. Dependabot now skips `databricks/` (the job's pins change only
   with a new hosted run and receipt) and holds pyspark to delta-spark's minor version and sagemaker
   to the v2 SDK the AWS pipeline is written against.
-- Live demo at corridor-decision-intelligence.streamlit.app: all twelve pages render with no errors.
+- Live demo at corridor-decision-intelligence.streamlit.app: all twelve pages render with no errors,
+  and a scenario solve there reproduces the committed plan ($42,649, 5,000 contacts).
+- Tables show thousands separators throughout ($42,649, not $42649); cent-level money uses Streamlit's
+  dollar format, so negatives read -$1.48. The scenario comparison labels every column. (Streamlit's
+  `step` truncates rather than rounds, so it is not used for display precision.)
 - Validation: 241 tests passed, one optional test skipped; runtime dependency audit found no known
   vulnerabilities; lint and formatting passed. Public deployment uses isolated demo-session owners.
 

@@ -135,14 +135,14 @@ else:
         width="stretch",
         column_config={
             "offer_name": "Offer",
-            "objective_value": st.column_config.NumberColumn("Expected value", format="$%.2f"),
-            "value_uplift": st.column_config.NumberColumn("30-day net", format="$%.2f"),
-            "later_value_uplift": st.column_config.NumberColumn("Days 31-90", format="$%.2f"),
-            "cost": st.column_config.NumberColumn("Incentive cost", format="$%.2f"),
+            "objective_value": st.column_config.NumberColumn("Expected value", format="dollar"),
+            "value_uplift": st.column_config.NumberColumn("30-day net", format="dollar"),
+            "later_value_uplift": st.column_config.NumberColumn("Days 31-90", format="dollar"),
+            "cost": st.column_config.NumberColumn("Incentive cost", format="dollar"),
             "trips_peak": st.column_config.NumberColumn("Peak trips", format="%+.2f"),
             "trips_offpeak": st.column_config.NumberColumn("Off-peak trips", format="%+.2f"),
             "trips_weekend": st.column_config.NumberColumn("Weekend trips", format="%+.2f"),
-            "value_uplift_sd": st.column_config.NumberColumn("± sd", format="$%.2f"),
+            "value_uplift_sd": st.column_config.NumberColumn("± sd", format="dollar"),
         },
     )
     download(table_view, f"offers_{customer_id}.csv")

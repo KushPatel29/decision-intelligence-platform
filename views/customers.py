@@ -64,7 +64,7 @@ with tab_segments:
             column_config={
                 "rfm_segment": "Segment",
                 "customers": st.column_config.NumberColumn("Customers", format="localized"),
-                "clv": st.column_config.NumberColumn("Projected 12-month value", format="$%.0f"),
+                "clv": st.column_config.NumberColumn("Projected 12-month value", format="$%,.0f"),
                 "propensity": st.column_config.ProgressColumn(
                     "Travel propensity", min_value=0, max_value=1, format="percent"
                 ),
@@ -75,7 +75,7 @@ with tab_segments:
                 "in_plan": st.column_config.ProgressColumn(
                     "Share in October plan", min_value=0, max_value=1, format="percent"
                 ),
-                "best_offer_value": st.column_config.NumberColumn("Mean best-offer value", format="$%.2f"),
+                "best_offer_value": st.column_config.NumberColumn("Mean best-offer value", format="dollar"),
             },
         )
     seg = metrics["segmentation"]
@@ -105,7 +105,7 @@ with tab_segments:
         width="stretch",
         column_config={
             "trips_90d": st.column_config.NumberColumn("Trips, 90 days", format="%.1f"),
-            "spend_90d": st.column_config.NumberColumn("Spend, 90 days", format="$%.0f"),
+            "spend_90d": st.column_config.NumberColumn("Spend, 90 days", format="$%,.0f"),
             "peak_share": st.column_config.NumberColumn("Peak share", format="percent"),
             "weekend_share": st.column_config.NumberColumn("Weekend share", format="percent"),
             "in_plan": st.column_config.NumberColumn("In plan", format="percent"),
@@ -243,8 +243,8 @@ with tab_360:
             "churn_probability": st.column_config.ProgressColumn(
                 "Inactivity risk", min_value=0, max_value=1, format="percent"
             ),
-            "clv_12m": st.column_config.NumberColumn("Projected value", format="$%.0f"),
-            "best_offer_value": st.column_config.NumberColumn("Best offer value", format="$%.2f"),
+            "clv_12m": st.column_config.NumberColumn("Projected value", format="$%,.0f"),
+            "best_offer_value": st.column_config.NumberColumn("Best offer value", format="dollar"),
         },
     )
     st.caption(

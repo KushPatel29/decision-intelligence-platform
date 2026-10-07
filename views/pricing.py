@@ -258,11 +258,11 @@ with tab_optimize:
         column_config={
             "price_change": st.column_config.NumberColumn("Price change", format="percent"),
             "elasticity": st.column_config.NumberColumn("Elasticity", format="%.2f"),
-            "forecast_trips": st.column_config.NumberColumn("Trips at chosen price", format="%.0f"),
+            "forecast_trips": st.column_config.NumberColumn("Trips at chosen price", format="%,.0f"),
             "campaign_trips": st.column_config.NumberColumn("Campaign trips", format="%+.0f"),
-            "remaining_with_reserve": st.column_config.NumberColumn("Free after reserve", format="%.0f"),
-            "incremental_contribution": st.column_config.NumberColumn("Contribution change", format="$%.0f"),
-            "consumer_surplus_change": st.column_config.NumberColumn("Surplus change", format="$%.0f"),
+            "remaining_with_reserve": st.column_config.NumberColumn("Free after reserve", format="%,.0f"),
+            "incremental_contribution": st.column_config.NumberColumn("Contribution change", format="$%,.0f"),
+            "consumer_surplus_change": st.column_config.NumberColumn("Surplus change", format="$%,.0f"),
         },
     )
     st.caption(receipt["assumptions"])

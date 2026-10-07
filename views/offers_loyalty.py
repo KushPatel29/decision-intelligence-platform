@@ -58,8 +58,8 @@ st.dataframe(
             "Trial: net CAD / customer", format="$%+.2f"
         ),
         "plan_contacts": st.column_config.NumberColumn("Plan contacts", format="localized"),
-        "plan_spend": st.column_config.NumberColumn("Plan spend", format="$%.0f"),
-        "plan_value": st.column_config.NumberColumn("Plan expected value", format="$%.0f"),
+        "plan_spend": st.column_config.NumberColumn("Plan spend", format="$%,.0f"),
+        "plan_value": st.column_config.NumberColumn("Plan expected value", format="$%,.0f"),
     },
 )
 callout(

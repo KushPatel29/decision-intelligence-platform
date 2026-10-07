@@ -342,9 +342,9 @@ with studio:
                 hide_index=True,
                 width="stretch",
                 column_config={
-                    "objective_value": st.column_config.NumberColumn("Expected value", format="$%.2f"),
-                    "cost": st.column_config.NumberColumn("Incentive cost", format="$%.2f"),
-                    "value_uplift_sd": st.column_config.NumberColumn("Uncertainty (sd)", format="$%.2f"),
+                    "objective_value": st.column_config.NumberColumn("Expected value", format="dollar"),
+                    "cost": st.column_config.NumberColumn("Incentive cost", format="dollar"),
+                    "value_uplift_sd": st.column_config.NumberColumn("Uncertainty (sd)", format="dollar"),
                 },
             )
         download(view, "scenario_allocation.csv", "Download scenario allocation")
@@ -371,11 +371,19 @@ with studio:
             hide_index=True,
             width="stretch",
             column_config={
-                "budget": st.column_config.NumberColumn("Budget", format="$%.0f"),
-                "spend": st.column_config.NumberColumn("Spend", format="$%.0f"),
-                "expected_value": st.column_config.NumberColumn("Expected value", format="$%.0f"),
-                "incremental_trips": st.column_config.NumberColumn("Extra trips", format="%.0f"),
+                "scenario": st.column_config.TextColumn("Scenario"),
+                "budget": st.column_config.NumberColumn("Budget", format="$%,.0f"),
+                "contacts": st.column_config.NumberColumn("Contacts", format="%,d"),
+                "spend": st.column_config.NumberColumn("Spend", format="$%,.0f"),
+                "expected_value": st.column_config.NumberColumn("Expected value", format="$%,.0f"),
+                "incremental_trips": st.column_config.NumberColumn("Extra trips", format="%,.0f"),
+                "points": st.column_config.NumberColumn("Points", format="%,d"),
                 "reserve": st.column_config.NumberColumn("Reserve", format="percent"),
+                "risk_aversion": st.column_config.NumberColumn("Risk aversion (SD)", format="%.1f"),
+                "relief_value": st.column_config.NumberColumn("Value per rush-hour trip", format="dollar"),
+                "rush_hour_trips_per_workday": st.column_config.NumberColumn(
+                    "Rush-hour trips / workday", format="%,.1f"
+                ),
             },
         )
         download(history, "scenario_comparison.csv")
