@@ -1,18 +1,26 @@
-"""Optional OIDC identity and deny-by-default production authorization."""
+"""Optional OIDC identity and deny-by-default production authorization.
+
+Modes (CORRIDOR_AUTH): ``local`` for your own machine, ``oidc`` for a private deployment with an identity
+allowlist (required in production), and ``demo`` for a public read-only demonstration: anonymous, with each
+browser session its own owner, so a visitor's saved plans are never shown to another visitor.
+"""
 
 import hashlib
 import os
+import secrets
 import time
 
 
 def require_access(st):
     production = os.environ.get("CORRIDOR_ENV", "local") == "production"
     mode = os.environ.get("CORRIDOR_AUTH", "local")
-    if mode not in {"local", "oidc"} or production and mode != "oidc":
+    if mode not in {"local", "oidc", "demo"} or production and mode != "oidc":
         st.error("Production access requires configured identity-provider sign-in.")
         st.stop()
     if mode == "local":
         return "local-owner"
+    if mode == "demo":
+        return st.session_state.setdefault("demo_owner", "demo-" + secrets.token_hex(8))
     try:
         configured = "auth" in st.secrets
     except Exception:

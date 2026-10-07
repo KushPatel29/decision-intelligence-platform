@@ -1,0 +1,4 @@
+# Streamlit Community Cloud installs this file: the tested runtime pins. The app adds src/ to the path
+# itself, so the package does not need installing. Deploy with Python 3.12 and the secret
+# CORRIDOR_AUTH = "demo" (see README, "Live demo").
+-r requirements-runtime.txt

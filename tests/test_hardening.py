@@ -156,3 +156,39 @@ def test_app_solver_slots_turn_away_extra_solves(monkeypatch):
             assert first and not second
     with webapp.solver_slot() as again:
         assert again  # released on exit, including after the refused attempt
+
+
+def test_demo_mode_gives_each_session_its_own_owner(monkeypatch):
+    from types import SimpleNamespace
+
+    from decision_platform.access import require_access
+
+    monkeypatch.setenv("CORRIDOR_AUTH", "demo")
+    monkeypatch.delenv("CORRIDOR_ENV", raising=False)
+    first, second = SimpleNamespace(session_state={}), SimpleNamespace(session_state={})
+    owner = require_access(first)
+    assert owner.startswith("demo-") and require_access(first) == owner  # stable within a session
+    assert require_access(second) != owner  # never shared across sessions
+
+
+def test_production_refuses_demo_mode(monkeypatch):
+    import pytest
+
+    from decision_platform.access import require_access
+
+    class Stop(Exception):
+        pass
+
+    class FakeSt:
+        session_state: dict = {}
+
+        def error(self, *_):
+            pass
+
+        def stop(self):
+            raise Stop
+
+    monkeypatch.setenv("CORRIDOR_AUTH", "demo")
+    monkeypatch.setenv("CORRIDOR_ENV", "production")
+    with pytest.raises(Stop):
+        require_access(FakeSt())

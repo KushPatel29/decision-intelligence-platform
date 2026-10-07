@@ -5,13 +5,19 @@ keeps reviewed plans in an owner-isolated audit store. No automatic cloud writes
 """
 
 import os
+import sys
+from pathlib import Path
 
 import streamlit as st
 
-from decision_platform import __version__
-from decision_platform.access import require_access
-from decision_platform.ui import CSS, footer
-from decision_platform.webapp import SERVING, snapshot_stamp, verify_snapshot
+# Hosts that install only requirements.txt (Streamlit Community Cloud) get the package from src/.
+if not any((Path(p) / "decision_platform").is_dir() for p in sys.path if p):
+    sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
+
+from decision_platform import __version__  # noqa: E402
+from decision_platform.access import require_access  # noqa: E402
+from decision_platform.ui import CSS, footer  # noqa: E402
+from decision_platform.webapp import SERVING, snapshot_stamp, verify_snapshot  # noqa: E402
 
 st.set_page_config(
     page_title="Corridor · Decision intelligence",
@@ -89,10 +95,16 @@ with st.sidebar:
         "holiday and exchange-rate context.</small></div>",
         unsafe_allow_html=True,
     )
+    if os.environ.get("CORRIDOR_AUTH") == "demo":
+        st.caption(
+            "Public demo. Scenarios you solve and plans you save stay in this browser session. "
+            "Source: github.com/KushPatel29/decision-intelligence-platform"
+        )
 
+mode = "public demo" if os.environ.get("CORRIDOR_AUTH") == "demo" else "local simulation"
 st.markdown(
     f'<div class="masthead"><span>Corridor / Planning workspace · v{__version__}</span>'
-    '<span class="status"><span class="status-dot"></span>Verified snapshot · local simulation</span></div>',
+    f'<span class="status"><span class="status-dot"></span>Verified snapshot · {mode}</span></div>',
     unsafe_allow_html=True,
 )
 navigation.run()
