@@ -17,10 +17,8 @@ Gurobi licence to certify the HiGHS plan as globally optimal.
 
 from __future__ import annotations
 
-import os
-import sys
 import time
-from contextlib import contextmanager
+from contextlib import nullcontext
 from dataclasses import dataclass
 
 import numpy as np
@@ -237,24 +235,14 @@ def _solve_gurobi(objective, matrix, upper, ub, time_limit):
             return x.X > 0.5, float(model.MIPGap), status, float(model.ObjVal)
 
 
-@contextmanager
 def _quiet():
-    """HiGHS writes progress straight to file descriptor 1; keep the console and app logs clean."""
-    try:
-        stdout = sys.stdout.fileno()
-    except (AttributeError, OSError, ValueError):
-        yield
-        return
-    saved = os.dup(stdout)
-    try:
-        with open(os.devnull, "w") as sink:
-            sys.stdout.flush()
-            os.dup2(sink.fileno(), stdout)
-            yield
-    finally:
-        sys.stdout.flush()
-        os.dup2(saved, stdout)
-        os.close(saved)
+    """Keep solver contexts compatible without redirecting process-wide file descriptors.
+
+    HiGHS logging is disabled by its default solver options. Native diagnostic lines
+    may still appear; suppressing them with dup2 races with concurrent requests and
+    can close another thread's stdout (including pytest's Linux capture descriptor).
+    """
+    return nullcontext()
 
 
 def _fixing(lp, ub, gap, bound):

@@ -2,6 +2,7 @@
 
 ## 2026-10-07 release review
 
+- Remove process-wide solver log redirection, which corrupted stdout during concurrent Linux solves.
 - Preserve exact serving artifact bytes through Git checkout; prevent Windows line-ending conversion
   from breaking snapshot checksums on Linux hosting. CI now verifies the shipped snapshot.
 - Verified serving reads now enforce manifest membership, safe paths and byte hashes at read time;
