@@ -14,6 +14,8 @@ with no data path and no credentials, because each table's rows are embedded in 
 
 ## The HTML panels
 
+![KPI strips on the eight analysis pages, rendered from the values Power BI's engine returned](../docs/images/powerbi-kpi-strips.png)
+
 | Panel | Page | Why HTML |
 |---|---|---|
 | KPI strip | Every analysis page | Each KPI carries a status pill in words and a micro-visual: progress against its limit, value against a target, the parts of a total, a mini trend, an interval or check dots |
