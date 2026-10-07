@@ -159,3 +159,58 @@ def test_sample_size_endpoint_matches_library(client):
     from decision_platform.experiments import sample_size
 
     assert body["customers_per_arm"] == sample_size(0.35, 0.05, comparisons=2)
+
+
+def test_requests_before_startup_are_not_ready():
+    from fastapi.testclient import TestClient
+
+    from decision_platform.api import create_app
+
+    # Without the context manager the startup hook never runs: the API must say "not ready", not crash.
+    assert TestClient(create_app()).get("/ready").status_code == 503
+
+
+def test_a_saturated_solver_answers_busy(client, monkeypatch):
+    import threading
+
+    import decision_platform.api as api
+
+    test_client, _ = client
+    release, inside, lock = threading.Event(), threading.Event(), threading.Lock()
+    count = [0]
+    real_solve = api.solve
+
+    def slow_solve(*args, **kwargs):
+        with lock:
+            count[0] += 1
+            if count[0] == 2:
+                inside.set()
+        release.wait(10)
+        return real_solve(*args, **kwargs)
+
+    monkeypatch.setattr(api, "solve", slow_solve)
+    statuses = []
+    workers = [
+        threading.Thread(
+            target=lambda: statuses.append(test_client.post("/v1/scenarios/solve", json={}).status_code)
+        )
+        for _ in range(2)
+    ]
+    for worker in workers:
+        worker.start()
+    assert inside.wait(10)
+    # Both slots are held; a third request is turned away at once instead of queueing behind them.
+    third = test_client.post("/v1/scenarios/solve", json={})
+    release.set()
+    for worker in workers:
+        worker.join(60)
+    assert third.status_code == 503 and third.headers.get("retry-after") == "5"
+    assert statuses == [200, 200]
+
+
+def test_every_response_carries_a_request_id(client):
+    test_client, _ = client
+    assert len(test_client.get("/health").headers["x-request-id"]) == 32
+    assert (
+        test_client.get("/health", headers={"X-Request-ID": "abc-123"}).headers["x-request-id"] == "abc-123"
+    )

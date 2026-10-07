@@ -1233,7 +1233,8 @@ def measure_reference() -> str:
         "Generated from `src/decision_platform/bi/model_spec.py` by `python -m decision_platform.bi.build_pbip`; do not edit by hand.",
         (
             f"{len(MEASURES)} business measures in {len({m[3] for m in MEASURES})} display folders. The report's own "
-            "SVG tile, header and button measures live in the *Report UI* folder and are not listed."
+            "header and button measures (*Report UI*) and its HTML panel measures (*11 HTML panels*, built in "
+            "`bi/html_spec.py`) are not listed."
         ),
         "",
     ]

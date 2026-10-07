@@ -7,6 +7,7 @@ import sys
 import numpy as np
 import pandas as pd
 
+from decision_platform import __version__
 from decision_platform.config import ROOT, frame_hash, write_json
 
 
@@ -88,7 +89,7 @@ def main():
         ROOT / "outputs/reproducibility.json",
         {
             "status": "passed",
-            "release": "0.4.0",
+            "release": __version__,
             "git_sha": manifest["git_sha"],
             "seed": 407,
             "customers": 8000,

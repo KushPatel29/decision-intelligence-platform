@@ -68,6 +68,31 @@ table.t tr.hl td{background:#0f2b3d;color:#eef8ff;font-weight:600}
 .ok{color:#9be59b;font-weight:700}
 .no{color:#ff9c9c;font-weight:700}
 .note{color:#8faebf;font-size:10px;margin-top:4px}
+.strip{display:grid;gap:10px}
+.kc{position:relative;background:linear-gradient(180deg,#112840,#0d2030);border:1px solid #263f52;border-radius:12px;padding:8px 12px 7px 15px;overflow:hidden;min-width:0}
+.kc.accent{border-color:#2f6b70;background:linear-gradient(180deg,#0f2f3a,#0d2030)}
+.rail{position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:#2d4c61}
+.kc.accent .rail{background:#4bdcd5}
+.kc .l{display:flex;justify-content:space-between;align-items:center;gap:6px;color:#b3c7d7;font-size:10.5px;letter-spacing:.02em;white-space:nowrap}
+.kc .v{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1.2;margin-top:2px;white-space:nowrap}
+.kc.accent .v{color:#7fe8e1}
+.kc .d{color:#8faebf;font-size:10px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{font-size:9.5px;border-radius:999px;padding:1px 7px;font-weight:600;white-space:nowrap}
+.pill.good{color:#9be59b;background:#0b2016;border:1px solid #1f6b2a}
+.pill.warn{color:#ffd27a;background:#2a1f05;border:1px solid #6b5212}
+.pill.info{color:#b7d9e5;background:#0b1c2a;border:1px solid #2d4c61}
+.mv{position:relative;height:6px;background:#1d3448;border-radius:3px;margin-top:6px}
+.mv i{position:absolute;left:0;top:0;bottom:0;border-radius:3px}
+.mv b{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:#eef8ff;border-radius:1px}
+.seg{display:flex;gap:2px;height:6px;border-radius:3px;overflow:hidden;margin-top:6px;background:#1d3448}
+.seg i{height:6px}
+.sp{display:flex;align-items:flex-end;gap:2px;height:20px;margin-top:3px}
+.sp i{flex:1;background:#3987e5;border-radius:2px 2px 0 0;min-height:2px;opacity:.9}
+.dots{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.dots i{width:9px;height:9px;border-radius:50%;background:#1d3448;border:1px solid #2d4c61}
+.dots i.on{background:#3fb96b;border-color:#3fb96b}
+.lg{margin-right:9px}
+.lg i{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:4px}
 """.split()
 )
 
@@ -77,17 +102,121 @@ def _f(expression: str, fmt: str) -> str:
     return f'IF(ISBLANK({expression}), "—", FORMAT({expression}, "{fmt}"))'
 
 
-def _kpi(label: str, value: str, detail: str, accent: bool = False) -> str:
+def _kpi(label: str, value: str, detail: str, accent: bool = False, micro: str = '""') -> str:
     klass = "kpi accent" if accent else "kpi"
     return (
-        f"\"<div class='{klass}'><div class='l'>{label}</div><div class='v'>\" & {value} & "
-        f'"</div><div class=\'d\'>" & {detail} & "</div></div>"'
+        f"\"<div class='{klass}'><div class='l'>{label}</div><div class='v'>\" & {value} & \"</div>\" & {micro} & "
+        f'"<div class=\'d\'>" & {detail} & "</div></div>"'
     )
 
 
 def _pct_width(expression: str) -> str:
     """A 0-100 integer for a CSS width, clamped."""
     return f'FORMAT(MAX(0, MIN(100, ({expression}) * 100)), "0")'
+
+
+# --------------------------------------------------------------------------------------------
+# KPI strips: one HTML visual per page replaces its row of image tiles. Each card is a label,
+# a value, a status pill that says in words what its colour says, a micro-visual that puts the
+# value against its limit, target, history or parts, and one line of context.
+# --------------------------------------------------------------------------------------------
+
+AMBER, GOOD = "#c98500", "#3fb96b"
+
+
+def _q(text: str) -> str:
+    """A DAX string literal (no double quotes are ever needed inside the markup)."""
+    return '"' + text + '"'
+
+
+def _pill(condition: str, good_text: str, bad_text: str) -> str:
+    return (
+        f"IF({condition}, \"<span class='pill good'>{good_text}</span>\", "
+        f"\"<span class='pill warn'>{bad_text}</span>\")"
+    )
+
+
+def _info_pill(text_expr: str) -> str:
+    return f'"<span class=\'pill info\'>" & {text_expr} & "</span>"'
+
+
+def _progress(ratio: str, warn_at: float | None = None, marker: float | None = None) -> str:
+    """A bar filled to `ratio` of its track; amber at or above `warn_at`; a tick at `marker`."""
+    colour = f'IF(({ratio}) >= {warn_at}, "{AMBER}", "{BLUE}")' if warn_at is not None else f'"{BLUE}"'
+    tick = f"<b style='left:{marker * 100:.0f}%'></b>" if marker is not None else ""
+    return f'"<div class=\'mv\'><i style=\'width:" & {_pct_width(ratio)} & "%;background:" & {colour} & "\'></i>{tick}</div>"'
+
+
+def _bullet(value: str, target: str, above_is_good: bool = True) -> str:
+    """Value against a target on one scale: the bar is the value, the tick is the target."""
+    scale = f"MAX({value}, {target}) * 1.12"
+    ok = f"({value}) >= ({target})" if above_is_good else f"({value}) <= ({target})"
+    return (
+        f'"<div class=\'mv\'><i style=\'width:" & {_pct_width(f"DIVIDE({value}, {scale})")} & "%;background:" & '
+        f'IF({ok}, "{BLUE}", "{AMBER}") & "\'></i><b style=\'left:" & '
+        f'{_pct_width(f"DIVIDE({target}, {scale})")} & "%\'></b></div>"'
+    )
+
+
+def _parts(parts: list[tuple[str, str]]) -> str:
+    """A stacked bar of non-negative parts, each in its own validated slot colour."""
+    total = " + ".join(f"MAX(0, {expr})" for expr, _ in parts)
+    segments = " & ".join(
+        f'"<i style=\'width:" & {_pct_width(f"DIVIDE(MAX(0, {expr}), {total})")} & "%;background:{colour}\'></i>"'
+        for expr, colour in parts
+    )
+    return f'"<div class=\'seg\'>" & {segments} & "</div>"'
+
+
+def _key(parts: list[tuple[str, str, str]]) -> str:
+    """Detail line that keys a stacked bar: a colour chip, a label and a formatted value per part."""
+    return " & ".join(
+        f"\"<span class='lg'><i style='background:{colour}'></i>{label} \" & {value}" + ' & "</span>"'
+        for label, value, colour in parts
+    )
+
+
+def _columns(table: str, order: str, value: str, label: str) -> str:
+    """Mini column chart: one bar per member of `order`, height relative to the tallest."""
+    return (
+        f"\"<div class='sp'>\" & CONCATENATEX(VALUES({order}), "
+        f"VAR vMax = MAXX(ALL({order}), CALCULATE({value})) "
+        f'RETURN "<i title=\'" & CALCULATE(MAX({label})) & "\' style=\'height:" & '
+        f'{_pct_width(f"DIVIDE(CALCULATE({value}), vMax)")} & "%\'></i>", "", {order}, ASC) & "</div>"'
+    )
+
+
+def _range(low: str, point: str, high: str, lo: str, hi: str) -> str:
+    """An interval [low, high] with its point estimate, on the scale [lo, hi]."""
+    span = f"(({hi}) - ({lo}))"
+    return (
+        f'"<div class=\'mv\'><i style=\'left:" & {_pct_width(f"DIVIDE(({low}) - ({lo}), {span})")} & "%;width:" & '
+        f"{_pct_width(f'DIVIDE(({high}) - ({low}), {span})')} & \"%;background:#2f5f8f'></i><b style='left:\" & "
+        f'{_pct_width(f"DIVIDE(({point}) - ({lo}), {span})")} & "%\'></b></div>"'
+    )
+
+
+def _dots(on: str, total: str) -> str:
+    return (
+        f"\"<div class='dots'>\" & CONCATENATEX(GENERATESERIES(1, MAX(1, {total})), "
+        f'IF([Value] <= {on}, "<i class=\'on\'></i>", "<i></i>"), "", [Value], ASC) & "</div>"'
+    )
+
+
+def _card(
+    label: str, value: str, detail: str, micro: str = '""', pill: str = '""', accent: bool = False
+) -> str:
+    klass = "kc accent" if accent else "kc"
+    return (
+        f"\"<div class='{klass}'><span class='rail'></span><div class='l'><span>{label}</span>\" & {pill} & "
+        f'"</div><div class=\'v\'>" & {value} & "</div>" & {micro} & "<div class=\'d\'>" & {detail} & '
+        '"</div></div>"'
+    )
+
+
+def _strip(cards: list[str]) -> str:
+    head = f"\"<div class='w'><div class='strip' style='grid-template-columns:repeat({len(cards)},1fr)'>\""
+    return "\n    & ".join([head, *cards, '"</div></div>"'])
 
 
 HERO = "\n".join(
@@ -111,19 +240,34 @@ HERO = "\n".join(
             _f("[Expected value]", "$#,0"),
             'FORMAT([Value per incentive dollar], "0.0") & "x the incentive spend"',
             True,
+            _parts(
+                [
+                    ("[Expected 30-day net]", BLUE),
+                    ("[Expected later value]", AQUA),
+                    ("[Relief value]", YELLOW),
+                ]
+            ),
         ),
         "    & "
         + _kpi(
             "True value · simulation",
             _f("[Optimized true value]", "$#,0"),
             'FORMAT(vShare, "0%") & " of the perfect-knowledge ceiling"',
+            micro=_progress("vShare"),
         ),
-        "    & " + _kpi("Net ROI · 30 days", _f("[Net ROI]", "0%"), '"floor 15%"'),
+        "    & "
+        + _kpi(
+            "Net ROI · 30 days",
+            _f("[Net ROI]", "0%"),
+            '"floor " & FORMAT([ROI floor], "0%")',
+            micro=_bullet("[Net ROI]", "[ROI floor]"),
+        ),
         "    & "
         + _kpi(
             "Rush-hour trips / workday",
             _f("[Rush-hour trips per workday]", "+#,0;-#,0"),
-            '"moved onto the 407"',
+            '"moved onto the 407, worth " & FORMAT([Relief value], "$#,0")',
+            micro=_progress("DIVIDE([Relief value], [Expected value])"),
         ),
         '    & "</div></div></div>"',
     ]
@@ -295,7 +439,297 @@ NARRATIVE = (
     'color:#d8ecf4\'>" & [Executive summary] & "</div></div>"'
 )
 
+KPI_STRIPS: dict[str, tuple[str, list[str]]] = {
+    "p1_plan": (
+        "Plan KPIs: expected value with its parts, spend against budget, contacts against the limit, and net "
+        "ROI against its floor.",
+        [
+            _card(
+                "Expected value",
+                _f("[Expected value]", "$#,0"),
+                _key(
+                    [
+                        ("30-day", 'FORMAT([Expected 30-day net], "$#,0")', BLUE),
+                        ("days 31-90", 'FORMAT([Expected later value], "$#,0")', AQUA),
+                        ("relief", 'FORMAT([Relief value], "$#,0")', YELLOW),
+                    ]
+                ),
+                _parts(
+                    [
+                        ("[Expected 30-day net]", BLUE),
+                        ("[Expected later value]", AQUA),
+                        ("[Relief value]", YELLOW),
+                    ]
+                ),
+                _info_pill('FORMAT([Value per incentive dollar], "0.0") & "x spend"'),
+                accent=True,
+            ),
+            _card(
+                "Incentive spend",
+                _f("[Incentive spend]", "$#,0"),
+                '"of the " & FORMAT([Budget], "$#,0") & " budget"',
+                _progress("DIVIDE([Incentive spend], [Budget])"),
+                _info_pill('FORMAT([Budget used], "0%") & " used"'),
+            ),
+            _card(
+                "Contacts",
+                _f("[Contacts]", "#,0"),
+                'FORMAT(DIVIDE([Contacts], [Eligible customers]), "0%") & " of " & FORMAT([Eligible customers], "#,0") '
+                '& " eligible customers"',
+                _progress("DIVIDE([Contacts], [Contact limit])"),
+                _info_pill('"limit " & FORMAT([Contact limit], "#,0")'),
+            ),
+            _card(
+                "Net ROI · 30 days",
+                _f("[Net ROI]", "0%"),
+                '"30-day net " & FORMAT([Expected 30-day net], "$#,0") & " on " & FORMAT([Incentive spend], "$#,0")',
+                _bullet("[Net ROI]", "[ROI floor]"),
+                _pill("[Net ROI] >= [ROI floor]", "✓ above floor", "✕ below floor"),
+            ),
+        ],
+    ),
+    "p2_contacts": (
+        "Contact KPIs: extra trips by travel period, points against the cap, estimate uncertainty and "
+        "congestion relief.",
+        [
+            _card(
+                "Extra trips",
+                _f("[Extra trips]", "#,0"),
+                _key(
+                    [
+                        ("peak", 'FORMAT([Extra peak trips], "+#,0;-#,0")', BLUE),
+                        ("off-peak", 'FORMAT([Extra off-peak trips], "+#,0;-#,0")', ORANGE),
+                        ("weekend", 'FORMAT([Extra weekend trips], "+#,0;-#,0")', AQUA),
+                    ]
+                ),
+                _parts(
+                    [
+                        ("[Extra peak trips]", BLUE),
+                        ("[Extra off-peak trips]", ORANGE),
+                        ("[Extra weekend trips]", AQUA),
+                    ]
+                ),
+                accent=True,
+            ),
+            _card(
+                "Offers in use",
+                'FORMAT([Offers in plan], "0") & " of " & FORMAT(COUNTROWS(ALL(dim_offer)), "0")',
+                'IF([Points awarded] = 0, "no loyalty points: not worth a contact under these limits", '
+                'FORMAT([Points awarded], "#,0") & " points of the " & FORMAT([Points cap], "#,0") & " cap")',
+                _dots("[Offers in plan]", "COUNTROWS(ALL(dim_offer))"),
+            ),
+            _card(
+                "Uncertainty per contact",
+                _f("[Mean uncertainty]", "$#,0.00"),
+                '"bootstrap sd against " & FORMAT(DIVIDE([Expected value], [Contacts]), "$#,0.00") & " value per contact"',
+                _progress("DIVIDE([Mean uncertainty], DIVIDE([Expected value], [Contacts]))", warn_at=1.0),
+            ),
+            _card(
+                "Congestion relief",
+                _f("[Relief value]", "$#,0"),
+                'FORMAT([Rush-hour trips per workday], "+#,0;-#,0") & " rush-hour trips a workday onto the 407"',
+                _progress("DIVIDE([Relief value], [Expected value])"),
+                _info_pill('FORMAT(DIVIDE([Relief value], [Expected value]), "0.0%") & " of value"'),
+            ),
+        ],
+    ),
+    "p3_customers": (
+        "Customer KPIs: customers by segment, travel propensity, inactivity risk and the share the plan contacts.",
+        [
+            _card(
+                "Customers",
+                _f("[Customers]", "#,0"),
+                '"by segment, Champions to Dormant"',
+                _columns(
+                    "customer_segments",
+                    "customer_segments[segment_order]",
+                    "[Customers]",
+                    "customer_segments[rfm_segment]",
+                ),
+                accent=True,
+            ),
+            _card(
+                "Travel propensity",
+                _f("[Mean travel propensity]", "0%"),
+                '"mean calibrated chance of a trip in 30 days"',
+                _progress("[Mean travel propensity]"),
+            ),
+            _card(
+                "Inactivity risk",
+                _f("[Mean inactivity risk]", "0.0%"),
+                'FORMAT([High-risk customers], "#,0") & " customers above 50% risk"',
+                _progress("[Mean inactivity risk]", warn_at=0.25),
+                _pill("[Mean inactivity risk] < 0.25", "✓ low", "▲ elevated"),
+            ),
+            _card(
+                "In the plan",
+                _f("[Share in plan]", "0.0%"),
+                'FORMAT([Customers in plan], "#,0") & " of " & FORMAT([Customers], "#,0") & " customers"',
+                _progress("[Share in plan]"),
+            ),
+        ],
+    ),
+    "p4_capacity": (
+        "Capacity KPIs: the October forecast with monthly history, campaign trips, load against the 80% "
+        "threshold and capacity used with the reserve.",
+        [
+            _card(
+                "Forecast trips · 30 days",
+                _f("[Forecast trips]", "#,0"),
+                '"monthly trips to September 2025"',
+                _columns(
+                    "monthly_trips",
+                    "monthly_trips[month_index]",
+                    "[Monthly trips]",
+                    "monthly_trips[month_label]",
+                ),
+                accent=True,
+            ),
+            _card(
+                "Campaign trips",
+                _f("[Campaign trips]", "+#,0;-#,0"),
+                'FORMAT(DIVIDE([Campaign trips], [Forecast trips]), "0.0%") & " on top of the forecast"',
+                _parts([("[Forecast trips]", GREY), ("[Campaign trips]", BLUE)]),
+            ),
+            _card(
+                "Load with the campaign",
+                _f("[Load]", "0%"),
+                "[Load caption]",
+                _progress("[Load]", warn_at=0.8, marker=0.8),
+                _pill("[Load] < 0.8", "✓ under 80%", "▲ 80% or more"),
+            ),
+            _card(
+                "Capacity committed",
+                _f(
+                    "DIVIDE([Forecast trips] + [Campaign trips] + [Safety reserve], [Planning capacity])",
+                    "0%",
+                ),
+                '"forecast, campaign and 20% reserve of " & FORMAT([Planning capacity], "#,0")',
+                _progress(
+                    "DIVIDE([Forecast trips] + [Campaign trips] + [Safety reserve], [Planning capacity])",
+                    warn_at=0.95,
+                ),
+            ),
+        ],
+    ),
+    "p5_pricing": (
+        "Pricing KPIs: mean elasticity with its interval, contribution from the optimized prices, and the "
+        "cells repriced.",
+        [
+            _card(
+                "Price elasticity",
+                _f("[Elasticity]", "0.00"),
+                "[Elasticity caption]",
+                _range("[Elasticity low]", "[Elasticity]", "[Elasticity high]", "-2.5", "0"),
+                _info_pill('IF([Elasticity] > -1, "inelastic", "elastic")'),
+                accent=True,
+            ),
+            _card(
+                "Contribution from prices",
+                _f("[Price contribution change]", "+$#,0;-$#,0"),
+                '"jointly optimized with the campaign"',
+                pill=_pill("[Price contribution change] >= 0", "✓ gain", "✕ loss"),
+            ),
+            _card(
+                "Cells repriced",
+                _f("[Cells repriced]", "0"),
+                '"of " & FORMAT([Price cells], "0") & " zone × period cells"',
+                _dots("[Cells repriced]", "[Price cells]"),
+            ),
+        ],
+    ),
+    "p6_experiments": (
+        "Experiment KPIs: customers per arm against the power requirement, variance removed by CUPED, and how "
+        "well the causal learners rank customers.",
+        [
+            _card(
+                "Customers per arm",
+                _f("[Customers per arm]", "#,0"),
+                '"10 arms · power calculation needs " & FORMAT([Required per arm], "#,0")',
+                _bullet("[Customers per arm]", "[Required per arm]"),
+                _pill("[Customers per arm] >= [Required per arm]", "✓ powered", "✕ under-powered"),
+                accent=True,
+            ),
+            _card(
+                "CUPED variance removed",
+                _f("[CUPED variance removed]", "0%"),
+                '"June trips as the pre-period covariate"',
+                _progress("[CUPED variance removed]"),
+            ),
+            _card(
+                "Learner rank correlation",
+                _f("[Learner rank correlation]", "0.00"),
+                '"mean ρ with the true value, all learners (simulation check)"',
+                _progress("[Learner rank correlation]"),
+            ),
+        ],
+    ),
+    "p7_policy": (
+        "Policy KPIs: the optimized plan's true value against the perfect-knowledge ceiling, the ceiling, and "
+        "propensity targeting against the same ceiling.",
+        [
+            _card(
+                "Optimized plan · true value",
+                _f("[Optimized true value]", "$#,0"),
+                "[Truth caption]",
+                _progress("DIVIDE([Optimized true value], [Value ceiling])"),
+                _info_pill('FORMAT(DIVIDE([Optimized true value], [Value ceiling]), "0%") & " of ceiling"'),
+                accent=True,
+            ),
+            _card(
+                "Ceiling · perfect knowledge",
+                _f("[Value ceiling]", "$#,0"),
+                '"the same MIP solved on the true effects"',
+            ),
+            _card(
+                "Propensity targeting · true value",
+                _f("[Propensity true value]", "$#,0"),
+                "[Propensity caption]",
+                _progress("DIVIDE([Propensity true value], [Value ceiling])"),
+                _info_pill('FORMAT(DIVIDE([Propensity true value], [Value ceiling]), "0%") & " of ceiling"'),
+            ),
+        ],
+    ),
+    "p8_operations": (
+        "Operations KPIs: release checks passed, held-out model AUC against the 0.70 gate, flagged feed days "
+        "and features above the drift threshold.",
+        [
+            _card(
+                "Release gate",
+                'FORMAT([Checks passed], "0") & " / " & FORMAT([Checks total], "0")',
+                "[Gate caption]",
+                _dots("[Checks passed]", "[Checks total]"),
+                _pill("[Checks passed] = [Checks total]", "✓ passed", "✕ review"),
+                accent=True,
+            ),
+            _card(
+                "Model AUC",
+                _f("[Model AUC]", "0.000"),
+                '"mean of three classifiers on the July 2025 test fold · gate 0.70"',
+                _progress("[Model AUC]", marker=0.7),
+            ),
+            _card(
+                "Flagged feed days",
+                _f("[Flagged days]", "0"),
+                '"of " & FORMAT([Feed days], "#,0") & " ingestion days, against the same-weekday median"',
+                pill=_info_pill('FORMAT(DIVIDE([Flagged days], [Feed days]), "0.0%") & " of days"'),
+            ),
+            _card(
+                "Features drifting",
+                _f("[Features to review]", "0"),
+                '"of " & FORMAT([Features monitored], "0") & " features above PSI 0.2"',
+                _progress("DIVIDE([Features to review], [Features monitored])", warn_at=0.25),
+                _pill("[Features to review] = 0", "✓ stable", "▲ review"),
+            ),
+        ],
+    ),
+}
+
 HTML_MEASURES: list[tuple[str, str, str, str, str]] = [
+    *[
+        (f"HTML KPIs {page}", _strip(cards), "", "11 HTML panels", description)
+        for page, (description, cards) in KPI_STRIPS.items()
+    ],
     ("HTML Hero", HERO, "", "11 HTML panels", "Command-centre banner with the plan's headline KPIs."),
     (
         "HTML Offer cards",

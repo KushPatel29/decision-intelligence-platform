@@ -136,7 +136,9 @@ plan depends on; the value of the plan's own choices is, and that is what the si
 
 ## 14. HTML and CSS panels in Power BI, validated in the engine
 
-**Decision.** Nine report panels (the command-centre hero, offer cards, guardrails, policy leaderboard, experiment
+**Decision.** Every page's KPI row is one HTML strip (a status pill in words and a micro-visual per KPI: progress
+against a limit, value against a target, parts of a total, a mini trend or an interval), and nine report panels
+(the command-centre hero, offer cards, guardrails, policy leaderboard, experiment
 forest plot, capacity heat grid, segment table, scorecard and narrative) are DAX measures that return HTML, rendered
 by the HTML Content custom visual with one shared stylesheet. Native visuals stay wherever cross-filtering matters.
 

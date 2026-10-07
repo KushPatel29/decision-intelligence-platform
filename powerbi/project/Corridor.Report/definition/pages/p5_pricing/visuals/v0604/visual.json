@@ -3,17 +3,17 @@
   "name": "v0604",
   "position": {
     "x": 20,
-    "y": 208,
+    "y": 470,
     "z": 1514,
-    "height": 246,
-    "width": 620,
+    "height": 234,
+    "width": 1240,
     "tabOrder": 1514
   },
   "visual": {
-    "visualType": "clusteredBarChart",
+    "visualType": "tableEx",
     "query": {
       "queryState": {
-        "Category": {
+        "Values": {
           "projections": [
             {
               "field": {
@@ -28,31 +28,8 @@
               },
               "queryRef": "dim_zone.zone_name",
               "nativeQueryRef": "zone_name",
-              "displayName": "Zone",
-              "active": true
-            }
-          ]
-        },
-        "Y": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Measures"
-                    }
-                  },
-                  "Property": "Elasticity"
-                }
-              },
-              "queryRef": "_Measures.Elasticity",
-              "nativeQueryRef": "Elasticity"
-            }
-          ]
-        },
-        "Series": {
-          "projections": [
+              "displayName": "Zone"
+            },
             {
               "field": {
                 "Column": {
@@ -66,8 +43,66 @@
               },
               "queryRef": "dim_period.period",
               "nativeQueryRef": "period",
-              "displayName": "Period",
-              "active": true
+              "displayName": "Period"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "price_plan"
+                    }
+                  },
+                  "Property": "price_change"
+                }
+              },
+              "queryRef": "price_plan.price_change",
+              "nativeQueryRef": "price_change",
+              "displayName": "Price change"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "price_plan"
+                    }
+                  },
+                  "Property": "forecast_trips"
+                }
+              },
+              "queryRef": "price_plan.forecast_trips",
+              "nativeQueryRef": "forecast_trips",
+              "displayName": "Forecast trips"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "price_plan"
+                    }
+                  },
+                  "Property": "campaign_trips"
+                }
+              },
+              "queryRef": "price_plan.campaign_trips",
+              "nativeQueryRef": "campaign_trips",
+              "displayName": "Campaign trips"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Price contribution change"
+                }
+              },
+              "queryRef": "_Measures.Price contribution change",
+              "nativeQueryRef": "Price contribution change"
             }
           ]
         }
@@ -76,16 +111,16 @@
         "sort": [
           {
             "field": {
-              "Column": {
+              "Measure": {
                 "Expression": {
                   "SourceRef": {
-                    "Entity": "dim_zone"
+                    "Entity": "_Measures"
                   }
                 },
-                "Property": "zone_name"
+                "Property": "Price contribution change"
               }
             },
-            "direction": "Ascending"
+            "direction": "Descending"
           }
         ],
         "isDefaultSort": false
@@ -99,7 +134,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Price elasticity by zone and period (empirical Bayes)'"
+                  "Value": "'Jointly optimized price per cell, sharing capacity with the campaign'"
                 }
               }
             },
@@ -119,35 +154,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Bar chart titled Price elasticity by zone and period. Plots Elasticity by zone for each period.'"
-                }
-              }
-            }
-          }
-        }
-      ]
-    },
-    "objects": {
-      "categoryAxis": [
-        {
-          "properties": {
-            "showAxisTitle": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "valueAxis": [
-        {
-          "properties": {
-            "showAxisTitle": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
+                  "Value": "'Table titled Jointly optimized price per cell. Lists zone, period, price change, forecast trips, campaign trips and Price contribution change.'"
                 }
               }
             }

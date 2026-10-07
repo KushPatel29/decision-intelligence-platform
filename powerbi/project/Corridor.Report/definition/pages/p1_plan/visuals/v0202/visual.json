@@ -2,42 +2,66 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
   "name": "v0202",
   "position": {
-    "x": 330,
-    "y": 88,
+    "x": 20,
+    "y": 208,
     "z": 1104,
-    "height": 107,
-    "width": 296,
+    "height": 246,
+    "width": 380,
     "tabOrder": 1104
   },
   "visual": {
-    "visualType": "image",
-    "objects": {
-      "image": [
-        {
-          "properties": {
-            "sourceType": {
-              "expr": {
-                "Literal": {
-                  "Value": "'imageUrl'"
-                }
-              }
-            },
-            "sourceUrl": {
-              "expr": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
                 "Measure": {
                   "Expression": {
                     "SourceRef": {
                       "Entity": "_Measures"
                     }
                   },
-                  "Property": "KPI SVG Incentive spend | Spend caption @310"
+                  "Property": "Executive summary"
+                }
+              },
+              "queryRef": "_Measures.Executive summary",
+              "nativeQueryRef": "Executive summary"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'The plan in one paragraph'"
                 }
               }
             },
-            "fit": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "'Fit'"
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Card titled The plan in one paragraph. Shows the executive summary.'"
                 }
               }
             }
@@ -45,55 +69,45 @@
         }
       ]
     },
-    "visualContainerObjects": {
-      "general": [
+    "objects": {
+      "labels": [
         {
           "properties": {
-            "altText": {
+            "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "'KPI tile. Incentive spend against the budget.'"
+                  "Value": "12D"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#eef8ff'"
+                    }
+                  }
                 }
               }
             }
           }
         }
       ],
-      "padding": [
+      "wordWrap": [
         {
           "properties": {
-            "top": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
-                }
-              }
-            },
-            "bottom": {
-              "expr": {
-                "Literal": {
-                  "Value": "0D"
-                }
-              }
-            },
-            "left": {
-              "expr": {
-                "Literal": {
-                  "Value": "0D"
-                }
-              }
-            },
-            "right": {
-              "expr": {
-                "Literal": {
-                  "Value": "0D"
+                  "Value": "true"
                 }
               }
             }
           }
         }
       ],
-      "title": [
+      "categoryLabels": [
         {
           "properties": {
             "show": {

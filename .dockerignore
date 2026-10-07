@@ -15,3 +15,14 @@ outputs/sagemaker_channels
 outputs/models/*.joblib
 outputs/mlflow.db
 outputs/*.log
+powerbi
+databricks
+aws
+docs
+tests
+scripts
+adhoc
+outputs/*.csv
+outputs/*.json
+outputs/sagemaker_local
+!outputs/serving

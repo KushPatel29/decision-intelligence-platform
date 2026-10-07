@@ -3,17 +3,17 @@
   "name": "v0804",
   "position": {
     "x": 20,
-    "y": 208,
+    "y": 470,
     "z": 1706,
-    "height": 246,
-    "width": 760,
+    "height": 234,
+    "width": 620,
     "tabOrder": 1706
   },
   "visual": {
-    "visualType": "clusteredBarChart",
+    "visualType": "tableEx",
     "query": {
       "queryState": {
-        "Category": {
+        "Values": {
           "projections": [
             {
               "field": {
@@ -28,13 +28,22 @@
               },
               "queryRef": "policy_comparison.policy",
               "nativeQueryRef": "policy",
-              "displayName": "Approach",
-              "active": true
-            }
-          ]
-        },
-        "Y": {
-          "projections": [
+              "displayName": "Approach"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "True value"
+                }
+              },
+              "queryRef": "_Measures.True value",
+              "nativeQueryRef": "True value"
+            },
             {
               "field": {
                 "Measure": {
@@ -57,11 +66,25 @@
                       "Entity": "_Measures"
                     }
                   },
-                  "Property": "True value"
+                  "Property": "Share of ceiling"
                 }
               },
-              "queryRef": "_Measures.True value",
-              "nativeQueryRef": "True value"
+              "queryRef": "_Measures.Share of ceiling",
+              "nativeQueryRef": "Share of ceiling"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Contacts losing money"
+                }
+              },
+              "queryRef": "_Measures.Contacts losing money",
+              "nativeQueryRef": "Contacts losing money"
             }
           ]
         }
@@ -93,7 +116,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Predicted against true value, by approach'"
+                  "Value": "'Approaches scored against the truth'"
                 }
               }
             },
@@ -113,7 +136,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Bar chart titled Predicted against true value. Plots Predicted value and True value by approach.'"
+                  "Value": "'Table titled Approaches scored against the truth. Lists approach, True value, Predicted value, Share of ceiling and Contacts losing money.'"
                 }
               }
             }
@@ -122,23 +145,10 @@
       ]
     },
     "objects": {
-      "categoryAxis": [
+      "total": [
         {
           "properties": {
-            "showAxisTitle": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "valueAxis": [
-        {
-          "properties": {
-            "showAxisTitle": {
+            "totals": {
               "expr": {
                 "Literal": {
                   "Value": "false"

@@ -10,6 +10,8 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import threading
+from contextlib import contextmanager
 from pathlib import Path
 
 import pandas as pd
@@ -27,6 +29,23 @@ REQUIRED = [
     "candidates.parquet",
     "capacity.parquet",
 ]
+
+
+# Live re-solves are CPU-bound and every session shares this process: at most CORRIDOR_MAX_SOLVES run at once,
+# each MIP sub-solve capped at CORRIDOR_SOLVE_SECONDS, the same limits the decision API uses.
+SOLVE_SECONDS = float(os.environ.get("CORRIDOR_SOLVE_SECONDS", "20"))
+_SOLVER_SLOTS = threading.BoundedSemaphore(max(1, int(os.environ.get("CORRIDOR_MAX_SOLVES", "2"))))
+
+
+@contextmanager
+def solver_slot():
+    """Yield True while holding a solver slot, or False at once when every slot is busy."""
+    acquired = _SOLVER_SLOTS.acquire(blocking=False)
+    try:
+        yield acquired
+    finally:
+        if acquired:
+            _SOLVER_SLOTS.release()
 
 
 def snapshot_stamp():

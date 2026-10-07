@@ -195,6 +195,27 @@ MEASURES: list[tuple[str, str, str, str, str]] = [
     ),
     ("Contact limit", "MAX(plan_summary[contact_limit])", COUNT, "01 Plan", "Maximum contacts."),
     (
+        "Points cap",
+        "MAX(plan_summary[points_limit])",
+        COUNT,
+        "01 Plan",
+        "Maximum loyalty points the plan may award.",
+    ),
+    (
+        "Offers in plan",
+        f"COUNTROWS(FILTER(VALUES({P}[offer_id]), CALCULATE(COUNTROWS({P})) > 0))",
+        COUNT,
+        "01 Plan",
+        "Offers with at least one contact in the plan.",
+    ),
+    (
+        "ROI floor",
+        "MAX(plan_summary[min_roi])",
+        PCT_0,
+        "01 Plan",
+        "Minimum 30-day net ROI the plan must hold.",
+    ),
+    (
         "Eligible customers",
         "MAX(plan_summary[eligible_customers])",
         COUNT,
@@ -456,6 +477,13 @@ MEASURES: list[tuple[str, str, str, str, str]] = [
         "Share of outcome variance removed by the pre-period covariate.",
     ),
     ("Customers per arm", "MIN(experiment_effects[n])", COUNT, "05 Experiments", "Smallest arm size."),
+    (
+        "Required per arm",
+        "MAX(plan_summary[required_per_arm])",
+        COUNT,
+        "05 Experiments",
+        "Customers per arm the power calculation required for a 5-point lift.",
+    ),
     ("Sequential z", "SUM(sequential_looks[z])", DEC_2, "05 Experiments", "Cumulative CUPED z-statistic."),
     (
         "Efficacy boundary",
@@ -549,6 +577,21 @@ MEASURES: list[tuple[str, str, str, str, str]] = [
         "Release acceptance checks passed.",
     ),
     ("Checks total", "COUNTROWS(quality_gate)", COUNT, "07 Operations", "Release acceptance checks."),
+    ("Feed days", "COUNTROWS(feed_quality)", COUNT, "07 Operations", "Ingestion days monitored."),
+    (
+        "Features monitored",
+        "COUNTROWS(feature_drift)",
+        COUNT,
+        "07 Operations",
+        "Model features under drift monitoring.",
+    ),
+    (
+        "Price cells",
+        "COUNTROWS(price_plan)",
+        COUNT,
+        "06 Pricing",
+        "Zone x period cells priced by the optimizer.",
+    ),
 ]
 
 # Colours returned by a measure; bound through a wildcard data-point selector.

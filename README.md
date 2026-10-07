@@ -67,7 +67,7 @@ Every method choice, including the ones that were tried and rejected, is in [`DE
 |---|---|---|
 | **Streamlit app** | Twelve pages: decision centre with live re-solves, next best offer per customer, pricing, segments, offers and loyalty, transportation, policy value, experiments, model operations, operations centre, analyst workbench | `tests/test_app.py` renders every page |
 | **FastAPI** | Decision service with API keys, health and readiness probes and a bounded scenario solver | `tests/test_api.py` |
-| **Power BI** | Generated PBIP: 9 pages, 118 visuals, 94 documented measures, SVG tiles and nine HTML/CSS panels (HTML Content visual) | All 149 measures executed against Power BI's engine (`scripts/validate_powerbi_model.ps1`); byte-for-byte drift gate in CI |
+| **Power BI** | Generated PBIP: 9 pages, 97 visuals, 101 documented measures, an HTML/CSS KPI strip on every page and nine HTML/CSS panels (HTML Content visual) | All 135 measures executed against Power BI's engine (`scripts/validate_powerbi_model.ps1`); byte-for-byte drift gate in CI |
 | **Databricks** | Four-task serverless job: pipeline with Gurobi and workspace MLflow → Delta medallion with CHECK constraints and a PySpark feature-parity gate → Unity Catalog model registry → reconciled publish and a run receipt | All four notebooks run locally by `databricks/local_run.py`; see [`databricks/README.md`](databricks/README.md) for the hosted run |
 | **AWS SageMaker** | Pipeline definition: Processing, Training, held-out Evaluation, quality gate, Model Registry (pending approval), Batch Transform | Stages run locally (`scripts/verify_cloud_stages.py`); not executed in AWS |
 

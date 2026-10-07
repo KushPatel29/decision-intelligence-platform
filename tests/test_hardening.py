@@ -143,3 +143,16 @@ def test_production_refuses_anonymous_local_mode(monkeypatch):
     app = AppTest.from_file(str(ROOT / "app.py")).run()
     assert not app.exception and app.error
     assert not app.radio
+
+
+def test_app_solver_slots_turn_away_extra_solves(monkeypatch):
+    import threading
+
+    import decision_platform.webapp as webapp
+
+    monkeypatch.setattr(webapp, "_SOLVER_SLOTS", threading.BoundedSemaphore(1))
+    with webapp.solver_slot() as first:
+        with webapp.solver_slot() as second:
+            assert first and not second
+    with webapp.solver_slot() as again:
+        assert again  # released on exit, including after the refused attempt

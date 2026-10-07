@@ -56,13 +56,27 @@ table plan_summary
 		summarizeBy: sum
 		sourceColumn: relief_value_per_trip
 
+	column min_roi
+		dataType: double
+		formatString: #,0.00
+		lineageTag: b99e5c86-c76d-5cf3-8801-3ed87f982b18
+		summarizeBy: sum
+		sourceColumn: min_roi
+
+	column required_per_arm
+		dataType: int64
+		formatString: #,0
+		lineageTag: 3a4007ef-6031-5692-84e3-3c01d2c6ded9
+		summarizeBy: sum
+		sourceColumn: required_per_arm
+
 	partition plan_summary = m
 		mode: import
 		source =
 				let
-				    Source = #table(type table [#"budget" = nullable text, #"contact_limit" = nullable text, #"points_limit" = nullable text, #"eligible_customers" = nullable text, #"proven_optimal" = nullable text, #"decision_variables" = nullable text, #"free_variables" = nullable text, #"relief_value_per_trip" = nullable text], {
-				        {"10000.0", "5000", "2500000", "17059", "True", "112563", "4402", "0.5"}
+				    Source = #table(type table [#"budget" = nullable text, #"contact_limit" = nullable text, #"points_limit" = nullable text, #"eligible_customers" = nullable text, #"proven_optimal" = nullable text, #"decision_variables" = nullable text, #"free_variables" = nullable text, #"relief_value_per_trip" = nullable text, #"min_roi" = nullable text, #"required_per_arm" = nullable text], {
+				        {"10000.0", "5000", "2500000", "17059", "True", "112563", "4402", "0.5", "0.15", "1794"}
 				    }),
-				    Typed = Table.TransformColumnTypes(Source, {{"budget", type number}, {"contact_limit", Int64.Type}, {"points_limit", Int64.Type}, {"eligible_customers", Int64.Type}, {"proven_optimal", type logical}, {"decision_variables", Int64.Type}, {"free_variables", Int64.Type}, {"relief_value_per_trip", type number}})
+				    Typed = Table.TransformColumnTypes(Source, {{"budget", type number}, {"contact_limit", Int64.Type}, {"points_limit", Int64.Type}, {"eligible_customers", Int64.Type}, {"proven_optimal", type logical}, {"decision_variables", Int64.Type}, {"free_variables", Int64.Type}, {"relief_value_per_trip", type number}, {"min_roi", type number}, {"required_per_arm", Int64.Type}})
 				in
 				    Typed

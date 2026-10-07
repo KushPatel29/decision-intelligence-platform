@@ -12,9 +12,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
 import secrets
+import threading
 import time
+import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -28,7 +31,19 @@ from .experiments import sample_size
 from .optimization import solve
 from .planning import with_reserve
 
+LOG = logging.getLogger("corridor.api")
+if not LOG.handlers:
+    # Access lines go to stdout as JSON whatever uvicorn's own log configuration is; the container's log
+    # driver collects them.
+    _handler = logging.StreamHandler()
+    _handler.setFormatter(logging.Formatter("%(message)s"))
+    LOG.addHandler(_handler)
+    LOG.setLevel(logging.INFO)
+    LOG.propagate = False
 DEFAULT_SERVING = Path(os.environ.get("CORRIDOR_SERVING", ROOT / "outputs" / "serving"))
+# A scenario solve is CPU-bound and can take tens of seconds on extreme inputs. CORRIDOR_SOLVE_SECONDS caps each
+# MIP sub-solve (a capped solve returns its best feasible plan with status "feasible"), and CORRIDOR_MAX_SOLVES
+# caps how many run at once, so a burst of requests degrades to "busy, retry" instead of exhausting the workers.
 
 
 class Snapshot:
@@ -105,10 +120,35 @@ def create_app(serving: Path | None = None) -> FastAPI:
         lifespan=lifespan,
     )
 
+    @app.middleware("http")
+    async def access_log(request: Request, call_next):
+        """One JSON line per request, keyed by a request ID the client can quote back."""
+        request_id = request.headers.get("x-request-id") or uuid.uuid4().hex
+        started = time.perf_counter()
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = request_id
+        LOG.info(
+            json.dumps(
+                {
+                    "request_id": request_id,
+                    "method": request.method,
+                    "path": request.url.path,
+                    "status": response.status_code,
+                    "ms": round((time.perf_counter() - started) * 1000, 1),
+                }
+            )
+        )
+        return response
+
+    solve_seconds = float(os.environ.get("CORRIDOR_SOLVE_SECONDS", "20"))
+    solves = threading.BoundedSemaphore(max(1, int(os.environ.get("CORRIDOR_MAX_SOLVES", "2"))))
+
     def snapshot(request: Request) -> Snapshot:
-        value = request.app.state.snapshot
+        # getattr: a request that arrives before startup has loaded the snapshot is "not ready", not a 500.
+        value = getattr(request.app.state, "snapshot", None)
         if value is None:
-            raise HTTPException(503, f"Serving snapshot unavailable: {request.app.state.error}")
+            error = getattr(request.app.state, "error", None) or "not loaded yet"
+            raise HTTPException(503, f"Serving snapshot unavailable: {error}")
         return value
 
     @app.get("/health", tags=["operations"])
@@ -217,6 +257,10 @@ def create_app(serving: Path | None = None) -> FastAPI:
         )
         keep = (candidates.objective_value > 0) | (candidates.trips_peak < 0)
         candidates = candidates[keep].reset_index(drop=True)
+        if not solves.acquire(blocking=False):
+            raise HTTPException(
+                503, "The solver is busy; retry in a few seconds", headers={"Retry-After": "5"}
+            )
         started = time.perf_counter()
         try:
             allocation = solve(
@@ -227,11 +271,14 @@ def create_app(serving: Path | None = None) -> FastAPI:
                 body.min_roi,
                 body.solver,
                 body.points,
+                time_limit=solve_seconds,
             )
         except ValueError as exc:
             raise HTTPException(422, str(exc)) from exc
         except RuntimeError as exc:
             raise HTTPException(503, str(exc)) from exc
+        finally:
+            solves.release()
         diagnostics = {k: v for k, v in allocation.diagnostics.items() if k != "certificate"}
         result = {
             "release_id": data.release_id,

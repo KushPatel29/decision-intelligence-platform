@@ -12,9 +12,10 @@ effects from the stored model to 1e-16.
 **Release gate.** Blocking checks are the ones production could compute; the simulation checks (share of the
 ceiling, elasticity coverage) are reported beside them.
 
-**Power BI.** A Command centre page and eight more panels drawn as HTML and CSS by DAX measures in the HTML Content
+**Power BI.** A Command centre page, a KPI strip on every page (each KPI with a status pill and a micro-visual against
+its limit, target, history or parts) and eight more panels drawn as HTML and CSS by DAX measures in the HTML Content
 visual: hero KPIs, offer cards, guardrails with shadow prices, a policy leaderboard, an experiment forest plot with
-Bonferroni intervals, a zone-by-period capacity heat grid, a segment table and a release scorecard. Every one of 149
+Bonferroni intervals, a zone-by-period capacity heat grid, a segment table and a release scorecard. Every one of 135
 measures is executed against Power BI's engine by `scripts/validate_powerbi_model.ps1`, which also found that an
 apostrophe in a measure name had stopped Desktop opening the model; the generator now escapes it. Offers share one
 colour map with the app, and the two loyalty rewards share a slot with a texture instead of a ninth, unvalidated hue.

@@ -8,8 +8,8 @@
       "p06PanelBg",
       "p06PanelTitle",
       "p06PanelClose",
-      "v0607",
-      "v0608",
+      "v0605",
+      "v0606",
       "p06PanelClear"
     ],
     "applyOnlyToTargetVisuals": true,
@@ -25,8 +25,8 @@
           "p06PanelBg": {},
           "p06PanelTitle": {},
           "p06PanelClose": {},
-          "v0607": {},
-          "v0608": {},
+          "v0605": {},
+          "v0606": {},
           "p06PanelClear": {}
         },
         "visualContainerGroups": {

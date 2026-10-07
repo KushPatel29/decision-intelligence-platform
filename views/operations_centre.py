@@ -161,7 +161,7 @@ with tab_release:
         ),
         (
             "Power BI",
-            "Generated nine-page report; all 149 measures executed against Power BI's engine",
+            "Generated nine-page report; all 135 measures executed against Power BI's engine",
             "Ready",
         ),
         (

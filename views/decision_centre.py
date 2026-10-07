@@ -21,7 +21,18 @@ from decision_platform.ui import (
     resource_ledger,
     tiles,
 )
-from decision_platform.webapp import ROOT, context, doc, download, offer_names, offer_order, table, zone_names
+from decision_platform.webapp import (
+    ROOT,
+    SOLVE_SECONDS,
+    context,
+    doc,
+    download,
+    offer_names,
+    offer_order,
+    solver_slot,
+    table,
+    zone_names,
+)
 
 page_header(
     "Decision centre",
@@ -203,9 +214,22 @@ with studio:
             candidates = candidates[keep].reset_index(drop=True)
             base = with_reserve(capacity, reserve)
             mode = "highs" if solver.startswith("HiGHS") else "auto"
-            with st.spinner("Solving the LP relaxation and the exact core…"):
-                allocation = solve(candidates, base, float(budget), int(limit), float(roi), mode, int(points))
-                lp = lp_relaxation(candidates, base, float(budget), int(limit), float(roi), int(points))
+            with solver_slot() as free:
+                if not free:
+                    st.warning("Other scenarios are solving right now. Try again in a few seconds.")
+                    st.stop()
+                with st.spinner("Solving the LP relaxation and the exact core…"):
+                    allocation = solve(
+                        candidates,
+                        base,
+                        float(budget),
+                        int(limit),
+                        float(roi),
+                        mode,
+                        int(points),
+                        time_limit=SOLVE_SECONDS,
+                    )
+                    lp = lp_relaxation(candidates, base, float(budget), int(limit), float(roi), int(points))
             result = {
                 "frame": allocation.selected,
                 "diagnostics": allocation.diagnostics,

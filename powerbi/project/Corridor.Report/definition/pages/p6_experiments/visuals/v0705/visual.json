@@ -3,17 +3,17 @@
   "name": "v0705",
   "position": {
     "x": 654,
-    "y": 208,
+    "y": 470,
     "z": 1607,
-    "height": 246,
+    "height": 234,
     "width": 606,
     "tabOrder": 1607
   },
   "visual": {
-    "visualType": "tableEx",
+    "visualType": "pivotTable",
     "query": {
       "queryState": {
-        "Values": {
+        "Rows": {
           "projections": [
             {
               "field": {
@@ -28,8 +28,33 @@
               },
               "queryRef": "dim_offer.offer_name",
               "nativeQueryRef": "offer_name",
-              "displayName": "Offer"
-            },
+              "displayName": "Offer",
+              "active": true
+            }
+          ]
+        },
+        "Columns": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "learner_comparison"
+                    }
+                  },
+                  "Property": "learner"
+                }
+              },
+              "queryRef": "learner_comparison.learner",
+              "nativeQueryRef": "learner",
+              "displayName": "Learner",
+              "active": true
+            }
+          ]
+        },
+        "Values": {
+          "projections": [
             {
               "field": {
                 "Measure": {
@@ -38,88 +63,14 @@
                       "Entity": "_Measures"
                     }
                   },
-                  "Property": "Trial value effect"
+                  "Property": "Learner rank correlation"
                 }
               },
-              "queryRef": "_Measures.Trial value effect",
-              "nativeQueryRef": "Trial value effect"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Measures"
-                    }
-                  },
-                  "Property": "Trial value low"
-                }
-              },
-              "queryRef": "_Measures.Trial value low",
-              "nativeQueryRef": "Trial value low"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Measures"
-                    }
-                  },
-                  "Property": "Trial value high"
-                }
-              },
-              "queryRef": "_Measures.Trial value high",
-              "nativeQueryRef": "Trial value high"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Measures"
-                    }
-                  },
-                  "Property": "Trial trips effect"
-                }
-              },
-              "queryRef": "_Measures.Trial trips effect",
-              "nativeQueryRef": "Trial trips effect"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Measures"
-                    }
-                  },
-                  "Property": "CUPED variance removed"
-                }
-              },
-              "queryRef": "_Measures.CUPED variance removed",
-              "nativeQueryRef": "CUPED variance removed"
+              "queryRef": "_Measures.Learner rank correlation",
+              "nativeQueryRef": "Learner rank correlation"
             }
           ]
         }
-      },
-      "sortDefinition": {
-        "sort": [
-          {
-            "field": {
-              "Measure": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "_Measures"
-                  }
-                },
-                "Property": "Trial value effect"
-              }
-            },
-            "direction": "Descending"
-          }
-        ],
-        "isDefaultSort": false
       }
     },
     "drillFilterOtherVisuals": true,
@@ -130,7 +81,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Effects with Bonferroni 95% intervals'"
+                  "Value": "'Causal learners: rank correlation with true value'"
                 }
               }
             },
@@ -150,7 +101,29 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Table titled Effects with Bonferroni 95% intervals. Lists offer, effect, interval bounds, trips effect and CUPED variance removed.'"
+                  "Value": "'Matrix titled Causal learners. Shows Learner rank correlation by offer and learner.'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "objects": {
+      "subTotals": [
+        {
+          "properties": {
+            "rowSubtotals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "columnSubtotals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }

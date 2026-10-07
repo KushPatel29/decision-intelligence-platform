@@ -8,9 +8,9 @@
       "p03PanelBg",
       "p03PanelTitle",
       "p03PanelClose",
-      "v0308",
-      "v0309",
-      "v0310",
+      "v0305",
+      "v0306",
+      "v0307",
       "p03PanelClear"
     ],
     "applyOnlyToTargetVisuals": true,
@@ -26,9 +26,9 @@
           "p03PanelBg": {},
           "p03PanelTitle": {},
           "p03PanelClose": {},
-          "v0308": {},
-          "v0309": {},
-          "v0310": {},
+          "v0305": {},
+          "v0306": {},
+          "v0307": {},
           "p03PanelClear": {}
         },
         "visualContainerGroups": {

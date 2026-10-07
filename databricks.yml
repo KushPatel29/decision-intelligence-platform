@@ -31,7 +31,6 @@ sync:
     - outputs/**
     - output/**
     - powerbi/**
-    - web/**
     - docs/**
     - tests/**
     - views/**

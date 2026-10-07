@@ -420,6 +420,8 @@ def _powerbi(cfg, tables, metrics, experiment, monitoring, policy, optimization)
                     "decision_variables": int(optimization["certification"].get("variables", 0)),
                     "free_variables": int(optimization["certification"].get("free_variables", 0)),
                     "relief_value_per_trip": cfg.relief_value,
+                    "min_roi": cfg.min_roi,
+                    "required_per_arm": int(experiment["required_per_arm"]),
                 }
             ]
         ),

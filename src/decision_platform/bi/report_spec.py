@@ -8,34 +8,14 @@ Fields are written ``table[column]`` for a column and ``[Measure]`` for a measur
 
 from __future__ import annotations
 
-from decision_platform.bi.html_spec import HTML_VISUAL
+from decision_platform.bi.html_spec import HTML_VISUAL, KPI_STRIPS
 from decision_platform.bi.report_chrome import add_chrome
 
+# Pages were laid out with a 118-px row of KPI tiles at the top; the KPI strip takes that row.
+# (The SVG "card" kind is still supported by the generator for reports that want image tiles.)
 CARD_Y, CARD_H = 20, 118
 ROW1_Y, ROW2_Y = 152, 442
-CARDS = ((20, 300), (330, 296), (634, 300), (942, 318))
-CARDS_3 = ((20, 404), (438, 404), (856, 404))
 SLICER = (1068, 192, 76)
-
-
-def cards(*specs: dict) -> list[dict]:
-    slots = CARDS if len(specs) == 4 else CARDS_3
-    return [
-        {"type": "card", "pos": (x, CARD_Y, width, CARD_H), **spec} for (x, width), spec in zip(slots, specs)
-    ]
-
-
-def tile(
-    field: str, alt: str, *, subtitle: str | None = None, label: str | None = None, rail: bool = True
-) -> dict:
-    spec: dict[str, object] = {"field": field, "alt": alt}
-    if subtitle:
-        spec["subtitle"] = subtitle
-    if label:
-        spec["label"] = label
-    if not rail:
-        spec["rail"] = False
-    return spec
 
 
 def slicers(*fields: tuple[str, str]) -> list[dict]:
@@ -55,6 +35,18 @@ def slicers(*fields: tuple[str, str]) -> list[dict]:
 OFFER = ("dim_offer[offer_name]", "Offer")
 ZONE = ("dim_zone[zone_name]", "Zone")
 PERIOD = ("dim_period[period]", "Travel period")
+
+
+def kpis(page: str) -> dict:
+    """The page's KPI strip: one HTML visual in place of a row of image tiles."""
+    description, _cards = KPI_STRIPS[page]
+    return {
+        "type": "html",
+        "measure": f"[HTML KPIs {page}]",
+        "pos": (20, CARD_Y, 1240, CARD_H),
+        "alt": f"KPI strip. {description}",
+        "framed": False,
+    }
 
 
 def html(measure: str, pos: tuple[int, int, int, int], alt: str, *, framed: bool = True) -> dict:
@@ -99,20 +91,7 @@ PAGES: list[dict] = [
         "name": "p1_plan",
         "display": "October plan",
         "visuals": [
-            *cards(
-                tile(
-                    "[Expected value]",
-                    "Card. Expected value of the October plan.",
-                    subtitle="[Value caption]",
-                ),
-                tile(
-                    "[Incentive spend]",
-                    "Card. Incentive spend against the budget.",
-                    subtitle="[Spend caption]",
-                ),
-                tile("[Contacts]", "Card. Customers contacted.", subtitle="[Contacts caption]"),
-                tile("[Net ROI]", "Card. 30-day net ROI of the plan.", subtitle="[ROI caption]", rail=False),
-            ),
+            kpis("p1_plan"),
             {
                 "type": "narrative",
                 "field": "[Executive summary]",
@@ -155,16 +134,7 @@ PAGES: list[dict] = [
         "name": "p2_contacts",
         "display": "Campaign contacts",
         "visuals": [
-            *cards(
-                tile(
-                    "[Extra trips]",
-                    "Card. Extra trips the plan is expected to create.",
-                    subtitle="[Peak caption]",
-                ),
-                tile("[Points awarded]", "Card. Loyalty points the plan awards."),
-                tile("[Mean uncertainty]", "Card. Mean bootstrap standard deviation per contact."),
-                tile("[Budget used]", "Card. Share of the budget used.", subtitle="[Spend caption]"),
-            ),
+            kpis("p2_contacts"),
             {
                 "type": "stacked_column",
                 "x": "dim_zone[zone_name]",
@@ -210,14 +180,7 @@ PAGES: list[dict] = [
         "name": "p3_customers",
         "display": "Customers",
         "visuals": [
-            *cards(
-                tile("[Customers]", "Card. Customers in the October snapshot."),
-                tile("[Mean travel propensity]", "Card. Mean probability of travelling in the next 30 days."),
-                tile(
-                    "[Mean inactivity risk]", "Card. Mean 90-day inactivity risk.", subtitle="[Risk caption]"
-                ),
-                tile("[Share in plan]", "Card. Share of customers in the plan."),
-            ),
+            kpis("p3_customers"),
             {
                 "type": "bar",
                 "x": "customer_segments[rfm_segment]",
@@ -249,14 +212,7 @@ PAGES: list[dict] = [
         "name": "p4_capacity",
         "display": "Transportation and capacity",
         "visuals": [
-            *cards(
-                tile("[Forecast trips]", "Card. 30-day baseline demand forecast."),
-                tile("[Campaign trips]", "Card. Signed trips the campaign adds.", subtitle="[Peak caption]"),
-                tile(
-                    "[Load]", "Card. Forecast plus campaign trips over capacity.", subtitle="[Load caption]"
-                ),
-                tile("[Planning capacity]", "Card. Planning capacity over the window."),
-            ),
+            kpis("p4_capacity"),
             html(
                 "HTML Capacity grid",
                 (20, ROW1_Y, 620, 272),
@@ -301,16 +257,7 @@ PAGES: list[dict] = [
         "name": "p5_pricing",
         "display": "Pricing",
         "visuals": [
-            *cards(
-                tile(
-                    "[Elasticity]",
-                    "Card. Mean price elasticity.",
-                    subtitle="[Elasticity caption]",
-                    rail=False,
-                ),
-                tile("[Price contribution change]", "Card. Contribution change from the optimized prices."),
-                tile("[Cells repriced]", "Card. Zone-period cells whose optimal price changes."),
-            ),
+            kpis("p5_pricing"),
             {
                 "type": "bar",
                 "x": "dim_zone[zone_name]",
@@ -354,15 +301,7 @@ PAGES: list[dict] = [
         "name": "p6_experiments",
         "display": "Experiments",
         "visuals": [
-            *cards(
-                tile("[Customers per arm]", "Card. Customers per trial arm.", subtitle="[Trial caption]"),
-                tile("[CUPED variance removed]", "Card. Variance removed by CUPED."),
-                tile(
-                    "[Learner rank correlation]",
-                    "Card. Mean rank correlation of causal learners with the truth.",
-                    rail=False,
-                ),
-            ),
+            kpis("p6_experiments"),
             html(
                 "HTML Experiment forest",
                 (20, ROW1_Y, 620, 272),
@@ -411,25 +350,7 @@ PAGES: list[dict] = [
         "name": "p7_policy",
         "display": "Policy value",
         "visuals": [
-            *cards(
-                tile(
-                    "[Optimized true value]",
-                    "Card. True value of the optimized plan.",
-                    subtitle="[Truth caption]",
-                    label="Optimized plan · true value",
-                ),
-                tile(
-                    "[Value ceiling]",
-                    "Card. Value of the plan with perfect knowledge.",
-                    label="Ceiling · perfect knowledge",
-                ),
-                tile(
-                    "[Propensity true value]",
-                    "Card. True value of propensity targeting.",
-                    subtitle="[Propensity caption]",
-                    label="Propensity targeting · true value",
-                ),
-            ),
+            kpis("p7_policy"),
             {
                 "type": "bar",
                 "x": "policy_comparison[policy]",
@@ -475,21 +396,7 @@ PAGES: list[dict] = [
         "name": "p8_operations",
         "display": "Operations",
         "visuals": [
-            *cards(
-                tile(
-                    "[Checks passed]",
-                    "Card. Release acceptance checks passed.",
-                    subtitle="[Gate caption]",
-                    rail=False,
-                ),
-                tile("[Model AUC]", "Card. Mean held-out AUC of the customer models.", rail=False),
-                tile("[Flagged days]", "Card. Feed ingestion days flagged.", subtitle="[Feed caption]"),
-                tile(
-                    "[Features to review]",
-                    "Card. Features above the drift threshold.",
-                    subtitle="[Drift caption]",
-                ),
-            ),
+            kpis("p8_operations"),
             {
                 "type": "line",
                 "x": "feed_quality[day]",

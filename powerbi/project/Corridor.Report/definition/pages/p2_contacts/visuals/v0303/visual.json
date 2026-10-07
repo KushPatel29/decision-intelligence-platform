@@ -2,42 +2,104 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
   "name": "v0303",
   "position": {
-    "x": 634,
-    "y": 88,
+    "x": 794,
+    "y": 208,
     "z": 1214,
-    "height": 107,
-    "width": 300,
+    "height": 246,
+    "width": 466,
     "tabOrder": 1214
   },
   "visual": {
-    "visualType": "image",
-    "objects": {
-      "image": [
-        {
-          "properties": {
-            "sourceType": {
-              "expr": {
-                "Literal": {
-                  "Value": "'imageUrl'"
+    "visualType": "clusteredBarChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_offer"
+                    }
+                  },
+                  "Property": "offer_name"
                 }
-              }
-            },
-            "sourceUrl": {
-              "expr": {
+              },
+              "queryRef": "dim_offer.offer_name",
+              "nativeQueryRef": "offer_name",
+              "displayName": "Offer",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
                 "Measure": {
                   "Expression": {
                     "SourceRef": {
                       "Entity": "_Measures"
                     }
                   },
-                  "Property": "KPI SVG Mean uncertainty @314"
+                  "Property": "Value per incentive dollar"
+                }
+              },
+              "queryRef": "_Measures.Value per incentive dollar",
+              "nativeQueryRef": "Value per incentive dollar"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "Value per incentive dollar"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Expected value per incentive dollar'"
                 }
               }
             },
-            "fit": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "'Fit'"
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Bar chart titled Expected value per incentive dollar. Plots Value per incentive dollar by offer.'"
                 }
               }
             }
@@ -45,61 +107,40 @@
         }
       ]
     },
-    "visualContainerObjects": {
-      "general": [
+    "objects": {
+      "categoryAxis": [
         {
           "properties": {
-            "altText": {
+            "showAxisTitle": {
               "expr": {
                 "Literal": {
-                  "Value": "'KPI tile. Mean bootstrap standard deviation per contact.'"
+                  "Value": "false"
                 }
               }
             }
           }
         }
       ],
-      "padding": [
+      "valueAxis": [
         {
           "properties": {
-            "top": {
+            "showAxisTitle": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
-                }
-              }
-            },
-            "bottom": {
-              "expr": {
-                "Literal": {
-                  "Value": "0D"
-                }
-              }
-            },
-            "left": {
-              "expr": {
-                "Literal": {
-                  "Value": "0D"
-                }
-              }
-            },
-            "right": {
-              "expr": {
-                "Literal": {
-                  "Value": "0D"
+                  "Value": "false"
                 }
               }
             }
           }
         }
       ],
-      "title": [
+      "labels": [
         {
           "properties": {
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             }

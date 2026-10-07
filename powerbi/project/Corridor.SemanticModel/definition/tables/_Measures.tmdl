@@ -91,6 +91,24 @@ table _Measures
 		lineageTag: 8dbf8533-709d-50b8-a0c1-2bf56e232405
 		displayFolder: 01 Plan
 
+	/// Maximum loyalty points the plan may award.
+	measure 'Points cap' = MAX(plan_summary[points_limit])
+		formatString: #,0
+		lineageTag: 44544529-32b7-54be-b383-42daf26f0b81
+		displayFolder: 01 Plan
+
+	/// Offers with at least one contact in the plan.
+	measure 'Offers in plan' = COUNTROWS(FILTER(VALUES(plan_contacts[offer_id]), CALCULATE(COUNTROWS(plan_contacts)) > 0))
+		formatString: #,0
+		lineageTag: 46078b79-bec3-5ec9-8dc8-20f7bb43e1ea
+		displayFolder: 01 Plan
+
+	/// Minimum 30-day net ROI the plan must hold.
+	measure 'ROI floor' = MAX(plan_summary[min_roi])
+		formatString: 0%
+		lineageTag: cca420e6-dd1c-54ba-a9a6-9cec5c358355
+		displayFolder: 01 Plan
+
 	/// Customers with consent, My Account, no past-due balance and an active account.
 	measure 'Eligible customers' = MAX(plan_summary[eligible_customers])
 		formatString: #,0
@@ -337,6 +355,12 @@ table _Measures
 		lineageTag: 5904e6fe-09a5-5cac-bf59-03a3a44b9180
 		displayFolder: 05 Experiments
 
+	/// Customers per arm the power calculation required for a 5-point lift.
+	measure 'Required per arm' = MAX(plan_summary[required_per_arm])
+		formatString: #,0
+		lineageTag: 214278b2-8a6f-5fcc-9df8-0b9a23a362c2
+		displayFolder: 05 Experiments
+
 	/// Cumulative CUPED z-statistic.
 	measure 'Sequential z' = SUM(sequential_looks[z])
 		formatString: #,0.00
@@ -450,6 +474,24 @@ table _Measures
 		formatString: #,0
 		lineageTag: 10142240-72f5-5a3d-a971-e008f86e6d4a
 		displayFolder: 07 Operations
+
+	/// Ingestion days monitored.
+	measure 'Feed days' = COUNTROWS(feed_quality)
+		formatString: #,0
+		lineageTag: 4dd9a033-411e-51d6-a6e4-30cd3163ae08
+		displayFolder: 07 Operations
+
+	/// Model features under drift monitoring.
+	measure 'Features monitored' = COUNTROWS(feature_drift)
+		formatString: #,0
+		lineageTag: 35817e0a-26f8-5c04-8e95-3b2f5e2ba063
+		displayFolder: 07 Operations
+
+	/// Zone x period cells priced by the optimizer.
+	measure 'Price cells' = COUNTROWS(price_plan)
+		formatString: #,0
+		lineageTag: b1cb6cb5-ff35-562b-8d58-80cf9d164da2
+		displayFolder: 06 Pricing
 
 	/// Blue for the production plan, light blue for the ceiling, grey otherwise.
 	measure 'Approach colour' = SWITCH(SELECTEDVALUE(policy_comparison[policy]), "Optimized (MIP)", "#3987e5", "Oracle optimum (true effects)", "#86b6ef", "#5b7486")
@@ -587,90 +629,6 @@ table _Measures
 		dataCategory: ImageUrl
 		displayFolder: Report UI
 
-	measure 'KPI SVG Expected value | Value caption @314' =
-			VAR vValue = [Expected value]
-			VAR vShown = IF(ISBLANK(vValue), "—", IF(ABS(vValue) >= 1000000, FORMAT(vValue / 1000000, "\$#,0.00") & "M", FORMAT(vValue, "\$#,0")))
-			VAR vCaptionRaw = SUBSTITUTE(SUBSTITUTE(COALESCE([Value caption], ""), "&", "&amp;"), "<", "&lt;")
-			VAR vCaption = IF(LEN(vCaptionRaw) > 61, LEFT(vCaptionRaw, 59) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='314' height='112' viewBox='0 0 314 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Expected value</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 7a771f22-701c-5d61-9279-cf23a761249b
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Incentive spend | Spend caption @310' =
-			VAR vValue = [Incentive spend]
-			VAR vShown = IF(ISBLANK(vValue), "—", IF(ABS(vValue) >= 1000000, FORMAT(vValue / 1000000, "\$#,0.00") & "M", FORMAT(vValue, "\$#,0")))
-			VAR vCaptionRaw = SUBSTITUTE(SUBSTITUTE(COALESCE([Spend caption], ""), "&", "&amp;"), "<", "&lt;")
-			VAR vCaption = IF(LEN(vCaptionRaw) > 61, LEFT(vCaptionRaw, 59) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='310' height='112' viewBox='0 0 310 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Incentive spend</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: ccc495d0-27da-5cee-82f7-2335c26cf01b
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Contacts | Contacts caption @314' =
-			VAR vValue = [Contacts]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "#,0"))
-			VAR vCaptionRaw = SUBSTITUTE(SUBSTITUTE(COALESCE([Contacts caption], ""), "&", "&amp;"), "<", "&lt;")
-			VAR vCaption = IF(LEN(vCaptionRaw) > 61, LEFT(vCaptionRaw, 59) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='314' height='112' viewBox='0 0 314 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Contacts</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 66538835-7107-59c2-a607-b17a9a1c52e3
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Net ROI | ROI caption | no rail @333' =
-			VAR vValue = [Net ROI]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "0%"))
-			VAR vCaptionRaw = SUBSTITUTE(SUBSTITUTE(COALESCE([ROI caption], ""), "&", "&amp;"), "<", "&lt;")
-			VAR vCaption = IF(LEN(vCaptionRaw) > 66, LEFT(vCaptionRaw, 64) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='333' height='112' viewBox='0 0 333 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Net ROI</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 22e74033-58c5-5a0f-acd6-2ed97e4d639c
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
 	measure 'Filter Context - Campaign contacts' =
 			VAR vText = IF(ISFILTERED('dim_offer'[offer_name]), CONCATENATEX(VALUES('dim_offer'[offer_name]), 'dim_offer'[offer_name], ", "), "all offers") & " · " & IF(ISFILTERED('dim_zone'[zone_name]), CONCATENATEX(VALUES('dim_zone'[zone_name]), 'dim_zone'[zone_name], ", "), "all zones") & " · " & IF(ISFILTERED('plan_contacts'[rfm_segment]), CONCATENATEX(VALUES('plan_contacts'[rfm_segment]), 'plan_contacts'[rfm_segment], ", "), "all segments")
 			RETURN IF(LEN(vText) > 72, LEFT(vText, 70) & "…", vText)
@@ -694,91 +652,6 @@ table _Measures
 			VAR vOn = INT(ISFILTERED('dim_offer'[offer_name])) + INT(ISFILTERED('dim_zone'[zone_name])) + INT(ISFILTERED('plan_contacts'[rfm_segment]))
 			RETURN IF(vOn = 0, "Filters", "Filters · " & vOn)
 		lineageTag: 4ecabbd6-ffbe-5aa7-a696-90d25c5bbe86
-		displayFolder: Report UI
-
-	measure 'KPI SVG Extra trips | Peak caption @314' =
-			VAR vValue = [Extra trips]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "#,0"))
-			VAR vCaptionRaw = SUBSTITUTE(SUBSTITUTE(COALESCE([Peak caption], ""), "&", "&amp;"), "<", "&lt;")
-			VAR vCaption = IF(LEN(vCaptionRaw) > 61, LEFT(vCaptionRaw, 59) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='314' height='112' viewBox='0 0 314 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Extra trips</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 288a823f-cf00-5187-874e-62a323540aa4
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Points awarded @310' =
-			VAR vValue = [Points awarded]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "#,0"))
-			VAR vCaptionRaw = ""
-			VAR vCaption = IF(LEN(vCaptionRaw) > 61, LEFT(vCaptionRaw, 59) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='310' height='112' viewBox='0 0 310 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Points awarded</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 138346e0-0c8b-57bf-bbbb-84af84894f14
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Mean uncertainty @314' =
-			VAR vValue = [Mean uncertainty]
-			VAR vShown = IF(ISBLANK(vValue), "—", IF(ABS(vValue) >= 1000000, FORMAT(vValue / 1000000, "\$#,0.00") & "M", FORMAT(vValue, "\$#,0.00")))
-			VAR vCaptionRaw = ""
-			VAR vCaption = IF(LEN(vCaptionRaw) > 61, LEFT(vCaptionRaw, 59) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='314' height='112' viewBox='0 0 314 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Mean uncertainty</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: f49bc3d0-0dfe-5989-bf7b-b8e68bed6da4
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Budget used | Spend caption @333' =
-			VAR vValue = [Budget used]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "0%"))
-			VAR vCaptionRaw = SUBSTITUTE(SUBSTITUTE(COALESCE([Spend caption], ""), "&", "&amp;"), "<", "&lt;")
-			VAR vCaption = IF(LEN(vCaptionRaw) > 66, LEFT(vCaptionRaw, 64) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vRail = ROUND(301 * MAX(0, MIN(1, COALESCE(vValue, 0))), 0)
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='333' height='112' viewBox='0 0 333 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Budget used</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & "<rect x='16' y='76' width='301' height='6' rx='3' fill='#263f52'/>" & "<rect x='16' y='76' width='" & vRail & "' height='6' rx='3' fill='#4bdcd5'/>"
-			        & "<text x='16' y='100' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 191fa14c-ae8e-53ea-b520-9ca544659048
-		dataCategory: ImageUrl
 		displayFolder: Report UI
 
 	measure 'Filter Context - Customers' =
@@ -806,93 +679,6 @@ table _Measures
 		lineageTag: 5981191e-1e6c-5c84-ba85-bce9a7e33bf8
 		displayFolder: Report UI
 
-	measure 'KPI SVG Customers @314' =
-			VAR vValue = [Customers]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "#,0"))
-			VAR vCaptionRaw = ""
-			VAR vCaption = IF(LEN(vCaptionRaw) > 61, LEFT(vCaptionRaw, 59) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='314' height='112' viewBox='0 0 314 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Customers</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 228e0d5f-304f-588d-872f-ba98c551dd51
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Mean travel propensity @310' =
-			VAR vValue = [Mean travel propensity]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "0.0%"))
-			VAR vCaptionRaw = ""
-			VAR vCaption = IF(LEN(vCaptionRaw) > 61, LEFT(vCaptionRaw, 59) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vRail = ROUND(278 * MAX(0, MIN(1, COALESCE(vValue, 0))), 0)
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='310' height='112' viewBox='0 0 310 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Mean travel propensity</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & "<rect x='16' y='76' width='278' height='6' rx='3' fill='#263f52'/>" & "<rect x='16' y='76' width='" & vRail & "' height='6' rx='3' fill='#4bdcd5'/>"
-			        & "<text x='16' y='100' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: a153070a-93ae-5d61-a2ec-84dc0ac45f3f
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Mean inactivity risk | Risk caption @314' =
-			VAR vValue = [Mean inactivity risk]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "0.0%"))
-			VAR vCaptionRaw = SUBSTITUTE(SUBSTITUTE(COALESCE([Risk caption], ""), "&", "&amp;"), "<", "&lt;")
-			VAR vCaption = IF(LEN(vCaptionRaw) > 61, LEFT(vCaptionRaw, 59) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vRail = ROUND(282 * MAX(0, MIN(1, COALESCE(vValue, 0))), 0)
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='314' height='112' viewBox='0 0 314 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Mean inactivity risk</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & "<rect x='16' y='76' width='282' height='6' rx='3' fill='#263f52'/>" & "<rect x='16' y='76' width='" & vRail & "' height='6' rx='3' fill='#4bdcd5'/>"
-			        & "<text x='16' y='100' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: b7e8bd00-8ad9-56de-9c03-6be79f12d80e
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Share in plan @333' =
-			VAR vValue = [Share in plan]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "0.0%"))
-			VAR vCaptionRaw = ""
-			VAR vCaption = IF(LEN(vCaptionRaw) > 66, LEFT(vCaptionRaw, 64) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vRail = ROUND(301 * MAX(0, MIN(1, COALESCE(vValue, 0))), 0)
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='333' height='112' viewBox='0 0 333 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Share in plan</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & "<rect x='16' y='76' width='301' height='6' rx='3' fill='#263f52'/>" & "<rect x='16' y='76' width='" & vRail & "' height='6' rx='3' fill='#4bdcd5'/>"
-			        & "<text x='16' y='100' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 6313ebc9-efaa-573e-841c-c833115fcfc8
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
 	measure 'Filter Context - Transportation and capacity' =
 			VAR vText = IF(ISFILTERED('dim_period'[period]), CONCATENATEX(VALUES('dim_period'[period]), 'dim_period'[period], ", "), "all periods")
 			RETURN IF(LEN(vText) > 72, LEFT(vText, 70) & "…", vText)
@@ -916,91 +702,6 @@ table _Measures
 			VAR vOn = INT(ISFILTERED('dim_period'[period]))
 			RETURN IF(vOn = 0, "Filters", "Filters · " & vOn)
 		lineageTag: be01a2e0-a663-52d3-969e-2ab84e6addd8
-		displayFolder: Report UI
-
-	measure 'KPI SVG Forecast trips @314' =
-			VAR vValue = [Forecast trips]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "#,0"))
-			VAR vCaptionRaw = ""
-			VAR vCaption = IF(LEN(vCaptionRaw) > 61, LEFT(vCaptionRaw, 59) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='314' height='112' viewBox='0 0 314 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Forecast trips</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 62cc237a-c257-5aac-87ae-0baed9645bd7
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Campaign trips | Peak caption @310' =
-			VAR vValue = [Campaign trips]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "#,0"))
-			VAR vCaptionRaw = SUBSTITUTE(SUBSTITUTE(COALESCE([Peak caption], ""), "&", "&amp;"), "<", "&lt;")
-			VAR vCaption = IF(LEN(vCaptionRaw) > 61, LEFT(vCaptionRaw, 59) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='310' height='112' viewBox='0 0 310 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Campaign trips</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: f27939aa-e40e-5926-8e56-46956ef11e9b
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Load | Load caption @314' =
-			VAR vValue = [Load]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "0.0%"))
-			VAR vCaptionRaw = SUBSTITUTE(SUBSTITUTE(COALESCE([Load caption], ""), "&", "&amp;"), "<", "&lt;")
-			VAR vCaption = IF(LEN(vCaptionRaw) > 61, LEFT(vCaptionRaw, 59) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vRail = ROUND(282 * MAX(0, MIN(1, COALESCE(vValue, 0))), 0)
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='314' height='112' viewBox='0 0 314 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Load</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & "<rect x='16' y='76' width='282' height='6' rx='3' fill='#263f52'/>" & "<rect x='16' y='76' width='" & vRail & "' height='6' rx='3' fill='#4bdcd5'/>"
-			        & "<text x='16' y='100' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: b2088f8d-5dda-55ef-a07e-c946d4a224b6
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Planning capacity @333' =
-			VAR vValue = [Planning capacity]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "#,0"))
-			VAR vCaptionRaw = ""
-			VAR vCaption = IF(LEN(vCaptionRaw) > 66, LEFT(vCaptionRaw, 64) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='333' height='112' viewBox='0 0 333 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Planning capacity</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 42c476ed-9fc3-5e86-ad3e-6d6b7d547ae7
-		dataCategory: ImageUrl
 		displayFolder: Report UI
 
 	measure 'Filter Context - Pricing' =
@@ -1028,69 +729,6 @@ table _Measures
 		lineageTag: f3293192-b674-5620-8d89-39e8b7040ee1
 		displayFolder: Report UI
 
-	measure 'KPI SVG Elasticity | Elasticity caption | no rail @423' =
-			VAR vValue = [Elasticity]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "0.00"))
-			VAR vCaptionRaw = SUBSTITUTE(SUBSTITUTE(COALESCE([Elasticity caption], ""), "&", "&amp;"), "<", "&lt;")
-			VAR vCaption = IF(LEN(vCaptionRaw) > 85, LEFT(vCaptionRaw, 83) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='423' height='112' viewBox='0 0 423 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Elasticity</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: e678d327-eff3-58f7-9227-1786329d5604
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Price contribution change @423' =
-			VAR vValue = [Price contribution change]
-			VAR vShown = IF(ISBLANK(vValue), "—", IF(ABS(vValue) >= 1000000, FORMAT(vValue / 1000000, "\$#,0.00") & "M", FORMAT(vValue, "\$#,0")))
-			VAR vCaptionRaw = ""
-			VAR vCaption = IF(LEN(vCaptionRaw) > 85, LEFT(vCaptionRaw, 83) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='423' height='112' viewBox='0 0 423 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Price contribution change</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: e954c666-56e4-5502-b626-fa7d99999e1d
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Cells repriced @423' =
-			VAR vValue = [Cells repriced]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "#,0"))
-			VAR vCaptionRaw = ""
-			VAR vCaption = IF(LEN(vCaptionRaw) > 85, LEFT(vCaptionRaw, 83) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='423' height='112' viewBox='0 0 423 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Cells repriced</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 4470d0ab-81cc-5738-b3ab-54a5f92c5223
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
 	measure 'Header SVG - Experiments' =
 			VAR vContext = "Page 7 of 9"
 			VAR vSvg =
@@ -1101,70 +739,6 @@ table _Measures
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
 		lineageTag: 27d0f953-2f4f-550d-9982-ef7fdcad1eb4
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Customers per arm | Trial caption @423' =
-			VAR vValue = [Customers per arm]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "#,0"))
-			VAR vCaptionRaw = SUBSTITUTE(SUBSTITUTE(COALESCE([Trial caption], ""), "&", "&amp;"), "<", "&lt;")
-			VAR vCaption = IF(LEN(vCaptionRaw) > 85, LEFT(vCaptionRaw, 83) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='423' height='112' viewBox='0 0 423 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Customers per arm</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 1e257b2d-8739-57ed-bd3f-4f65e0bc7d50
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG CUPED variance removed @423' =
-			VAR vValue = [CUPED variance removed]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "0%"))
-			VAR vCaptionRaw = ""
-			VAR vCaption = IF(LEN(vCaptionRaw) > 85, LEFT(vCaptionRaw, 83) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vRail = ROUND(391 * MAX(0, MIN(1, COALESCE(vValue, 0))), 0)
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='423' height='112' viewBox='0 0 423 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>CUPED variance removed</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & "<rect x='16' y='76' width='391' height='6' rx='3' fill='#263f52'/>" & "<rect x='16' y='76' width='" & vRail & "' height='6' rx='3' fill='#4bdcd5'/>"
-			        & "<text x='16' y='100' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: b67043cd-cd15-5fb9-951b-a1aad269aa04
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Learner rank correlation | no rail @423' =
-			VAR vValue = [Learner rank correlation]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "0.00"))
-			VAR vCaptionRaw = ""
-			VAR vCaption = IF(LEN(vCaptionRaw) > 85, LEFT(vCaptionRaw, 83) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='423' height='112' viewBox='0 0 423 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Learner rank correlation</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 912cec9e-f896-5f96-9ec1-8c742fe19cf8
 		dataCategory: ImageUrl
 		displayFolder: Report UI
 
@@ -1181,69 +755,6 @@ table _Measures
 		dataCategory: ImageUrl
 		displayFolder: Report UI
 
-	measure 'KPI SVG Optimized true value | Truth caption | Optimized plan · true value @423' =
-			VAR vValue = [Optimized true value]
-			VAR vShown = IF(ISBLANK(vValue), "—", IF(ABS(vValue) >= 1000000, FORMAT(vValue / 1000000, "\$#,0.00") & "M", FORMAT(vValue, "\$#,0")))
-			VAR vCaptionRaw = SUBSTITUTE(SUBSTITUTE(COALESCE([Truth caption], ""), "&", "&amp;"), "<", "&lt;")
-			VAR vCaption = IF(LEN(vCaptionRaw) > 85, LEFT(vCaptionRaw, 83) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='423' height='112' viewBox='0 0 423 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Optimized plan · true value</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: fd237b13-cf30-548e-aa6c-909c51c643b3
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Value ceiling | Ceiling · perfect knowledge @423' =
-			VAR vValue = [Value ceiling]
-			VAR vShown = IF(ISBLANK(vValue), "—", IF(ABS(vValue) >= 1000000, FORMAT(vValue / 1000000, "\$#,0.00") & "M", FORMAT(vValue, "\$#,0")))
-			VAR vCaptionRaw = ""
-			VAR vCaption = IF(LEN(vCaptionRaw) > 85, LEFT(vCaptionRaw, 83) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='423' height='112' viewBox='0 0 423 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Ceiling · perfect knowledge</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 157f7c51-7853-5d9a-ac39-7889b8cb69ba
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
-	measure 'KPI SVG Propensity true value | Propensity caption | Propensity targeting · true value @423' =
-			VAR vValue = [Propensity true value]
-			VAR vShown = IF(ISBLANK(vValue), "—", IF(ABS(vValue) >= 1000000, FORMAT(vValue / 1000000, "\$#,0.00") & "M", FORMAT(vValue, "\$#,0")))
-			VAR vCaptionRaw = SUBSTITUTE(SUBSTITUTE(COALESCE([Propensity caption], ""), "&", "&amp;"), "<", "&lt;")
-			VAR vCaption = IF(LEN(vCaptionRaw) > 85, LEFT(vCaptionRaw, 83) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='423' height='112' viewBox='0 0 423 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Propensity targeting · true value</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 8656cf9d-944a-5952-a398-eb1b6bee3297
-		dataCategory: ImageUrl
-		displayFolder: Report UI
-
 	measure 'Header SVG - Operations' =
 			VAR vContext = "Page 9 of 9"
 			VAR vSvg =
@@ -1257,89 +768,90 @@ table _Measures
 		dataCategory: ImageUrl
 		displayFolder: Report UI
 
-	measure 'KPI SVG Checks passed | Gate caption | no rail @314' =
-			VAR vValue = [Checks passed]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "#,0"))
-			VAR vCaptionRaw = SUBSTITUTE(SUBSTITUTE(COALESCE([Gate caption], ""), "&", "&amp;"), "<", "&lt;")
-			VAR vCaption = IF(LEN(vCaptionRaw) > 61, LEFT(vCaptionRaw, 59) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='314' height='112' viewBox='0 0 314 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Checks passed</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: e8274038-5cf6-527c-89d1-c4d374a9b743
-		dataCategory: ImageUrl
-		displayFolder: Report UI
+	/// Plan KPIs: expected value with its parts, spend against budget, contacts against the limit, and net ROI against its floor.
+	measure 'HTML KPIs p1_plan' =
+			"<div class='w'><div class='strip' style='grid-template-columns:repeat(4,1fr)'>"
+			    & "<div class='kc accent'><span class='rail'></span><div class='l'><span>Expected value</span>" & "<span class='pill info'>" & FORMAT([Value per incentive dollar], "0.0") & "x spend" & "</span>" & "</div><div class='v'>" & IF(ISBLANK([Expected value]), "—", FORMAT([Expected value], "$#,0")) & "</div>" & "<div class='seg'>" & "<i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE(MAX(0, [Expected 30-day net]), MAX(0, [Expected 30-day net]) + MAX(0, [Expected later value]) + MAX(0, [Relief value]))) * 100)), "0") & "%;background:#3987e5'></i>" & "<i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE(MAX(0, [Expected later value]), MAX(0, [Expected 30-day net]) + MAX(0, [Expected later value]) + MAX(0, [Relief value]))) * 100)), "0") & "%;background:#199e70'></i>" & "<i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE(MAX(0, [Relief value]), MAX(0, [Expected 30-day net]) + MAX(0, [Expected later value]) + MAX(0, [Relief value]))) * 100)), "0") & "%;background:#c98500'></i>" & "</div>" & "<div class='d'>" & "<span class='lg'><i style='background:#3987e5'></i>30-day " & FORMAT([Expected 30-day net], "$#,0") & "</span>" & "<span class='lg'><i style='background:#199e70'></i>days 31-90 " & FORMAT([Expected later value], "$#,0") & "</span>" & "<span class='lg'><i style='background:#c98500'></i>relief " & FORMAT([Relief value], "$#,0") & "</span>" & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Incentive spend</span>" & "<span class='pill info'>" & FORMAT([Budget used], "0%") & " used" & "</span>" & "</div><div class='v'>" & IF(ISBLANK([Incentive spend]), "—", FORMAT([Incentive spend], "$#,0")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE([Incentive spend], [Budget])) * 100)), "0") & "%;background:" & "#3987e5" & "'></i></div>" & "<div class='d'>" & "of the " & FORMAT([Budget], "$#,0") & " budget" & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Contacts</span>" & "<span class='pill info'>" & "limit " & FORMAT([Contact limit], "#,0") & "</span>" & "</div><div class='v'>" & IF(ISBLANK([Contacts]), "—", FORMAT([Contacts], "#,0")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE([Contacts], [Contact limit])) * 100)), "0") & "%;background:" & "#3987e5" & "'></i></div>" & "<div class='d'>" & FORMAT(DIVIDE([Contacts], [Eligible customers]), "0%") & " of " & FORMAT([Eligible customers], "#,0") & " eligible customers" & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Net ROI · 30 days</span>" & IF([Net ROI] >= [ROI floor], "<span class='pill good'>✓ above floor</span>", "<span class='pill warn'>✕ below floor</span>") & "</div><div class='v'>" & IF(ISBLANK([Net ROI]), "—", FORMAT([Net ROI], "0%")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE([Net ROI], MAX([Net ROI], [ROI floor]) * 1.12)) * 100)), "0") & "%;background:" & IF(([Net ROI]) >= ([ROI floor]), "#3987e5", "#c98500") & "'></i><b style='left:" & FORMAT(MAX(0, MIN(100, (DIVIDE([ROI floor], MAX([Net ROI], [ROI floor]) * 1.12)) * 100)), "0") & "%'></b></div>" & "<div class='d'>" & "30-day net " & FORMAT([Expected 30-day net], "$#,0") & " on " & FORMAT([Incentive spend], "$#,0") & "</div></div>"
+			    & "</div></div>"
+		lineageTag: a2be86e9-7ce0-54bb-8dba-3555aed2e636
+		displayFolder: 11 HTML panels
 
-	measure 'KPI SVG Model AUC | no rail @310' =
-			VAR vValue = [Model AUC]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "0.000"))
-			VAR vCaptionRaw = ""
-			VAR vCaption = IF(LEN(vCaptionRaw) > 61, LEFT(vCaptionRaw, 59) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='310' height='112' viewBox='0 0 310 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Model AUC</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 77a85286-f0f5-5eaa-8de6-3cc635a7b673
-		dataCategory: ImageUrl
-		displayFolder: Report UI
+	/// Contact KPIs: extra trips by travel period, points against the cap, estimate uncertainty and congestion relief.
+	measure 'HTML KPIs p2_contacts' =
+			"<div class='w'><div class='strip' style='grid-template-columns:repeat(4,1fr)'>"
+			    & "<div class='kc accent'><span class='rail'></span><div class='l'><span>Extra trips</span>" & "" & "</div><div class='v'>" & IF(ISBLANK([Extra trips]), "—", FORMAT([Extra trips], "#,0")) & "</div>" & "<div class='seg'>" & "<i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE(MAX(0, [Extra peak trips]), MAX(0, [Extra peak trips]) + MAX(0, [Extra off-peak trips]) + MAX(0, [Extra weekend trips]))) * 100)), "0") & "%;background:#3987e5'></i>" & "<i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE(MAX(0, [Extra off-peak trips]), MAX(0, [Extra peak trips]) + MAX(0, [Extra off-peak trips]) + MAX(0, [Extra weekend trips]))) * 100)), "0") & "%;background:#d95926'></i>" & "<i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE(MAX(0, [Extra weekend trips]), MAX(0, [Extra peak trips]) + MAX(0, [Extra off-peak trips]) + MAX(0, [Extra weekend trips]))) * 100)), "0") & "%;background:#199e70'></i>" & "</div>" & "<div class='d'>" & "<span class='lg'><i style='background:#3987e5'></i>peak " & FORMAT([Extra peak trips], "+#,0;-#,0") & "</span>" & "<span class='lg'><i style='background:#d95926'></i>off-peak " & FORMAT([Extra off-peak trips], "+#,0;-#,0") & "</span>" & "<span class='lg'><i style='background:#199e70'></i>weekend " & FORMAT([Extra weekend trips], "+#,0;-#,0") & "</span>" & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Offers in use</span>" & "" & "</div><div class='v'>" & FORMAT([Offers in plan], "0") & " of " & FORMAT(COUNTROWS(ALL(dim_offer)), "0") & "</div>" & "<div class='dots'>" & CONCATENATEX(GENERATESERIES(1, MAX(1, COUNTROWS(ALL(dim_offer)))), IF([Value] <= [Offers in plan], "<i class='on'></i>", "<i></i>"), "", [Value], ASC) & "</div>" & "<div class='d'>" & IF([Points awarded] = 0, "no loyalty points: not worth a contact under these limits", FORMAT([Points awarded], "#,0") & " points of the " & FORMAT([Points cap], "#,0") & " cap") & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Uncertainty per contact</span>" & "" & "</div><div class='v'>" & IF(ISBLANK([Mean uncertainty]), "—", FORMAT([Mean uncertainty], "$#,0.00")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE([Mean uncertainty], DIVIDE([Expected value], [Contacts]))) * 100)), "0") & "%;background:" & IF((DIVIDE([Mean uncertainty], DIVIDE([Expected value], [Contacts]))) >= 1.0, "#c98500", "#3987e5") & "'></i></div>" & "<div class='d'>" & "bootstrap sd against " & FORMAT(DIVIDE([Expected value], [Contacts]), "$#,0.00") & " value per contact" & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Congestion relief</span>" & "<span class='pill info'>" & FORMAT(DIVIDE([Relief value], [Expected value]), "0.0%") & " of value" & "</span>" & "</div><div class='v'>" & IF(ISBLANK([Relief value]), "—", FORMAT([Relief value], "$#,0")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE([Relief value], [Expected value])) * 100)), "0") & "%;background:" & "#3987e5" & "'></i></div>" & "<div class='d'>" & FORMAT([Rush-hour trips per workday], "+#,0;-#,0") & " rush-hour trips a workday onto the 407" & "</div></div>"
+			    & "</div></div>"
+		lineageTag: 2c881bbb-1b04-5973-906f-4b84d686f952
+		displayFolder: 11 HTML panels
 
-	measure 'KPI SVG Flagged days | Feed caption @314' =
-			VAR vValue = [Flagged days]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "#,0"))
-			VAR vCaptionRaw = SUBSTITUTE(SUBSTITUTE(COALESCE([Feed caption], ""), "&", "&amp;"), "<", "&lt;")
-			VAR vCaption = IF(LEN(vCaptionRaw) > 61, LEFT(vCaptionRaw, 59) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='314' height='112' viewBox='0 0 314 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Flagged days</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 044efc5c-cd20-59d0-a7b0-f43c3677f28b
-		dataCategory: ImageUrl
-		displayFolder: Report UI
+	/// Customer KPIs: customers by segment, travel propensity, inactivity risk and the share the plan contacts.
+	measure 'HTML KPIs p3_customers' =
+			"<div class='w'><div class='strip' style='grid-template-columns:repeat(4,1fr)'>"
+			    & "<div class='kc accent'><span class='rail'></span><div class='l'><span>Customers</span>" & "" & "</div><div class='v'>" & IF(ISBLANK([Customers]), "—", FORMAT([Customers], "#,0")) & "</div>" & "<div class='sp'>" & CONCATENATEX(VALUES(customer_segments[segment_order]), VAR vMax = MAXX(ALL(customer_segments[segment_order]), CALCULATE([Customers])) RETURN "<i title='" & CALCULATE(MAX(customer_segments[rfm_segment])) & "' style='height:" & FORMAT(MAX(0, MIN(100, (DIVIDE(CALCULATE([Customers]), vMax)) * 100)), "0") & "%'></i>", "", customer_segments[segment_order], ASC) & "</div>" & "<div class='d'>" & "by segment, Champions to Dormant" & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Travel propensity</span>" & "" & "</div><div class='v'>" & IF(ISBLANK([Mean travel propensity]), "—", FORMAT([Mean travel propensity], "0%")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, ([Mean travel propensity]) * 100)), "0") & "%;background:" & "#3987e5" & "'></i></div>" & "<div class='d'>" & "mean calibrated chance of a trip in 30 days" & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Inactivity risk</span>" & IF([Mean inactivity risk] < 0.25, "<span class='pill good'>✓ low</span>", "<span class='pill warn'>▲ elevated</span>") & "</div><div class='v'>" & IF(ISBLANK([Mean inactivity risk]), "—", FORMAT([Mean inactivity risk], "0.0%")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, ([Mean inactivity risk]) * 100)), "0") & "%;background:" & IF(([Mean inactivity risk]) >= 0.25, "#c98500", "#3987e5") & "'></i></div>" & "<div class='d'>" & FORMAT([High-risk customers], "#,0") & " customers above 50% risk" & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>In the plan</span>" & "" & "</div><div class='v'>" & IF(ISBLANK([Share in plan]), "—", FORMAT([Share in plan], "0.0%")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, ([Share in plan]) * 100)), "0") & "%;background:" & "#3987e5" & "'></i></div>" & "<div class='d'>" & FORMAT([Customers in plan], "#,0") & " of " & FORMAT([Customers], "#,0") & " customers" & "</div></div>"
+			    & "</div></div>"
+		lineageTag: 4ff7cc55-c400-5f14-8ae6-c5a9cbd9b6fb
+		displayFolder: 11 HTML panels
 
-	measure 'KPI SVG Features to review | Drift caption @333' =
-			VAR vValue = [Features to review]
-			VAR vShown = IF(ISBLANK(vValue), "—", FORMAT(vValue, "#,0"))
-			VAR vCaptionRaw = SUBSTITUTE(SUBSTITUTE(COALESCE([Drift caption], ""), "&", "&amp;"), "<", "&lt;")
-			VAR vCaption = IF(LEN(vCaptionRaw) > 66, LEFT(vCaptionRaw, 64) & "…", vCaptionRaw)
-			VAR vTone = "#8faebf"
-			VAR vArrow = ""
-			VAR vSvg =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='333' height='112' viewBox='0 0 333 112'>"
-			        & "<rect x='0' y='18' width='3' height='76' rx='1.5' fill='#4bdcd5'/>"
-			        & "<text x='16' y='28' font-family='Segoe UI' font-size='11' fill='#b3c7d7'>Features to review</text>"
-			        & "<text x='16' y='64' font-family='Segoe UI Light' font-size='30' fill='#eef8ff'>" & vShown & "</text>"
-			        & ""
-			        & "<text x='16' y='90' font-family='Segoe UI' font-size='10' fill='" & vTone & "'>" & vArrow & vCaption & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(vSvg, "%", "%25"), "#", "%23")
-		lineageTag: 2728faf6-fb55-5562-b65e-1bed4a9c6c66
-		dataCategory: ImageUrl
-		displayFolder: Report UI
+	/// Capacity KPIs: the October forecast with monthly history, campaign trips, load against the 80% threshold and capacity used with the reserve.
+	measure 'HTML KPIs p4_capacity' =
+			"<div class='w'><div class='strip' style='grid-template-columns:repeat(4,1fr)'>"
+			    & "<div class='kc accent'><span class='rail'></span><div class='l'><span>Forecast trips · 30 days</span>" & "" & "</div><div class='v'>" & IF(ISBLANK([Forecast trips]), "—", FORMAT([Forecast trips], "#,0")) & "</div>" & "<div class='sp'>" & CONCATENATEX(VALUES(monthly_trips[month_index]), VAR vMax = MAXX(ALL(monthly_trips[month_index]), CALCULATE([Monthly trips])) RETURN "<i title='" & CALCULATE(MAX(monthly_trips[month_label])) & "' style='height:" & FORMAT(MAX(0, MIN(100, (DIVIDE(CALCULATE([Monthly trips]), vMax)) * 100)), "0") & "%'></i>", "", monthly_trips[month_index], ASC) & "</div>" & "<div class='d'>" & "monthly trips to September 2025" & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Campaign trips</span>" & "" & "</div><div class='v'>" & IF(ISBLANK([Campaign trips]), "—", FORMAT([Campaign trips], "+#,0;-#,0")) & "</div>" & "<div class='seg'>" & "<i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE(MAX(0, [Forecast trips]), MAX(0, [Forecast trips]) + MAX(0, [Campaign trips]))) * 100)), "0") & "%;background:#5b7486'></i>" & "<i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE(MAX(0, [Campaign trips]), MAX(0, [Forecast trips]) + MAX(0, [Campaign trips]))) * 100)), "0") & "%;background:#3987e5'></i>" & "</div>" & "<div class='d'>" & FORMAT(DIVIDE([Campaign trips], [Forecast trips]), "0.0%") & " on top of the forecast" & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Load with the campaign</span>" & IF([Load] < 0.8, "<span class='pill good'>✓ under 80%</span>", "<span class='pill warn'>▲ 80% or more</span>") & "</div><div class='v'>" & IF(ISBLANK([Load]), "—", FORMAT([Load], "0%")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, ([Load]) * 100)), "0") & "%;background:" & IF(([Load]) >= 0.8, "#c98500", "#3987e5") & "'></i><b style='left:80%'></b></div>" & "<div class='d'>" & [Load caption] & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Capacity committed</span>" & "" & "</div><div class='v'>" & IF(ISBLANK(DIVIDE([Forecast trips] + [Campaign trips] + [Safety reserve], [Planning capacity])), "—", FORMAT(DIVIDE([Forecast trips] + [Campaign trips] + [Safety reserve], [Planning capacity]), "0%")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE([Forecast trips] + [Campaign trips] + [Safety reserve], [Planning capacity])) * 100)), "0") & "%;background:" & IF((DIVIDE([Forecast trips] + [Campaign trips] + [Safety reserve], [Planning capacity])) >= 0.95, "#c98500", "#3987e5") & "'></i></div>" & "<div class='d'>" & "forecast, campaign and 20% reserve of " & FORMAT([Planning capacity], "#,0") & "</div></div>"
+			    & "</div></div>"
+		lineageTag: af611776-c4c7-5763-83ca-8b563e735a4b
+		displayFolder: 11 HTML panels
+
+	/// Pricing KPIs: mean elasticity with its interval, contribution from the optimized prices, and the cells repriced.
+	measure 'HTML KPIs p5_pricing' =
+			"<div class='w'><div class='strip' style='grid-template-columns:repeat(3,1fr)'>"
+			    & "<div class='kc accent'><span class='rail'></span><div class='l'><span>Price elasticity</span>" & "<span class='pill info'>" & IF([Elasticity] > -1, "inelastic", "elastic") & "</span>" & "</div><div class='v'>" & IF(ISBLANK([Elasticity]), "—", FORMAT([Elasticity], "0.00")) & "</div>" & "<div class='mv'><i style='left:" & FORMAT(MAX(0, MIN(100, (DIVIDE(([Elasticity low]) - (-2.5), ((0) - (-2.5)))) * 100)), "0") & "%;width:" & FORMAT(MAX(0, MIN(100, (DIVIDE(([Elasticity high]) - ([Elasticity low]), ((0) - (-2.5)))) * 100)), "0") & "%;background:#2f5f8f'></i><b style='left:" & FORMAT(MAX(0, MIN(100, (DIVIDE(([Elasticity]) - (-2.5), ((0) - (-2.5)))) * 100)), "0") & "%'></b></div>" & "<div class='d'>" & [Elasticity caption] & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Contribution from prices</span>" & IF([Price contribution change] >= 0, "<span class='pill good'>✓ gain</span>", "<span class='pill warn'>✕ loss</span>") & "</div><div class='v'>" & IF(ISBLANK([Price contribution change]), "—", FORMAT([Price contribution change], "+$#,0;-$#,0")) & "</div>" & "" & "<div class='d'>" & "jointly optimized with the campaign" & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Cells repriced</span>" & "" & "</div><div class='v'>" & IF(ISBLANK([Cells repriced]), "—", FORMAT([Cells repriced], "0")) & "</div>" & "<div class='dots'>" & CONCATENATEX(GENERATESERIES(1, MAX(1, [Price cells])), IF([Value] <= [Cells repriced], "<i class='on'></i>", "<i></i>"), "", [Value], ASC) & "</div>" & "<div class='d'>" & "of " & FORMAT([Price cells], "0") & " zone × period cells" & "</div></div>"
+			    & "</div></div>"
+		lineageTag: 2d5ecf96-85b8-57e6-a452-fcbaeceb48ba
+		displayFolder: 11 HTML panels
+
+	/// Experiment KPIs: customers per arm against the power requirement, variance removed by CUPED, and how well the causal learners rank customers.
+	measure 'HTML KPIs p6_experiments' =
+			"<div class='w'><div class='strip' style='grid-template-columns:repeat(3,1fr)'>"
+			    & "<div class='kc accent'><span class='rail'></span><div class='l'><span>Customers per arm</span>" & IF([Customers per arm] >= [Required per arm], "<span class='pill good'>✓ powered</span>", "<span class='pill warn'>✕ under-powered</span>") & "</div><div class='v'>" & IF(ISBLANK([Customers per arm]), "—", FORMAT([Customers per arm], "#,0")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE([Customers per arm], MAX([Customers per arm], [Required per arm]) * 1.12)) * 100)), "0") & "%;background:" & IF(([Customers per arm]) >= ([Required per arm]), "#3987e5", "#c98500") & "'></i><b style='left:" & FORMAT(MAX(0, MIN(100, (DIVIDE([Required per arm], MAX([Customers per arm], [Required per arm]) * 1.12)) * 100)), "0") & "%'></b></div>" & "<div class='d'>" & "10 arms · power calculation needs " & FORMAT([Required per arm], "#,0") & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>CUPED variance removed</span>" & "" & "</div><div class='v'>" & IF(ISBLANK([CUPED variance removed]), "—", FORMAT([CUPED variance removed], "0%")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, ([CUPED variance removed]) * 100)), "0") & "%;background:" & "#3987e5" & "'></i></div>" & "<div class='d'>" & "June trips as the pre-period covariate" & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Learner rank correlation</span>" & "" & "</div><div class='v'>" & IF(ISBLANK([Learner rank correlation]), "—", FORMAT([Learner rank correlation], "0.00")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, ([Learner rank correlation]) * 100)), "0") & "%;background:" & "#3987e5" & "'></i></div>" & "<div class='d'>" & "mean ρ with the true value, all learners (simulation check)" & "</div></div>"
+			    & "</div></div>"
+		lineageTag: 8c0a089f-4590-5550-adc6-966773d6d3bc
+		displayFolder: 11 HTML panels
+
+	/// Policy KPIs: the optimized plan's true value against the perfect-knowledge ceiling, the ceiling, and propensity targeting against the same ceiling.
+	measure 'HTML KPIs p7_policy' =
+			"<div class='w'><div class='strip' style='grid-template-columns:repeat(3,1fr)'>"
+			    & "<div class='kc accent'><span class='rail'></span><div class='l'><span>Optimized plan · true value</span>" & "<span class='pill info'>" & FORMAT(DIVIDE([Optimized true value], [Value ceiling]), "0%") & " of ceiling" & "</span>" & "</div><div class='v'>" & IF(ISBLANK([Optimized true value]), "—", FORMAT([Optimized true value], "$#,0")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE([Optimized true value], [Value ceiling])) * 100)), "0") & "%;background:" & "#3987e5" & "'></i></div>" & "<div class='d'>" & [Truth caption] & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Ceiling · perfect knowledge</span>" & "" & "</div><div class='v'>" & IF(ISBLANK([Value ceiling]), "—", FORMAT([Value ceiling], "$#,0")) & "</div>" & "" & "<div class='d'>" & "the same MIP solved on the true effects" & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Propensity targeting · true value</span>" & "<span class='pill info'>" & FORMAT(DIVIDE([Propensity true value], [Value ceiling]), "0%") & " of ceiling" & "</span>" & "</div><div class='v'>" & IF(ISBLANK([Propensity true value]), "—", FORMAT([Propensity true value], "$#,0")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE([Propensity true value], [Value ceiling])) * 100)), "0") & "%;background:" & "#3987e5" & "'></i></div>" & "<div class='d'>" & [Propensity caption] & "</div></div>"
+			    & "</div></div>"
+		lineageTag: f72da614-5108-59b8-9aaf-dd624e499f7c
+		displayFolder: 11 HTML panels
+
+	/// Operations KPIs: release checks passed, held-out model AUC against the 0.70 gate, flagged feed days and features above the drift threshold.
+	measure 'HTML KPIs p8_operations' =
+			"<div class='w'><div class='strip' style='grid-template-columns:repeat(4,1fr)'>"
+			    & "<div class='kc accent'><span class='rail'></span><div class='l'><span>Release gate</span>" & IF([Checks passed] = [Checks total], "<span class='pill good'>✓ passed</span>", "<span class='pill warn'>✕ review</span>") & "</div><div class='v'>" & FORMAT([Checks passed], "0") & " / " & FORMAT([Checks total], "0") & "</div>" & "<div class='dots'>" & CONCATENATEX(GENERATESERIES(1, MAX(1, [Checks total])), IF([Value] <= [Checks passed], "<i class='on'></i>", "<i></i>"), "", [Value], ASC) & "</div>" & "<div class='d'>" & [Gate caption] & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Model AUC</span>" & "" & "</div><div class='v'>" & IF(ISBLANK([Model AUC]), "—", FORMAT([Model AUC], "0.000")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, ([Model AUC]) * 100)), "0") & "%;background:" & "#3987e5" & "'></i><b style='left:70%'></b></div>" & "<div class='d'>" & "mean of three classifiers on the July 2025 test fold · gate 0.70" & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Flagged feed days</span>" & "<span class='pill info'>" & FORMAT(DIVIDE([Flagged days], [Feed days]), "0.0%") & " of days" & "</span>" & "</div><div class='v'>" & IF(ISBLANK([Flagged days]), "—", FORMAT([Flagged days], "0")) & "</div>" & "" & "<div class='d'>" & "of " & FORMAT([Feed days], "#,0") & " ingestion days, against the same-weekday median" & "</div></div>"
+			    & "<div class='kc'><span class='rail'></span><div class='l'><span>Features drifting</span>" & IF([Features to review] = 0, "<span class='pill good'>✓ stable</span>", "<span class='pill warn'>▲ review</span>") & "</div><div class='v'>" & IF(ISBLANK([Features to review]), "—", FORMAT([Features to review], "0")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE([Features to review], [Features monitored])) * 100)), "0") & "%;background:" & IF((DIVIDE([Features to review], [Features monitored])) >= 0.25, "#c98500", "#3987e5") & "'></i></div>" & "<div class='d'>" & "of " & FORMAT([Features monitored], "0") & " features above PSI 0.2" & "</div></div>"
+			    & "</div></div>"
+		lineageTag: edb8f9cd-5ad9-5179-93a4-c39548ae310b
+		displayFolder: 11 HTML panels
 
 	/// Command-centre banner with the plan's headline KPIs.
 	measure 'HTML Hero' =
@@ -1353,10 +865,10 @@ table _Measures
 			    & "<span class='badge'>" & IF(vCertified, "✓ Proven optimal", "Within solver gap") & "</span>"
 			    & "<span class='badge blue'>10-arm blocked trial</span><span class='badge blue'>Synthetic data</span>"
 			    & "</div><div class='kpis'>"
-			    & "<div class='kpi accent'><div class='l'>Expected value</div><div class='v'>" & IF(ISBLANK([Expected value]), "—", FORMAT([Expected value], "$#,0")) & "</div><div class='d'>" & FORMAT([Value per incentive dollar], "0.0") & "x the incentive spend" & "</div></div>"
-			    & "<div class='kpi'><div class='l'>True value · simulation</div><div class='v'>" & IF(ISBLANK([Optimized true value]), "—", FORMAT([Optimized true value], "$#,0")) & "</div><div class='d'>" & FORMAT(vShare, "0%") & " of the perfect-knowledge ceiling" & "</div></div>"
-			    & "<div class='kpi'><div class='l'>Net ROI · 30 days</div><div class='v'>" & IF(ISBLANK([Net ROI]), "—", FORMAT([Net ROI], "0%")) & "</div><div class='d'>" & "floor 15%" & "</div></div>"
-			    & "<div class='kpi'><div class='l'>Rush-hour trips / workday</div><div class='v'>" & IF(ISBLANK([Rush-hour trips per workday]), "—", FORMAT([Rush-hour trips per workday], "+#,0;-#,0")) & "</div><div class='d'>" & "moved onto the 407" & "</div></div>"
+			    & "<div class='kpi accent'><div class='l'>Expected value</div><div class='v'>" & IF(ISBLANK([Expected value]), "—", FORMAT([Expected value], "$#,0")) & "</div>" & "<div class='seg'>" & "<i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE(MAX(0, [Expected 30-day net]), MAX(0, [Expected 30-day net]) + MAX(0, [Expected later value]) + MAX(0, [Relief value]))) * 100)), "0") & "%;background:#3987e5'></i>" & "<i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE(MAX(0, [Expected later value]), MAX(0, [Expected 30-day net]) + MAX(0, [Expected later value]) + MAX(0, [Relief value]))) * 100)), "0") & "%;background:#199e70'></i>" & "<i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE(MAX(0, [Relief value]), MAX(0, [Expected 30-day net]) + MAX(0, [Expected later value]) + MAX(0, [Relief value]))) * 100)), "0") & "%;background:#c98500'></i>" & "</div>" & "<div class='d'>" & FORMAT([Value per incentive dollar], "0.0") & "x the incentive spend" & "</div></div>"
+			    & "<div class='kpi'><div class='l'>True value · simulation</div><div class='v'>" & IF(ISBLANK([Optimized true value]), "—", FORMAT([Optimized true value], "$#,0")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, (vShare) * 100)), "0") & "%;background:" & "#3987e5" & "'></i></div>" & "<div class='d'>" & FORMAT(vShare, "0%") & " of the perfect-knowledge ceiling" & "</div></div>"
+			    & "<div class='kpi'><div class='l'>Net ROI · 30 days</div><div class='v'>" & IF(ISBLANK([Net ROI]), "—", FORMAT([Net ROI], "0%")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE([Net ROI], MAX([Net ROI], [ROI floor]) * 1.12)) * 100)), "0") & "%;background:" & IF(([Net ROI]) >= ([ROI floor]), "#3987e5", "#c98500") & "'></i><b style='left:" & FORMAT(MAX(0, MIN(100, (DIVIDE([ROI floor], MAX([Net ROI], [ROI floor]) * 1.12)) * 100)), "0") & "%'></b></div>" & "<div class='d'>" & "floor " & FORMAT([ROI floor], "0%") & "</div></div>"
+			    & "<div class='kpi'><div class='l'>Rush-hour trips / workday</div><div class='v'>" & IF(ISBLANK([Rush-hour trips per workday]), "—", FORMAT([Rush-hour trips per workday], "+#,0;-#,0")) & "</div>" & "<div class='mv'><i style='width:" & FORMAT(MAX(0, MIN(100, (DIVIDE([Relief value], [Expected value])) * 100)), "0") & "%;background:" & "#3987e5" & "'></i></div>" & "<div class='d'>" & "moved onto the 407, worth " & FORMAT([Relief value], "$#,0") & "</div></div>"
 			    & "</div></div></div>"
 		lineageTag: 3dea072f-071c-5160-87fb-fe33cbb2b7a0
 		displayFolder: 11 HTML panels

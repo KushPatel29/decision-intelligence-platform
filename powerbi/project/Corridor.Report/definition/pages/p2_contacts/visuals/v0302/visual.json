@@ -2,42 +2,124 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
   "name": "v0302",
   "position": {
-    "x": 330,
-    "y": 88,
+    "x": 20,
+    "y": 208,
     "z": 1213,
-    "height": 107,
-    "width": 296,
+    "height": 246,
+    "width": 760,
     "tabOrder": 1213
   },
   "visual": {
-    "visualType": "image",
-    "objects": {
-      "image": [
-        {
-          "properties": {
-            "sourceType": {
-              "expr": {
-                "Literal": {
-                  "Value": "'imageUrl'"
+    "visualType": "columnChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_zone"
+                    }
+                  },
+                  "Property": "zone_name"
                 }
-              }
-            },
-            "sourceUrl": {
-              "expr": {
+              },
+              "queryRef": "dim_zone.zone_name",
+              "nativeQueryRef": "zone_name",
+              "displayName": "Zone",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
                 "Measure": {
                   "Expression": {
                     "SourceRef": {
                       "Entity": "_Measures"
                     }
                   },
-                  "Property": "KPI SVG Points awarded @310"
+                  "Property": "Contacts"
+                }
+              },
+              "queryRef": "_Measures.Contacts",
+              "nativeQueryRef": "Contacts"
+            }
+          ]
+        },
+        "Series": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_offer"
+                    }
+                  },
+                  "Property": "offer_name"
+                }
+              },
+              "queryRef": "dim_offer.offer_name",
+              "nativeQueryRef": "offer_name",
+              "displayName": "Offer",
+              "active": true
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "dim_zone"
+                  }
+                },
+                "Property": "zone_name"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Contacts by home zone and offer'"
                 }
               }
             },
-            "fit": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "'Fit'"
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Stacked column chart titled Contacts by home zone and offer. Plots Contacts by zone name for each offer.'"
                 }
               }
             }
@@ -45,58 +127,24 @@
         }
       ]
     },
-    "visualContainerObjects": {
-      "general": [
+    "objects": {
+      "categoryAxis": [
         {
           "properties": {
-            "altText": {
+            "showAxisTitle": {
               "expr": {
                 "Literal": {
-                  "Value": "'KPI tile. Loyalty points the plan awards.'"
+                  "Value": "false"
                 }
               }
             }
           }
         }
       ],
-      "padding": [
+      "valueAxis": [
         {
           "properties": {
-            "top": {
-              "expr": {
-                "Literal": {
-                  "Value": "0D"
-                }
-              }
-            },
-            "bottom": {
-              "expr": {
-                "Literal": {
-                  "Value": "0D"
-                }
-              }
-            },
-            "left": {
-              "expr": {
-                "Literal": {
-                  "Value": "0D"
-                }
-              }
-            },
-            "right": {
-              "expr": {
-                "Literal": {
-                  "Value": "0D"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "title": [
-        {
-          "properties": {
-            "show": {
+            "showAxisTitle": {
               "expr": {
                 "Literal": {
                   "Value": "false"

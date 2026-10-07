@@ -42,7 +42,8 @@ def test_every_measure_references_resolve(name, dax):
         assert table in columns, f"{name}: unknown table {table}"
         assert column in columns[table], f"{name}: {table} has no column {column}"
     for reference in MEASURE.findall(code):
-        assert reference in measures, f"{name}: unknown measure [{reference}]"
+        # [Value] is the column GENERATESERIES creates, not a measure.
+        assert reference in measures | {"Value"}, f"{name}: unknown measure [{reference}]"
 
 
 def test_every_visual_binds_to_something_that_exists():

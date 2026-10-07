@@ -1,7 +1,7 @@
 # Power BI measures
 
 Generated from `src/decision_platform/bi/model_spec.py` by `python -m decision_platform.bi.build_pbip`; do not edit by hand.
-94 business measures in 10 display folders. The report's own SVG tile, header and button measures live in the *Report UI* folder and are not listed.
+101 business measures in 10 display folders. The report's own header and button measures (*Report UI*) and its HTML panel measures (*11 HTML panels*, built in `bi/html_spec.py`) are not listed.
 
 
 ## 01 Plan
@@ -23,6 +23,9 @@ Generated from `src/decision_platform/bi/model_spec.py` by `python -m decision_p
 | Mean uncertainty | Mean bootstrap standard deviation of the 30-day value estimate per contact. | `\$#,0.00` | `AVERAGE(plan_contacts[value_sd])` |
 | Budget | The incentive budget the plan was solved under. | `\$#,0` | `MAX(plan_summary[budget])` |
 | Contact limit | Maximum contacts. | `#,0` | `MAX(plan_summary[contact_limit])` |
+| Points cap | Maximum loyalty points the plan may award. | `#,0` | `MAX(plan_summary[points_limit])` |
+| Offers in plan | Offers with at least one contact in the plan. | `#,0` | `COUNTROWS(FILTER(VALUES(plan_contacts[offer_id]), CALCULATE(COUNTROWS(plan_contacts)) > 0))` |
+| ROI floor | Minimum 30-day net ROI the plan must hold. | `0%` | `MAX(plan_summary[min_roi])` |
 | Eligible customers | Customers with consent, My Account, no past-due balance and an active account. | `#,0` | `MAX(plan_summary[eligible_customers])` |
 | Budget used | Incentive spend / budget. | `0%` | `DIVIDE([Incentive spend], [Budget])` |
 | Decision variables | Customer-offer binaries in the mixed-integer program the plan solves. | `#,0` | `MAX(plan_summary[decision_variables])` |
@@ -84,6 +87,7 @@ Generated from `src/decision_platform/bi/model_spec.py` by `python -m decision_p
 | Trial trips effect | CUPED-adjusted incremental trips per randomised customer. | `#,0.00` | `SUM(experiment_effects[trips_effect])` |
 | CUPED variance removed | Share of outcome variance removed by the pre-period covariate. | `0%` | `AVERAGE(experiment_effects[variance_reduction])` |
 | Customers per arm | Smallest arm size. | `#,0` | `MIN(experiment_effects[n])` |
+| Required per arm | Customers per arm the power calculation required for a 5-point lift. | `#,0` | `MAX(plan_summary[required_per_arm])` |
 | Sequential z | Cumulative CUPED z-statistic. | `#,0.00` | `SUM(sequential_looks[z])` |
 | Efficacy boundary | O'Brien-Fleming boundary at the look. | `#,0.00` | `AVERAGE(sequential_looks[boundary])` |
 | Learner rank correlation | Rank correlation between a learner's value estimates and the true values (simulation check). | `0.00` | `AVERAGE(learner_comparison[value_spearman])` |
@@ -113,6 +117,14 @@ Generated from `src/decision_platform/bi/model_spec.py` by `python -m decision_p
 | Model AUC | Held-out ROC-AUC. | `0.000` | `AVERAGE(model_quality[auc])` |
 | Checks passed | Release acceptance checks passed. | `#,0` | `COUNTROWS(FILTER(quality_gate, quality_gate[passed]))` |
 | Checks total | Release acceptance checks. | `#,0` | `COUNTROWS(quality_gate)` |
+| Feed days | Ingestion days monitored. | `#,0` | `COUNTROWS(feed_quality)` |
+| Features monitored | Model features under drift monitoring. | `#,0` | `COUNTROWS(feature_drift)` |
+
+## 06 Pricing
+
+| Measure | Definition | Format | DAX |
+|---|---|---|---|
+| Price cells | Zone x period cells priced by the optimizer. | `#,0` | `COUNTROWS(price_plan)` |
 
 ## 09 Colours
 
