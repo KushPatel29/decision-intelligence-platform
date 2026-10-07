@@ -1,7 +1,6 @@
 # Corridor: customer, pricing and transportation decision intelligence
 
-[Open the live Corridor demo](https://corridor-decision-intelligence.streamlit.app/) · Synthetic data, isolated visitor sessions.
-
+[Open the live Corridor demo](https://corridor-decision-intelligence.streamlit.app/) Â· Synthetic data, isolated visitor sessions.
 
 [![ci](https://github.com/KushPatel29/decision-intelligence-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/KushPatel29/decision-intelligence-platform/actions/workflows/ci.yml)
 

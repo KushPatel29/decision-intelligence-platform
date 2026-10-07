@@ -11,9 +11,13 @@
   standalone value is negative. Regression cases prove the better feasible joint plan is retained.
 - Production API readiness refuses missing API-key configuration. Pricing Studio respects the
   configured MIP time limit, including the HiGHS and Gurobi paths.
-- Validation: 240 tests passed, one optional test skipped; runtime dependency audit found no known
+- Runtime pins: FastAPI 0.142.2, Streamlit 1.65.0, uvicorn 0.54.0; GitHub Actions checkout,
+  setup-python and upload-artifact v7. Dependabot now skips `databricks/` (the job's pins change only
+  with a new hosted run and receipt) and holds pyspark to delta-spark's minor version and sagemaker
+  to the v2 SDK the AWS pipeline is written against.
+- Live demo at corridor-decision-intelligence.streamlit.app: all twelve pages render with no errors.
+- Validation: 241 tests passed, one optional test skipped; runtime dependency audit found no known
   vulnerabilities; lint and formatting passed. Public deployment uses isolated demo-session owners.
-
 
 ## 1.1.0
 

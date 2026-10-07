@@ -71,8 +71,8 @@ The local harness cannot see three things a real workspace enforces, and the fir
    "Optimized (MIP)"; Delta rejects spaces and brackets. The publish task snake-cases column names, and the
    local harness now applies Delta's rule so it would have failed the same way.
 3. **The platform's own packages.** Serverless fixes numpy, pandas and pyarrow and refuses other versions.
-   The job pins everything else to the locally tested versions (`job-packages.txt`, named so Dependabot leaves it alone: changing a pin means re-running the hosted
-   job, not merging a pull request); the manifest of
+   The job pins everything else to the locally tested versions (`job-packages.txt`, which Dependabot is configured to skip: changing a pin means re-running the
+   hosted job, not merging a pull request); the manifest of
    each run records what it used.
 
 ## Hosted against local results

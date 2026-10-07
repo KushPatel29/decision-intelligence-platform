@@ -1,6 +1,5 @@
 # Weekly dependency and action updates. Pull requests run the full CI, including the pipeline
-# and every test, before anything merges. The Databricks job's pins (databricks/job-packages.txt) are
-# deliberately outside this: they change only with a new hosted run.
+# and every test, before anything merges.
 version: 2
 updates:
   - package-ecosystem: pip
@@ -8,6 +7,9 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    # The Databricks job's pins change only with a new hosted run and receipt.
+    exclude-paths:
+      - "databricks/**"
     ignore:
       # delta-spark 4.0 supports pyspark 4.0 only; the two move together, by hand.
       - dependency-name: pyspark
