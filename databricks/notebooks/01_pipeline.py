@@ -10,7 +10,7 @@
 # MAGIC The pipeline needs a POSIX file system for DuckDB, so it runs on the task's local disk and then copies
 # MAGIC its layers and outputs to a Unity Catalog volume, which is how the later tasks receive them.
 # MAGIC
-# MAGIC Packages are pinned to `databricks/requirements-job.txt`, the versions the local run was tested with,
+# MAGIC Packages are pinned to `databricks/job-packages.txt`, the versions the local run was tested with,
 # MAGIC except numpy, pandas and pyarrow, which serverless fixes; the run's manifest records the versions used.
 
 # COMMAND ----------

@@ -96,9 +96,18 @@ def test_saved_decisions_are_isolated_by_owner(tmp_path):
     assert saved_plans(tmp_path, "unknown") == []
 
 
-def test_joint_pricing_uses_capacity_and_exactly_one_price_per_cell():
+def test_joint_pricing_uses_capacity_and_exactly_one_price_per_cell(monkeypatch):
+    import decision_platform.pricing as pricing
     from decision_platform.pricing import optimize_prices
 
+    original = pricing._lp_guided
+    observed = []
+
+    def checked(*args, **kwargs):
+        observed.append(kwargs["time_limit"])
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(pricing, "_lp_guided", checked)
     frame, capacity = allocation_fixture()
     options = pd.DataFrame(
         {
@@ -113,8 +122,9 @@ def test_joint_pricing_uses_capacity_and_exactly_one_price_per_cell():
         }
     )
     prices, campaign, receipt = optimize_prices(
-        options, frame, budget=11, contacts=2, roi=0.5, solver="highs"
+        options, frame, budget=11, contacts=2, roi=0.5, solver="highs", time_limit=7
     )
+    assert observed == [7]
     assert len(prices) == 1
     assert prices.protected_load.sum() + campaign.incremental_trips.sum() <= 10 + 1e-8
     assert campaign.cost.sum() <= 11 and receipt["all_constraints_passed"]

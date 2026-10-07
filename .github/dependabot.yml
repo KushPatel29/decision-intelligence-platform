@@ -1,5 +1,6 @@
 # Weekly dependency and action updates. Pull requests run the full CI, including the pipeline
-# and every test, before anything merges.
+# and every test, before anything merges. The Databricks job's pins (databricks/job-packages.txt) are
+# deliberately outside this: they change only with a new hosted run.
 version: 2
 updates:
   - package-ecosystem: pip
@@ -7,6 +8,13 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # delta-spark 4.0 supports pyspark 4.0 only; the two move together, by hand.
+      - dependency-name: pyspark
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
+      # aws/pipeline.py is written against the v2 SDK (Estimator, Processor, Transformer).
+      - dependency-name: sagemaker
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule:

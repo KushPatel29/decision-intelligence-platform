@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-07 release review
+
+- Verified serving reads now enforce manifest membership, safe paths and byte hashes at read time;
+  required API artifacts and the release ID are checked before serving.
+- Scenario solves retain capacity-relieving options in off-peak and weekend periods even when their
+  standalone value is negative. Regression cases prove the better feasible joint plan is retained.
+- Production API readiness refuses missing API-key configuration. Pricing Studio respects the
+  configured MIP time limit, including the HiGHS and Gurobi paths.
+- Validation: 240 tests passed, one optional test skipped; runtime dependency audit found no known
+  vulnerabilities; lint and formatting passed. Public deployment uses isolated demo-session owners.
+
+
 ## 1.1.0
 
 **Rush hour and congestion relief.** A ninth offer, 25% off rush-hour trips, and a planning value per net rush-hour
@@ -36,7 +48,7 @@ DuckDB, so a registered model's serving environment does not need it.
 `databricks/receipts/`). It found three issues the local stand-in could not: nanosecond Parquet timestamps from
 pandas 2 (all layers now written in microseconds), Delta's column-name rule (publish snake-cases names; the
 harness enforces the rule), and platform-fixed numpy, pandas and pyarrow (the rest pinned in
-`databricks/requirements-job.txt`). On identical data its plan reaches 65% of the ceiling against 75% locally.
+`databricks/job-packages.txt`). On identical data its plan reaches 65% of the ceiling against 75% locally.
 `run_job.py` can re-attach to a run (`--attach`) and re-run only failed tasks (`--repair`).
 
 **Production hardening.** Decision API: bounded solve time and concurrency, 503 before startup, request IDs and

@@ -1,6 +1,8 @@
 # Versions the Databricks job installs, matched to the local reference run.
 # numpy, pandas and pyarrow are not listed: serverless compute fixes them (its Spark client depends on them)
 # and refuses other versions. Each run records the versions it actually used in outputs/manifest.json.
+# Change a pin only together with a new hosted run and receipt (databricks/receipts/): the receipt is the
+# evidence these versions work on serverless.
 scipy==1.18.1
 scikit-learn==1.9.0
 duckdb==1.5.4

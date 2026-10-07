@@ -5,7 +5,16 @@ import streamlit as st
 
 from decision_platform.runtime import audit_event
 from decision_platform.ui import NEUTRAL, SERIES, callout, chart, money, page_header, tiles
-from decision_platform.webapp import ROOT, context, doc, download, solver_slot, table, zone_names
+from decision_platform.webapp import (
+    ROOT,
+    SOLVE_SECONDS,
+    context,
+    doc,
+    download,
+    solver_slot,
+    table,
+    zone_names,
+)
 
 page_header(
     "Pricing studio",
@@ -193,6 +202,7 @@ with tab_optimize:
                         points=doc("optimization")["combined"]["points_limit"],
                         solver="auto",
                         surplus_weight=surplus,
+                        time_limit=SOLVE_SECONDS,
                     )
             st.session_state["price_plan"] = (ctx["stamp"], chosen, contacts, result)
             audit_event(ROOT, ctx["owner"], "solve_prices", {"release_id": ctx["release_id"], **result})

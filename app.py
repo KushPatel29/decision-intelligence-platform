@@ -17,7 +17,7 @@ if not any((Path(p) / "decision_platform").is_dir() for p in sys.path if p):
 from decision_platform import __version__  # noqa: E402
 from decision_platform.access import require_access  # noqa: E402
 from decision_platform.ui import CSS, footer  # noqa: E402
-from decision_platform.webapp import SERVING, snapshot_stamp, verify_snapshot  # noqa: E402
+from decision_platform.webapp import _doc, snapshot_stamp, verify_snapshot  # noqa: E402
 
 st.set_page_config(
     page_title="Corridor · Decision intelligence",
@@ -37,9 +37,7 @@ if stamp is None:
 try:
     manifest = verify_snapshot(stamp)
     if os.environ.get("CORRIDOR_ENV") == "production":
-        import json
-
-        gate = json.loads((SERVING / "quality_gate.json").read_text())
+        gate = _doc("quality_gate", stamp)
         if not gate["passed"]:
             raise ValueError("Production model acceptance failed")
 except (ValueError, OSError, KeyError) as exc:

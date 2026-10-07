@@ -7,17 +7,18 @@ loaders, so a page never touches files the release manifest did not hash.
 
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import threading
 from contextlib import contextmanager
+from io import BytesIO
 from pathlib import Path
 
 import pandas as pd
 import streamlit as st
 
 from .config import ROOT
+from .serving import read_verified, verify_manifest
 
 SERVING = Path(os.environ.get("CORRIDOR_SERVING", ROOT / "outputs" / "serving"))
 REQUIRED = [
@@ -56,27 +57,17 @@ def snapshot_stamp():
 @st.cache_resource(show_spinner=False)
 def verify_snapshot(stamp):
     """Check every serving file against the snapshot manifest; raise on any mismatch."""
-    manifest = json.loads((SERVING / "manifest.json").read_text())
-    for name, digest in manifest["files"].items():
-        path = (SERVING / name).resolve()
-        if not path.is_relative_to(SERVING.resolve()) or not path.is_file():
-            raise ValueError(f"Serving snapshot is missing {name}")
-        if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
-            raise ValueError(f"Serving snapshot integrity check failed for {name}")
-    missing = [name for name in REQUIRED if name not in manifest["files"]]
-    if missing:
-        raise ValueError(f"Serving snapshot is incomplete: {missing}")
-    return manifest
+    return verify_manifest(SERVING, REQUIRED)
 
 
 @st.cache_data(show_spinner=False, max_entries=64)
 def _table(name, stamp):
-    return pd.read_parquet(SERVING / f"{name}.parquet")
+    return pd.read_parquet(BytesIO(read_verified(SERVING, verify_snapshot(stamp), f"{name}.parquet")))
 
 
 @st.cache_data(show_spinner=False, max_entries=64)
 def _doc(name, stamp):
-    return json.loads((SERVING / f"{name}.json").read_text(encoding="utf-8"))
+    return json.loads(read_verified(SERVING, verify_snapshot(stamp), f"{name}.json"))
 
 
 def context():
@@ -92,7 +83,7 @@ def doc(name):
 
 
 def has(name):
-    return (SERVING / name).exists()
+    return name in verify_snapshot(context()["stamp"])["files"]
 
 
 def zone_names():

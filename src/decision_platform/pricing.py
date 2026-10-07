@@ -98,10 +98,13 @@ def optimize_prices(
     points=35000,
     solver="auto",
     surplus_weight=0.0,
+    time_limit=90.0,
 ):
     """Choose one effective price per zone/period and the campaign contacts in a single MIP."""
     from .optimization import GUROBI_LICENCE_LIMIT, _period_usage, _solve_gurobi, validate_inputs
 
+    if not np.isfinite(time_limit) or time_limit <= 0:
+        raise ValueError("Solve time limit must be finite and positive")
     cells = options.drop_duplicates(["zone_id", "period"])[["zone_id", "period", "capacity_trips"]].copy()
     cells["available_trips"] = cells.capacity_trips
     cells["baseline_over_capacity"] = False
@@ -144,7 +147,7 @@ def optimize_prices(
             # Equalities as paired inequalities so one solver interface serves both problems.
             stacked = vstack([a, -a[len(upper) - len(groups) :]]).tocsr()
             limits = np.r_[upper, -lower[len(upper) - len(groups) :]]
-            selected, gap, _, _ = _solve_gurobi(objective, stacked, limits, bounds, 30)
+            selected, gap, _, _ = _solve_gurobi(objective, stacked, limits, bounds, min(30.0, time_limit))
             actual = "Gurobi"
         except Exception as exc:
             if (
@@ -154,7 +157,9 @@ def optimize_prices(
             ):
                 raise
     if selected is None:
-        selected, gap, lp_bound, kept = _lp_guided(objective, a, lower, upper, bounds, n)
+        selected, gap, lp_bound, kept = _lp_guided(
+            objective, a, lower, upper, bounds, n, time_limit=time_limit
+        )
         actual = f"HiGHS (LP-guided, {kept:,} campaign variables kept)"
     lhs = a @ selected.astype(float)
     if np.any(lhs > upper + 1e-6) or np.any(lhs < lower - 1e-6):

@@ -81,7 +81,7 @@ def test_only_the_latest_attempt_of_each_task_counts():
 
 def test_job_notebooks_pin_the_tested_versions():
     """Serverless otherwise installs its own versions, and the hosted models then fit differently."""
-    text = (ROOT / "databricks" / "requirements-job.txt").read_text()
+    text = (ROOT / "databricks" / "job-packages.txt").read_text()
     pins = {line.strip() for line in text.splitlines() if line.strip() and not line.startswith("#")}
     for name in ("01_pipeline.py", "03_registry.py"):
         line = next(

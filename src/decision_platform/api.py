@@ -19,6 +19,7 @@ import threading
 import time
 import uuid
 from contextlib import asynccontextmanager
+from io import BytesIO
 from pathlib import Path
 
 import pandas as pd
@@ -30,6 +31,7 @@ from .config import ROOT
 from .experiments import sample_size
 from .optimization import solve
 from .planning import with_reserve
+from .serving import read_verified, verify_manifest
 
 LOG = logging.getLogger("corridor.api")
 if not LOG.handlers:
@@ -50,19 +52,28 @@ class Snapshot:
     """Verified, read-only serving data loaded once per process."""
 
     def __init__(self, folder: Path):
-        manifest = json.loads((folder / "manifest.json").read_text())
-        for name, digest in manifest["files"].items():
-            if hashlib.sha256((folder / name).read_bytes()).hexdigest() != digest:
-                raise ValueError(f"Serving snapshot integrity check failed for {name}")
+        required = [
+            "customers.parquet",
+            "candidates.parquet",
+            "decisions.parquet",
+            "capacity.parquet",
+            "summary.json",
+            "optimization.json",
+        ]
+        manifest = verify_manifest(folder, required)
+
+        def payload(name):
+            return read_verified(folder, manifest, name)
+
         self.folder = folder
         self.manifest = manifest
         self.release_id = manifest["release_id"]
-        self.customers = pd.read_parquet(folder / "customers.parquet").set_index("customer_id")
-        self.candidates = pd.read_parquet(folder / "candidates.parquet")
-        self.decisions = pd.read_parquet(folder / "decisions.parquet")
-        self.capacity = pd.read_parquet(folder / "capacity.parquet")
-        self.summary = json.loads((folder / "summary.json").read_text())
-        self.optimization = json.loads((folder / "optimization.json").read_text())
+        self.customers = pd.read_parquet(BytesIO(payload("customers.parquet"))).set_index("customer_id")
+        self.candidates = pd.read_parquet(BytesIO(payload("candidates.parquet")))
+        self.decisions = pd.read_parquet(BytesIO(payload("decisions.parquet")))
+        self.capacity = pd.read_parquet(BytesIO(payload("capacity.parquet")))
+        self.summary = json.loads(payload("summary.json"))
+        self.optimization = json.loads(payload("optimization.json"))
 
 
 class ScenarioRequest(BaseModel):
@@ -157,6 +168,8 @@ def create_app(serving: Path | None = None) -> FastAPI:
 
     @app.get("/ready", tags=["operations"])
     def ready(request: Request):
+        if os.environ.get("CORRIDOR_ENV") == "production" and not _keys():
+            raise HTTPException(503, "API keys are not configured")
         data = snapshot(request)
         return {
             "status": "ready",
@@ -255,7 +268,9 @@ def create_app(serving: Path | None = None) -> FastAPI:
         candidates["objective_value"] = (
             candidates.net_contribution + candidates.later_value_uplift + candidates.relief_value
         )
-        keep = (candidates.objective_value > 0) | (candidates.trips_peak < 0)
+        keep = (candidates.objective_value > 0) | candidates[
+            ["trips_peak", "trips_offpeak", "trips_weekend"]
+        ].lt(0).any(axis=1)
         candidates = candidates[keep].reset_index(drop=True)
         if not solves.acquire(blocking=False):
             raise HTTPException(

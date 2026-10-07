@@ -139,6 +139,7 @@ def test_production_refuses_to_serve_without_keys(client, monkeypatch):
     monkeypatch.setenv("CORRIDOR_ENV", "production")
     monkeypatch.delenv("CORRIDOR_API_KEYS", raising=False)
     assert test_client.get("/v1/plan/summary").status_code == 503
+    assert test_client.get("/ready").status_code == 503
 
 
 def test_tampered_snapshot_is_never_served(tmp_path, client):
@@ -214,3 +215,39 @@ def test_every_response_carries_a_request_id(client):
     assert (
         test_client.get("/health", headers={"X-Request-ID": "abc-123"}).headers["x-request-id"] == "abc-123"
     )
+
+
+@pytest.mark.parametrize("period,column", [("Off-peak", "trips_offpeak"), ("Weekend", "trips_weekend")])
+def test_scenario_keeps_negative_value_capacity_relief(client, period, column):
+    test_client, _ = client
+    data = test_client.app.state.snapshot
+    rows = candidate_rows().iloc[[0, 2]].copy()
+    rows[["trips_peak", "trips_offpeak", "trips_weekend"]] = 0.0
+    rows["value_uplift"] = [20.0, -1.0]
+    rows["later_value_uplift"] = 0.0
+    rows[column] = [1.0, -1.0]
+    data.candidates = rows
+    data.capacity.loc[data.capacity.period.eq(period), "capacity_trips"] = (
+        100.0 if period == "Off-peak" else 50.0
+    )
+    response = test_client.post(
+        "/v1/scenarios/solve",
+        json={"budget": 20, "contacts": 2, "reserve": 0, "solver": "highs", "include_allocation": True},
+    )
+    assert response.status_code == 200
+    assert response.json()["objective"] == pytest.approx(19.0)
+    assert len(response.json()["allocation"]) == 2
+
+
+def test_api_refuses_unlisted_required_file(client):
+    import hashlib
+
+    _, serving = client
+    manifest = json.loads((serving / "manifest.json").read_text())
+    del manifest["files"]["customers.parquet"]
+    manifest["release_id"] = hashlib.sha256(
+        json.dumps(manifest["files"], sort_keys=True).encode()
+    ).hexdigest()
+    (serving / "manifest.json").write_text(json.dumps(manifest))
+    with TestClient(create_app(serving)) as fresh:
+        assert fresh.get("/ready").status_code == 503

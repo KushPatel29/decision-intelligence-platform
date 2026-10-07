@@ -210,7 +210,9 @@ with studio:
             candidates["objective_value"] = (
                 candidates.net_contribution + candidates.later_value_uplift + candidates.relief_value
             )
-            keep = (candidates.objective_value > 0) | (candidates.trips_peak < 0)
+            keep = (candidates.objective_value > 0) | candidates[
+                ["trips_peak", "trips_offpeak", "trips_weekend"]
+            ].lt(0).any(axis=1)
             candidates = candidates[keep].reset_index(drop=True)
             base = with_reserve(capacity, reserve)
             mode = "highs" if solver.startswith("HiGHS") else "auto"
