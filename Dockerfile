@@ -1,6 +1,6 @@
 # Serving image for the Streamlit app and the decision API. It carries code and the hash-verified
 # serving snapshot only: no raw data, simulator truth, model binaries or credentials.
-FROM python:3.12-slim
+FROM python:3.14-slim
 ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 CORRIDOR_ROOT=/app CORRIDOR_ENV=production CORRIDOR_AUTH=oidc
 WORKDIR /app
 COPY requirements-runtime.txt ./
