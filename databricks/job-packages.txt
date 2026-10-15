@@ -12,4 +12,4 @@ xgboost==2.0.3
 lifetimes==0.11.3
 shap==0.52.0
 gurobipy==13.0.3
-mlflow==3.14.0
+mlflow==3.16.1
