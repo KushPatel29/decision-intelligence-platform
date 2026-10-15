@@ -76,8 +76,10 @@ def evaluate_quality(metrics):
         }
     )
     uplift = metrics["uplift"]
+    # The scored model is the ensemble of the selected learners. "selected" names its members joined by "+"
+    # ("s_learner+x_learner"), which is only a key of its own when a single learner is chosen.
     qini = [
-        uplift[offer][uplift[offer]["selected"]]["qini"]
+        uplift[offer].get("ensemble", uplift[offer].get(uplift[offer]["selected"], {})).get("qini", np.nan)
         for offer in uplift
         if isinstance(uplift[offer], dict) and "selected" in uplift[offer]
     ]

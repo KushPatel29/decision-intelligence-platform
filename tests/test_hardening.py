@@ -9,7 +9,7 @@ from test_contracts import allocation_fixture
 from decision_platform.config import ROOT, Config, write_json
 from decision_platform.monitoring import psi
 from decision_platform.optimization import solve
-from decision_platform.quality import select_regression
+from decision_platform.quality import evaluate_quality, select_regression
 from decision_platform.runtime import (
     audit_event,
     pipeline_run,
@@ -202,3 +202,18 @@ def test_production_refuses_demo_mode(monkeypatch):
     monkeypatch.setenv("CORRIDOR_ENV", "production")
     with pytest.raises(Stop):
         require_access(FakeSt())
+
+
+def test_quality_gate_reads_an_ensemble_of_uplift_learners():
+    """The selected uplift model can be an ensemble ("s_learner+x_learner"), which has no metrics entry of its own.
+
+    CI's Linux pipeline chose one on 2026-10-15 and the gate raised KeyError instead of scoring it.
+    """
+    ensemble = json.loads((ROOT / "outputs" / "serving" / "metrics.json").read_text(encoding="utf-8"))
+    offers = [o for o, v in ensemble["uplift"].items() if isinstance(v, dict) and "selected" in v]
+    assert offers
+    for offer in offers:
+        ensemble["uplift"][offer]["selected"] = "s_learner+x_learner"
+    check = next(c for c in evaluate_quality(ensemble)["checks"] if c["model"] == "uplift")
+    expected = sum(ensemble["uplift"][o]["ensemble"]["qini"] for o in offers) / len(offers)
+    assert check["value"] == pytest.approx(expected)

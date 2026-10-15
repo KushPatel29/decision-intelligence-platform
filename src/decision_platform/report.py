@@ -371,7 +371,7 @@ def _powerbi(cfg, tables, metrics, experiment, monitoring, policy, optimization)
                     "learner": learner.replace("_learner", "").upper() + "-learner",
                     "value_spearman": getattr(row, f"{learner}_value_spearman", float("nan")),
                     "qini": getattr(row, f"{learner}_qini"),
-                    "selected": row.selected == learner,
+                    "selected": learner in str(row.selected).split("+"),
                 }
             )
     backtest = tables["demand_backtest"]
