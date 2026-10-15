@@ -73,7 +73,14 @@ fig = go.Figure(
     )
 )
 fig.add_vline(x=0, line_color="#5b7486")
-fig.update_xaxes(title="True expected value: 30-day net contribution + days 31-90 margin (CAD)")
+# Leave room beside the shortest bars for their labels: a negative bar's outside label otherwise lands on top
+# of the category names.
+span = max(order.true_value.max(), 0) - min(order.true_value.min(), 0)
+fig.update_traces(cliponaxis=False)
+fig.update_xaxes(
+    title="True expected value: 30-day net contribution + days 31-90 margin (CAD)",
+    range=[min(order.true_value.min(), 0) - 0.16 * span, max(order.true_value.max(), 0) + 0.12 * span],
+)
 fig.update_layout(margin=dict(r=120))
 chart(fig, 360, legend=False)
 st.caption(
