@@ -253,7 +253,18 @@ def _fixing(lp, ub, gap, bound):
     return fixed_zero, fixed_one
 
 
-def _lp(objective, matrix, upper, ub):
+def _solve_time_limit(value):
+    try:
+        seconds = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("time_limit must be finite and positive") from exc
+    if isinstance(value, bool) or not np.isfinite(seconds) or seconds <= 0:
+        raise ValueError("time_limit must be finite and positive")
+    return seconds
+
+
+def _lp(objective, matrix, upper, ub, time_limit=60):
+    time_limit = _solve_time_limit(time_limit)
     with _quiet():
         result = linprog(
             -objective,
@@ -261,6 +272,7 @@ def _lp(objective, matrix, upper, ub):
             b_ub=upper,
             bounds=np.column_stack([np.zeros(len(ub)), ub]),
             method="highs",
+            options={"time_limit": time_limit},
         )
     if result.status != 0:
         raise RuntimeError(f"LP relaxation failed: {result.message}")
@@ -337,7 +349,7 @@ def _exact(objective, matrix, upper, ub, solver, time_limit):
     more than z_I, so it can be fixed. The core left free is small enough to
     solve exactly; if it cannot beat z_I, the incumbent is globally optimal.
     """
-    lp = _lp(objective, matrix, upper, ub)
+    lp = _lp(objective, matrix, upper, ub, time_limit)
     bound = float(-lp.fun)
     incumbent = _round(lp.x, objective, matrix, upper, ub)
     value = float(objective[incumbent].sum())
@@ -448,6 +460,7 @@ def solve(
 ):
     """Optimal allocation. Licence-sized problems go straight to a MIP solver; large ones use `_exact`."""
     validate_inputs(frame, capacity, budget, campaign_limit, min_roi, solver, points_budget)
+    time_limit = _solve_time_limit(time_limit)
     if capacity.baseline_over_capacity.any():
         raise ValueError("Baseline plus safety reserve exceeds capacity before campaign allocation")
     frame = frame.reset_index(drop=True)
@@ -519,12 +532,17 @@ def solve(
     return Allocation(chosen, actual, status, float(chosen.objective_value.sum()), gap, diagnostics)
 
 
-def lp_relaxation(frame, capacity, budget, campaign_limit, min_roi, points_budget=None):
+def lp_relaxation(frame, capacity, budget, campaign_limit, min_roi, points_budget=None, time_limit=60):
     """LP bound and shadow prices of the named side constraints."""
+    time_limit = _solve_time_limit(time_limit)
     frame = frame.reset_index(drop=True)
     matrix, upper, names = constraint_matrix(frame, capacity, budget, campaign_limit, min_roi, points_budget)
     result = _lp(
-        frame.objective_value.to_numpy(float), matrix, upper, frame.eligible.astype(float).to_numpy()
+        frame.objective_value.to_numpy(float),
+        matrix,
+        upper,
+        frame.eligible.astype(float).to_numpy(),
+        time_limit,
     )
     duals = -result.ineqlin.marginals  # Value of relaxing each <= row by one unit.
     prices = [
