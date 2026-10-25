@@ -62,6 +62,7 @@ def _lp_guided(objective, a, lower, upper, bounds, n, keep_rc=2.0, time_limit=90
             b_eq=upper[equality],
             bounds=np.column_stack([np.zeros(len(bounds)), bounds]),
             method="highs",
+            options={"time_limit": time_limit},
         )
     if lp.status != 0:
         raise RuntimeError(f"Joint pricing LP failed: {lp.message}")

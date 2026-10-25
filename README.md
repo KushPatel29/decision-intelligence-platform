@@ -3,7 +3,7 @@
 [Open the live Corridor demo](https://corridor-decision-intelligence.streamlit.app/) · Synthetic data, isolated visitor sessions.
 
 [![ci](https://github.com/KushPatel29/decision-intelligence-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/KushPatel29/decision-intelligence-platform/actions/workflows/ci.yml)
-![Tests](https://img.shields.io/badge/tests-244%20collected-3B8C6E)
+![Tests](https://img.shields.io/badge/tests-258%20collected-3B8C6E)
 ![Policy test](https://img.shields.io/badge/policy%20A%2FB-%2B%241.40%20per%20customer-0B5FA5)
 [![Portfolio](https://img.shields.io/badge/portfolio-kushpatel29.github.io-2AEAE5)](https://kushpatel29.github.io/#p-corridor)
 
@@ -107,6 +107,8 @@ Databricks: `databricks bundle deploy && databricks bundle run corridor`, or wit
 
 - **Tests.** 200+ tests: data contracts, leakage, brute-force optimality on small instances, every app page,
   the API, the Power BI model's references, the registry scorer reproducing the plan's effects to 1e-9.
+  Finite positive time limits apply to both LP and integer-solver phases, including joint pricing and
+  scenario shadow-price requests. A timed-out LP fails explicitly; it cannot certify an optimal plan.
 - **Release gate.** Evaluated on every run (`quality.py`): calibrated classifiers beat their baselines on an
   untouched later fold, demand beats the seasonal baseline with interval coverage ≥ 80%, held-out uplift
   Qini above zero; and, as simulation-only checks, the plan reaches ≥ 60% of the ceiling and elasticity

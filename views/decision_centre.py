@@ -231,7 +231,15 @@ with studio:
                         int(points),
                         time_limit=SOLVE_SECONDS,
                     )
-                    lp = lp_relaxation(candidates, base, float(budget), int(limit), float(roi), int(points))
+                    lp = lp_relaxation(
+                        candidates,
+                        base,
+                        float(budget),
+                        int(limit),
+                        float(roi),
+                        int(points),
+                        time_limit=SOLVE_SECONDS,
+                    )
             result = {
                 "frame": allocation.selected,
                 "diagnostics": allocation.diagnostics,

@@ -33,7 +33,7 @@ REQUIRED = [
 
 
 # Live re-solves are CPU-bound and every session shares this process: at most CORRIDOR_MAX_SOLVES run at once,
-# each MIP sub-solve capped at CORRIDOR_SOLVE_SECONDS, the same limits the decision API uses.
+# each LP/MIP sub-solve capped at CORRIDOR_SOLVE_SECONDS, the same limits the decision API uses.
 SOLVE_SECONDS = float(os.environ.get("CORRIDOR_SOLVE_SECONDS", "20"))
 _SOLVER_SLOTS = threading.BoundedSemaphore(max(1, int(os.environ.get("CORRIDOR_MAX_SOLVES", "2"))))
 
