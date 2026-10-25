@@ -296,13 +296,13 @@ def _repair(selection, objective, matrix, upper):
     return None
 
 
-def _fill(selection, order, objective, matrix, upper):
-    """Greedily add candidates in `order` while every row they touch still holds."""
+def _fill(selection, order, objective, matrix, upper, ub):
+    """Greedily add eligible candidates while every row they touch still holds."""
     selection = selection.copy()
     lhs = matrix @ selection.astype(float)
     csc = matrix.tocsc()
     for j in order:
-        if selection[j] or objective[j] <= 0:
+        if selection[j] or ub[j] <= 0 or objective[j] <= 0:
             continue
         rows = csc.indices[csc.indptr[j] : csc.indptr[j + 1]]
         values = csc.data[csc.indptr[j] : csc.indptr[j + 1]]
@@ -319,7 +319,7 @@ def _round(x, objective, matrix, upper, ub):
     if repaired is None:
         repaired = np.zeros(len(x), dtype=bool)
     order = np.lexsort((-objective, -x))
-    return _fill(repaired, order, objective, matrix, upper)
+    return _fill(repaired, order, objective, matrix, upper, ub)
 
 
 def _solve_highs(objective, matrix, upper, ub, time_limit):
