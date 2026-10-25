@@ -6,7 +6,8 @@ scikit-learn==1.9.0
 duckdb==1.5.4
 pyarrow==24.0.0
 joblib==1.6.0
-streamlit==1.64.0
+streamlit==1.66.1
+pillow==13.0.0
 plotly==6.3.1
 gurobipy==13.0.3
 mlflow==3.14.0
