@@ -118,8 +118,13 @@ with tab_scenarios:
         format_func=lambda v: f"{v:+.0%}" if v else "Baseline",
     )
     row = current[current.price_change == change].iloc[0]
+    # The delta slot carries an uncertainty band, not a change, so it gets no arrow.
     st.columns(3)[0].metric(
-        "Elasticity", f"{row.elasticity:.2f}", f"± {1.96 * row.elasticity_se:.2f}", delta_color="off"
+        "Elasticity",
+        f"{row.elasticity:.2f}",
+        f"95% CI ± {1.96 * row.elasticity_se:.2f}",
+        delta_color="off",
+        delta_arrow="off",
     )
     fig = go.Figure()
     x = current.price_change * 100
