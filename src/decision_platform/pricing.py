@@ -81,12 +81,36 @@ def _lp_guided(objective, a, lower, upper, bounds, n, keep_rc=2.0, time_limit=90
             options={"time_limit": time_limit, "mip_rel_gap": 1e-5},
         )
     if result.x is None:
-        raise RuntimeError("No feasible joint pricing plan")
-    selected = np.zeros(len(objective), dtype=bool)
-    selected[np.flatnonzero(keep)[result.x > 0.5]] = True
+        # HiGHS can stop at its time limit (or on a numerical edge) without an incumbent, and the
+        # pipeline used to crash here. A price-only plan always exists: every zone/period keeps its
+        # best eligible price and nobody is contacted. Publish that, labelled, rather than nothing.
+        selected = _price_only_plan(objective, a, lower, upper, bounds, n)
+        if selected is None:
+            raise RuntimeError(f"No feasible joint pricing plan: {getattr(result, 'message', '')}")
+        status = "fallback"
+    else:
+        selected = np.zeros(len(objective), dtype=bool)
+        selected[np.flatnonzero(keep)[result.x > 0.5]] = True
+        status = "optimal" if getattr(result, "success", True) else "time_limit"
     bound = float(-lp.fun)
     gap = (bound - float(objective[selected].sum())) / max(abs(bound), 1e-9)
-    return selected, gap, bound, int(keep[:n].sum())
+    return selected, gap, bound, int(keep[:n].sum()), status
+
+
+def _price_only_plan(objective, a, lower, upper, bounds, n, tolerance=1e-6):
+    """The best eligible price in each zone/period and no campaign contacts, if it is feasible."""
+    a = csr_matrix(a)
+    selected = np.zeros(len(objective), dtype=bool)
+    for row in np.flatnonzero(lower > -np.inf):
+        columns = a.indices[a.indptr[row] : a.indptr[row + 1]]
+        columns = columns[(columns >= n) & (bounds[columns] > 0)]
+        if not len(columns):
+            return None
+        selected[columns[np.argmax(objective[columns])]] = True
+    lhs = a @ selected.astype(float)
+    if np.any(lhs > upper + tolerance) or np.any(lhs < lower - tolerance):
+        return None
+    return selected
 
 
 @bounded_operation
@@ -158,10 +182,15 @@ def optimize_prices(
             ):
                 raise
     if selected is None:
-        selected, gap, lp_bound, kept = _lp_guided(
+        selected, gap, lp_bound, kept, status = _lp_guided(
             objective, a, lower, upper, bounds, n, time_limit=time_limit
         )
-        actual = f"HiGHS (LP-guided, {kept:,} campaign variables kept)"
+        actual = {
+            "optimal": f"HiGHS (LP-guided, {kept:,} campaign variables kept)",
+            "time_limit": f"HiGHS (LP-guided, {kept:,} campaign variables kept; best plan at the time limit)",
+            "fallback": "HiGHS returned no plan; price-only fallback (best eligible price per zone/period, "
+            "no campaign contacts)",
+        }[status]
     lhs = a @ selected.astype(float)
     if np.any(lhs > upper + 1e-6) or np.any(lhs < lower - 1e-6):
         raise RuntimeError("Joint pricing constraint violation")

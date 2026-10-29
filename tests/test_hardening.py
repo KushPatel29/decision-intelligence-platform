@@ -130,6 +130,39 @@ def test_joint_pricing_uses_capacity_and_exactly_one_price_per_cell(monkeypatch)
     assert campaign.cost.sum() <= 11 and receipt["all_constraints_passed"]
 
 
+def test_joint_pricing_publishes_a_labelled_price_only_plan_when_the_solver_returns_none(monkeypatch):
+    """CI on 2026-10-29 crashed with 'No feasible joint pricing plan': HiGHS returned no incumbent,
+    though keeping each cell's best eligible price and contacting nobody is always feasible."""
+    from types import SimpleNamespace
+
+    import decision_platform.pricing as pricing
+
+    monkeypatch.setattr(
+        pricing,
+        "milp",
+        lambda *a, **k: SimpleNamespace(x=None, success=False, status=1, message="Time limit reached"),
+    )
+    frame, _ = allocation_fixture()
+    options = pd.DataFrame(
+        {
+            "zone_id": [0, 0, 0],
+            "period": ["Off-peak"] * 3,
+            "capacity_trips": [10.0] * 3,
+            "protected_load": [9.0, 5.0, 12.0],
+            "available_trips": [1.0, 5.0, -2.0],
+            "incremental_contribution": [30.0, 20.0, 99.0],
+            "consumer_surplus_change": [-2.0, 1.0, 0.0],
+            "eligible": [True, True, False],
+        }
+    )
+    prices, campaign, receipt = pricing.optimize_prices(
+        options, frame, budget=11, contacts=2, roi=0.5, solver="highs", time_limit=7
+    )
+    assert prices.incremental_contribution.tolist() == [30.0], "best ELIGIBLE price, never the infeasible one"
+    assert campaign.empty and receipt["contacts"] == 0
+    assert "price-only fallback" in receipt["solver"] and receipt["all_constraints_passed"]
+
+
 def test_local_model_gate_and_mart_grains():
     path = ROOT / "outputs/quality_gate.json"
     if not path.exists():
