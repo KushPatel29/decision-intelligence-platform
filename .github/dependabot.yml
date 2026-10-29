@@ -14,6 +14,10 @@ updates:
       # delta-spark 4.0 supports pyspark 4.0 only; the two move together, by hand.
       - dependency-name: pyspark
         update-types: ["version-update:semver-minor", "version-update:semver-major"]
+      # Delta's minors are built for newer Spark lines than the pinned pyspark 4.0, and CI
+      # does not install the spark extra, so a bump here would merge untested. By hand, with pyspark.
+      - dependency-name: delta-spark
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
       # aws/pipeline.py is written against the v2 SDK (Estimator, Processor, Transformer).
       - dependency-name: sagemaker
         update-types: ["version-update:semver-major"]
@@ -25,3 +29,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # The image matches the Streamlit Community Cloud runtime (Python 3.12); 3.14 fails
+      # the integration suite. Move both together, by hand.
+      - dependency-name: python
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
