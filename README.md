@@ -3,7 +3,7 @@
 [Open the live Corridor demo](https://corridor-decision-intelligence.streamlit.app/) · Synthetic data, isolated visitor sessions.
 
 [![ci](https://github.com/KushPatel29/decision-intelligence-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/KushPatel29/decision-intelligence-platform/actions/workflows/ci.yml)
-![Tests](https://img.shields.io/badge/tests-281%20collected-3B8C6E)
+![Tests](https://img.shields.io/badge/tests-293%20collected-3B8C6E)
 ![Policy test](https://img.shields.io/badge/policy%20A%2FB-%2B%241.40%20per%20customer-0B5FA5)
 [![Portfolio](https://img.shields.io/badge/portfolio-kushpatel29.github.io-2AEAE5)](https://kushpatel29.github.io/#p-corridor)
 
