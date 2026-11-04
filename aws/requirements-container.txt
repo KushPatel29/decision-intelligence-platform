@@ -4,4 +4,4 @@ scipy==1.18.1
 scikit-learn==1.9.0
 joblib==1.6.0
 flask>=3.1,<4
-waitress>=3.0,<4
+waitress>=3.0.2,<4
